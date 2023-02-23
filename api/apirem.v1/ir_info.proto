@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+option go_package = "apirem.v1";
+
+message RawIrData {
+    uint32 carrier_freq_khz = 1;
+    repeated uint32 on_off_pluse_ns = 2;
+}
