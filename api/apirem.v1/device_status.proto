@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option go_package = "apirem.v1";
+
+message DeviceStatus {
+    //デバイスと意思疎通が取れるかどうか
+    bool is_active = 1;
+
+    //バッテリー残量
+    optional uint32 battery = 2;
+
+    //電波強度
+    optional float rssi = 3;
+}
