@@ -3,14 +3,15 @@ package daemon
 import (
 	"encoding/json"
 	"os"
-	"pirem/internal/app/pirem/controller"
-	"pirem/internal/app/pirem/device"
-	"pirem/internal/app/pirem/entity"
-	server "pirem/internal/app/pirem/server"
 	"plugin"
 	"syscall"
 
-	device_controllerv1 "github.com/NaKa2355/pirem_pkg/device_controller"
+	"github.com/NaKa2355/pirem/internal/app/pirem/controller"
+	"github.com/NaKa2355/pirem/internal/app/pirem/device"
+	"github.com/NaKa2355/pirem/internal/app/pirem/entity"
+	server "github.com/NaKa2355/pirem/internal/app/pirem/server"
+
+	device_controllerv1 "github.com/NaKa2355/pirem/pkg/device_controller"
 
 	"golang.org/x/exp/slog"
 )

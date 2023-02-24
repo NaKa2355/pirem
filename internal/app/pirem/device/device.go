@@ -3,12 +3,13 @@ package device
 import (
 	"context"
 	"fmt"
-	"pirem/internal/app/pirem/usecases"
 	"sync"
 	"time"
 
-	apiremv1 "github.com/NaKa2355/pirem_pkg/apirem.v1"
-	dev_controller "github.com/NaKa2355/pirem_pkg/device_controller"
+	"github.com/NaKa2355/pirem/internal/app/pirem/usecases"
+
+	apiremv1 "github.com/NaKa2355/pirem/pkg/apirem.v1"
+	dev_controller "github.com/NaKa2355/pirem/pkg/device_controller"
 )
 
 type Device struct {
