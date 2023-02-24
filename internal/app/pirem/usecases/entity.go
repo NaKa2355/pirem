@@ -2,7 +2,7 @@ package usecases
 
 import (
 	"context"
-	apiremv1 "pirem/pkg/apirem.v1"
+	apiremv1 "github.com/NaKa2355/pirem_pkg/apirem.v1"
 )
 
 type EntityController interface {

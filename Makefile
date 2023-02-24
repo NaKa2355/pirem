@@ -19,11 +19,11 @@ PLUGIN_INSTALL:=/opt/piremd
 CMD_BIN_DIR:=bin
 
 #コマンドのパッケージ名
-COMMAND_PACKAGES:=$(shell go list ./cmd/pirem)
+CMD_PACKAGES:=$(shell go list ./cmd/...)
 #GOのファイル
 GO_FILES:=$(shell find . -type f -name '*.go' -print)
 
-CMD_BIN:=$(COMMAND_PACKAGES:$(MOD_NAME)/cmd/%=$(CMD_BIN_DIR)/%) 
+CMD_BIN:=$(CMD_PACKAGES:$(MOD_NAME)/cmd/%=$(CMD_BIN_DIR)/%) 
 
 BUILD_OPT := -ldflags="-s -w" -trimpath
 

@@ -10,7 +10,7 @@ import (
 	"os"
 
 	int_cmd "pirem/internal/app/pirem/cmd"
-	apirem_v1 "pirem/pkg/apirem.v1"
+	apirem_v1 "github.com/NaKa2355/pirem_pkg/apirem.v1"
 
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/proto"

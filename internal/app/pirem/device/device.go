@@ -4,10 +4,11 @@ import (
 	"context"
 	"fmt"
 	"pirem/internal/app/pirem/usecases"
-	apiremv1 "pirem/pkg/apirem.v1"
-	dev_controller "pirem/pkg/device_controller"
 	"sync"
 	"time"
+
+	apiremv1 "github.com/NaKa2355/pirem_pkg/apirem.v1"
+	dev_controller "github.com/NaKa2355/pirem_pkg/device_controller"
 )
 
 type Device struct {
