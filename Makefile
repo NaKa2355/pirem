@@ -30,13 +30,13 @@ BUILD_OPT := -ldflags="-s -w" -trimpath
 BUILD_ENV := GOOS=linux CGO_ENABLED=1
 .PHONY: clean
 clean:
-	rm bin/**
+	rm $(CMD_BIN_DIR)/**
 
 .PHONY: build
 build: $(CMD_BIN)
 
 $(CMD_BIN): $(GO_FILES)
-	go build $(BUILD_OPT) -o $(CMD_BIN_DIR) $(@:$(CMD_BIN_DIR)/%=$(MOD_NAME)/cmd/%)
+	$(BUILD_ENV) go build $(BUILD_OPT) -o $(CMD_BIN_DIR) $(@:$(CMD_BIN_DIR)/%=$(MOD_NAME)/cmd/%)
 
 .PHONY: install
 install:

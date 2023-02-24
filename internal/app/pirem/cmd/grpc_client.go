@@ -28,7 +28,8 @@ func MakeConnection(protocol string, addr string) (*grpc.ClientConn, apiremv1.Pi
 		grpc.WithContextDialer(dialer),
 	}
 
-	ctx, _ := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
 	conn, err := grpc.DialContext(ctx, DomainSocketPath, options...)
 	if err != nil {
 		return conn, client, err
