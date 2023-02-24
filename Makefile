@@ -27,10 +27,10 @@ CMD_BIN:=$(COMMAND_PACKAGES:$(MOD_NAME)/cmd/%=$(CMD_BIN_DIR)/%)
 
 BUILD_OPT := -ldflags="-s -w" -trimpath
 
+BUILD_ENV := GOOS=linux CGO_ENABLED=1
 .PHONY: clean
 clean:
-	rm $(CMD_BIN_DIR)/*
-	rm $(PLUGIN_BIN_DIR)/*
+	rm bin/**
 
 .PHONY: build
 build: $(CMD_BIN)
