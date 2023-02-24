@@ -3,7 +3,7 @@ package server
 import (
 	"context"
 	"errors"
-	pirem_err "pirem/pkg/error"
+	pirem_err "github.com/NaKa2355/pirem_pkg/error"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

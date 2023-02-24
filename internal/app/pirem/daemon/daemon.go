@@ -7,9 +7,10 @@ import (
 	"pirem/internal/app/pirem/device"
 	"pirem/internal/app/pirem/entity"
 	server "pirem/internal/app/pirem/server"
-	device_controllerv1 "pirem/pkg/device_controller"
 	"plugin"
 	"syscall"
+
+	device_controllerv1 "github.com/NaKa2355/pirem_pkg/device_controller"
 
 	"golang.org/x/exp/slog"
 )
