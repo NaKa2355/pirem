@@ -6,8 +6,8 @@ package cmd
 import (
 	"fmt"
 	"os"
-	int_cmd "pirem/internal/app/pirem/cmd"
-	"pirem/internal/app/pirem/daemon"
+	int_cmd "github.com/NaKa2355/pirem/internal/app/pirem/cmd"
+	"github.com/NaKa2355/pirem/internal/app/pirem/daemon"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/exp/slog"

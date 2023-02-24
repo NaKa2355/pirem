@@ -1,15 +1,15 @@
 #go.modがあるディレクトリの名前
-MOD_NAME:=pirem
+MOD_NAME:=$(shell go list -m)
 
 #コマンドのインストール先
 CMD_INSTALL:=/usr/local/bin
 
 #コンフィグファイルのインストール先
-CONFIG_FILE:=init/piremd.json
+CONFIG_FILE:=config/piremd.json
 CONFIG_INSTALL:=/etc/piremd.json
 
 #サービスファイルのインストール先
-SERVICE_FILE:=init/piremd.service
+SERVICE_FILE:=config/piremd.service
 SERVICE_INSTALL:=/lib/systemd/system/piremd.service
 
 #プラグインのインストール先
@@ -19,7 +19,7 @@ PLUGIN_INSTALL:=/opt/piremd
 CMD_BIN_DIR:=bin
 
 #コマンドのパッケージ名
-CMD_PACKAGES:=$(shell go list ./cmd/...)
+CMD_PACKAGES:=$(MOD_NAME)/cmd/pirem
 #GOのファイル
 GO_FILES:=$(shell find . -type f -name '*.go' -print)
 
@@ -28,6 +28,9 @@ CMD_BIN:=$(CMD_PACKAGES:$(MOD_NAME)/cmd/%=$(CMD_BIN_DIR)/%)
 BUILD_OPT := -ldflags="-s -w" -trimpath
 
 BUILD_ENV := GOOS=linux CGO_ENABLED=1
+
+all:
+	@echo $(CMD_BIN)
 .PHONY: clean
 clean:
 	rm $(CMD_BIN_DIR)/**

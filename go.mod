@@ -1,4 +1,4 @@
-module pirem
+module github.com/NaKa2355/pirem
 
 go 1.19
 
@@ -17,7 +17,6 @@ require (
 )
 
 require (
-	github.com/NaKa2355/pirem_pkg v0.0.0-20230224201539-3e5f6aa02b25 // direct
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	golang.org/x/net v0.7.0 // indirect

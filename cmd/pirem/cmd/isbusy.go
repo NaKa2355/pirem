@@ -7,9 +7,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	int_cmd "pirem/internal/app/pirem/cmd"
 
-	apiremv1 "github.com/NaKa2355/pirem_pkg/apirem.v1"
+	int_cmd "github.com/NaKa2355/pirem/internal/app/pirem/cmd"
+
+	apiremv1 "github.com/NaKa2355/pirem/pkg/apirem.v1"
 
 	"github.com/spf13/cobra"
 )

@@ -3,8 +3,9 @@ package cmd
 import (
 	"context"
 	"net"
-	apiremv1 "github.com/NaKa2355/pirem_pkg/apirem.v1"
 	"time"
+
+	apiremv1 "github.com/NaKa2355/pirem/pkg/apirem.v1"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
