@@ -1,7 +1,9 @@
 package pirem_error
 
-import "fmt"
+import (
+	"errors"
+)
 
-var ErrDeviceNotFound = fmt.Errorf("device not found")
-var ErrInvaildArgument = fmt.Errorf("invaild argument")
-var ErrDeviceInternal = fmt.Errorf("device internal error")
+var ErrDeviceNotFound = errors.New("device not found")
+var ErrInvaildArgument = errors.New("invaild argument")
+var ErrDeviceInternal = errors.New("device internal error")
