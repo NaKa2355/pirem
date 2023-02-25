@@ -1,12 +1,12 @@
 package daemon
 
-const StartingDaemon = "starting daemon..."
-const StartDaemon = "start daemon"
-const ShuttingDownDaemon = "shutting down daemon..."
-const StopDaemon = "stopped daemon"
-const LoadDevice = "loaded device"
+const MsgStartingDaemon = "starting daemon..."
+const MsgStartDaemon = "start daemon"
+const MsgShuttingDownDaemon = "shutting down daemon..."
+const MsgStopDaemon = "stopped daemon"
+const MsgLoadedDevice = "loaded device"
 
-const FaildStartDaemon = "faild to start daemon"
-const FaildLoadConfig = "faild to load config file"
-const FaildLoadDev = "faild to load device"
-const FaildStopDaemonGracefully = "faild to stop daemon gracefully"
+const MsgFaildStartDaemon = "faild to start daemon"
+const MsgFaildLoadConfig = "faild to load config file"
+const MsgFaildLoadDev = "faild to load device"
+const MsgFaildStopDaemonGracefully = "faild to stop daemon gracefully"

@@ -3,7 +3,6 @@ package daemon
 import (
 	"encoding/json"
 	"os"
-	"plugin"
 	"syscall"
 
 	"github.com/NaKa2355/pirem/internal/app/pirem/controller"
@@ -11,8 +10,7 @@ import (
 	"github.com/NaKa2355/pirem/internal/app/pirem/entity"
 	server "github.com/NaKa2355/pirem/internal/app/pirem/server"
 
-	device_controllerv1 "github.com/NaKa2355/pirem/pkg/device_controller"
-
+	plugin "github.com/NaKa2355/pirem/pkg/plugin"
 	"golang.org/x/exp/slog"
 )
 
@@ -45,29 +43,17 @@ func loadConfig(filePath string) (*Config, error) {
 	return config, err
 }
 
-func getAndAddDevfromConf(devConf DeviceConfig, entity *entity.Entity) error {
-	p, err := plugin.Open(devConf.PluginPath)
+func LoadDevice(devConf DeviceConfig, entity *entity.Entity) error {
+	devCtrl, client, err := plugin.LoadPlugin(devConf.PluginPath)
 	if err != nil {
 		return err
 	}
-
-	getCtrlSym, err := p.Lookup("GetController")
+	dev, err := device.New(devConf.ID, devConf.Name, devCtrl, client)
 	if err != nil {
 		return err
 	}
-
-	getController := getCtrlSym.(func(json.RawMessage) (device_controllerv1.DeviceController, error))
-	devCtrl, err := getController(devConf.Config)
-	if err != nil {
-		return err
-	}
-
-	dev, err := device.New(devConf.ID, devConf.Name, devCtrl)
-	if err != nil {
-		return err
-	}
-
-	return entity.AddDevice(dev)
+	entity.AddDevice(dev)
+	return nil
 }
 
 func New(logger *slog.Logger, configPath string) (*Daemon, error) {
@@ -79,23 +65,23 @@ func New(logger *slog.Logger, configPath string) (*Daemon, error) {
 	//load config file
 	d.config, err = loadConfig(configPath)
 	if err != nil {
-		logger.Error(FaildLoadConfig, err)
+		logger.Error(MsgFaildLoadConfig, err)
 		return d, err
 	}
 
 	//load device plugins
 	for _, devConf := range d.config.Devices {
-		err := getAndAddDevfromConf(devConf, d.entity)
+		err := LoadDevice(devConf, d.entity)
 		if err != nil {
 			logger.Error(
-				FaildLoadDev,
+				MsgFaildLoadDev,
 				err,
 				"plugin file path", devConf.PluginPath,
 			)
 			continue
 		}
 		logger.Info(
-			LoadDevice,
+			MsgLoadedDevice,
 			"plugin file path", devConf.PluginPath,
 			"device name", devConf.Name,
 			"device id", devConf.ID,
@@ -110,17 +96,17 @@ func New(logger *slog.Logger, configPath string) (*Daemon, error) {
 // run until signal comes
 func (d *Daemon) Start(domainSocket string) error {
 	if err := d.srv.Start(domainSocket); err != nil {
-		d.logger.Error(FaildStartDaemon, err)
+		d.logger.Error(MsgFaildStartDaemon, err)
 		return err
 	}
 	d.logger.Info(
-		StartDaemon,
+		MsgStartDaemon,
 		"unix domain socket path", domainSocket,
 	)
 
 	d.srv.WaitSigAndStop(syscall.SIGTERM, syscall.SIGKILL, syscall.SIGINT)
-	d.logger.Info(ShuttingDownDaemon)
+	d.logger.Info(MsgShuttingDownDaemon)
 	d.entity.Drop()
-	d.logger.Info(StopDaemon)
+	d.logger.Info(MsgStopDaemon)
 	return nil
 }

@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option go_package = "apirem.v1";
+
+import "device_info.proto";
+import "device_status.proto";
+import "ir_info.proto";
+import "google/protobuf/empty.proto";
+
+message DeviceConfig {
+    string json_config = 1;
+}
+
+service DevicePluginService {
+    rpc SendRawIr(RawIrData) returns (google.protobuf.Empty) {}
+    rpc ReceiveRawIr(google.protobuf.Empty) returns (RawIrData) {}
+    rpc GetDeviceInfo(google.protobuf.Empty) returns (DeviceInfo) {}
+    rpc GetDeviceStatus(google.protobuf.Empty) returns (DeviceStatus) {}
+    rpc Init(DeviceConfig) returns (google.protobuf.Empty) {}
+}
