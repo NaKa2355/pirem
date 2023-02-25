@@ -9,15 +9,14 @@ import (
 	"github.com/NaKa2355/pirem/internal/app/pirem/device"
 	"github.com/NaKa2355/pirem/internal/app/pirem/entity"
 	server "github.com/NaKa2355/pirem/internal/app/pirem/server"
-
-	"golang.org/x/exp/slog"
+	"github.com/hashicorp/go-hclog"
 )
 
 type Daemon struct {
 	srv    *server.Server
 	entity *entity.Entity
 	config *Config
-	logger *slog.Logger
+	logger hclog.Logger
 }
 
 type DeviceConfig struct {
@@ -42,8 +41,8 @@ func readConf(filePath string) (*Config, error) {
 	return config, err
 }
 
-func addDevice(devConf DeviceConfig, entity *entity.Entity) error {
-	dev, err := device.NewFromPlugin(devConf.ID, devConf.Name, devConf.Config, devConf.PluginPath)
+func addDevice(devConf DeviceConfig, entity *entity.Entity, logger hclog.Logger) error {
+	dev, err := device.NewFromPlugin(devConf.ID, devConf.Name, devConf.Config, devConf.PluginPath, logger)
 	if err != nil {
 		return err
 	}
@@ -51,7 +50,7 @@ func addDevice(devConf DeviceConfig, entity *entity.Entity) error {
 	return nil
 }
 
-func New(logger *slog.Logger, configPath string) (*Daemon, error) {
+func New(logger hclog.Logger, configPath string) (*Daemon, error) {
 	var err error = nil
 	d := &Daemon{}
 	d.logger = logger
@@ -60,17 +59,17 @@ func New(logger *slog.Logger, configPath string) (*Daemon, error) {
 	//load config file
 	d.config, err = readConf(configPath)
 	if err != nil {
-		logger.Error(MsgFaildLoadConfig, err)
+		logger.Error(MsgFaildLoadConfig, "error", err)
 		return d, err
 	}
 
 	//load device plugins
 	for _, devConf := range d.config.Devices {
-		err := addDevice(devConf, d.entity)
+		err := addDevice(devConf, d.entity, logger)
 		if err != nil {
 			logger.Error(
 				MsgFaildLoadDev,
-				err,
+				"error", err,
 				"plugin file path", devConf.PluginPath,
 			)
 			continue
@@ -91,7 +90,7 @@ func New(logger *slog.Logger, configPath string) (*Daemon, error) {
 // run until signal comes
 func (d *Daemon) Start(domainSocket string) error {
 	if err := d.srv.Start(domainSocket); err != nil {
-		d.logger.Error(MsgFaildStartDaemon, err)
+		d.logger.Error(MsgFaildStartDaemon, "error", err)
 		return err
 	}
 	d.logger.Info(
@@ -101,7 +100,7 @@ func (d *Daemon) Start(domainSocket string) error {
 
 	d.srv.WaitSigAndStop(syscall.SIGTERM, syscall.SIGKILL, syscall.SIGINT)
 	d.logger.Info(MsgShuttingDownDaemon)
-	d.entity.Drop()
+	defer d.entity.Drop()
 	d.logger.Info(MsgStopDaemon)
 	return nil
 }
