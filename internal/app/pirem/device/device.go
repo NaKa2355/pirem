@@ -12,6 +12,7 @@ import (
 
 	apiremv1 "github.com/NaKa2355/pirem/gen/apirem/v1"
 	"github.com/NaKa2355/pirem/pkg/plugin"
+	"github.com/hashicorp/go-hclog"
 	go_plugin "github.com/hashicorp/go-plugin"
 )
 
@@ -53,13 +54,14 @@ func New(id string, name string, dev_ctrler plugin.DeviceController, client *go_
 	return dev, err
 }
 
-func NewFromPlugin(id string, name string, conf json.RawMessage, pluginPath string) (*Device, error) {
+func NewFromPlugin(id string, name string, conf json.RawMessage, pluginPath string, logger hclog.Logger) (*Device, error) {
 	dev := &Device{}
 	client := go_plugin.NewClient(
 		&go_plugin.ClientConfig{
 			HandshakeConfig: plugin.Handshake,
 			Plugins:         plugin.PluginMap,
 			Cmd:             exec.Command(pluginPath),
+			Logger:          logger,
 			AllowedProtocols: []go_plugin.Protocol{
 				go_plugin.ProtocolGRPC,
 			},
@@ -83,6 +85,9 @@ func NewFromPlugin(id string, name string, conf json.RawMessage, pluginPath stri
 		return dev, plugin.ErrPluginNotSupported
 	}
 
+	if err := devCtrl.Init(context.Background(), conf); err != nil {
+		return dev, err
+	}
 	return New(id, name, devCtrl, client)
 }
 

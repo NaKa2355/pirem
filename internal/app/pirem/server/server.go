@@ -6,18 +6,18 @@ import (
 	"os/signal"
 
 	apiremv1 "github.com/NaKa2355/pirem/gen/apirem/v1"
+	"github.com/hashicorp/go-hclog"
 
-	"golang.org/x/exp/slog"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
 type Server struct {
-	logger *slog.Logger
+	logger hclog.Logger
 	server *grpc.Server
 }
 
-func New(logger *slog.Logger, handler apiremv1.PiRemServiceServer, useReflectiton bool) *Server {
+func New(logger hclog.Logger, handler apiremv1.PiRemServiceServer, useReflectiton bool) *Server {
 	piremServer := &Server{}
 	piremServer.logger = logger
 	piremServer.server = grpc.NewServer(grpc.UnaryInterceptor(ErrorWrapping))
@@ -39,7 +39,7 @@ func (s *Server) Start(domainSocketPath string) error {
 		if err != nil {
 			s.logger.Error(
 				"server error",
-				err,
+				"error", err,
 			)
 		}
 	}()

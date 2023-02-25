@@ -6,11 +6,12 @@ package cmd
 import (
 	"fmt"
 	"os"
+
 	int_cmd "github.com/NaKa2355/pirem/internal/app/pirem/cmd"
 	"github.com/NaKa2355/pirem/internal/app/pirem/daemon"
+	"github.com/hashicorp/go-hclog"
 
 	"github.com/spf13/cobra"
-	"golang.org/x/exp/slog"
 )
 
 const ConfigFilePath = "/etc/piremd.json"
@@ -29,7 +30,7 @@ var daemonCmd = &cobra.Command{
 }
 
 func startDaemon() error {
-	logger := slog.New(slog.NewTextHandler(os.Stderr))
+	logger := hclog.New(hclog.DefaultOptions)
 	d, err := daemon.New(logger, int_cmd.ConfigFilePath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "faild to start daemon: %s\n", err)
