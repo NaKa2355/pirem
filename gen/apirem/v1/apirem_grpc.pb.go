@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.12.4
-// source: apirem.proto
+// source: apirem/v1/apirem.proto
 
-package apirem_v1
+package v1
 
 import (
 	context "context"
@@ -281,5 +281,5 @@ var PiRemService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "apirem.proto",
+	Metadata: "apirem/v1/apirem.proto",
 }

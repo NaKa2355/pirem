@@ -2,12 +2,13 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.12.4
-// source: device_plugin.proto
+// source: plugin/v1/device_plugin.proto
 
-package apirem_v1
+package v1
 
 import (
 	context "context"
+	v1 "github.com/NaKa2355/pirem/gen/apirem/v1"
 	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
@@ -23,10 +24,10 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DevicePluginServiceClient interface {
-	SendRawIr(ctx context.Context, in *RawIrData, opts ...grpc.CallOption) (*empty.Empty, error)
-	ReceiveRawIr(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*RawIrData, error)
-	GetDeviceInfo(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*DeviceInfo, error)
-	GetDeviceStatus(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*DeviceStatus, error)
+	SendRawIr(ctx context.Context, in *v1.RawIrData, opts ...grpc.CallOption) (*empty.Empty, error)
+	ReceiveRawIr(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*v1.RawIrData, error)
+	GetDeviceInfo(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*v1.DeviceInfo, error)
+	GetDeviceStatus(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*v1.DeviceStatus, error)
 	Init(ctx context.Context, in *DeviceConfig, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
@@ -38,36 +39,36 @@ func NewDevicePluginServiceClient(cc grpc.ClientConnInterface) DevicePluginServi
 	return &devicePluginServiceClient{cc}
 }
 
-func (c *devicePluginServiceClient) SendRawIr(ctx context.Context, in *RawIrData, opts ...grpc.CallOption) (*empty.Empty, error) {
+func (c *devicePluginServiceClient) SendRawIr(ctx context.Context, in *v1.RawIrData, opts ...grpc.CallOption) (*empty.Empty, error) {
 	out := new(empty.Empty)
-	err := c.cc.Invoke(ctx, "/DevicePluginService/SendRawIr", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/plugin.DevicePluginService/SendRawIr", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *devicePluginServiceClient) ReceiveRawIr(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*RawIrData, error) {
-	out := new(RawIrData)
-	err := c.cc.Invoke(ctx, "/DevicePluginService/ReceiveRawIr", in, out, opts...)
+func (c *devicePluginServiceClient) ReceiveRawIr(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*v1.RawIrData, error) {
+	out := new(v1.RawIrData)
+	err := c.cc.Invoke(ctx, "/plugin.DevicePluginService/ReceiveRawIr", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *devicePluginServiceClient) GetDeviceInfo(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*DeviceInfo, error) {
-	out := new(DeviceInfo)
-	err := c.cc.Invoke(ctx, "/DevicePluginService/GetDeviceInfo", in, out, opts...)
+func (c *devicePluginServiceClient) GetDeviceInfo(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*v1.DeviceInfo, error) {
+	out := new(v1.DeviceInfo)
+	err := c.cc.Invoke(ctx, "/plugin.DevicePluginService/GetDeviceInfo", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *devicePluginServiceClient) GetDeviceStatus(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*DeviceStatus, error) {
-	out := new(DeviceStatus)
-	err := c.cc.Invoke(ctx, "/DevicePluginService/GetDeviceStatus", in, out, opts...)
+func (c *devicePluginServiceClient) GetDeviceStatus(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*v1.DeviceStatus, error) {
+	out := new(v1.DeviceStatus)
+	err := c.cc.Invoke(ctx, "/plugin.DevicePluginService/GetDeviceStatus", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +77,7 @@ func (c *devicePluginServiceClient) GetDeviceStatus(ctx context.Context, in *emp
 
 func (c *devicePluginServiceClient) Init(ctx context.Context, in *DeviceConfig, opts ...grpc.CallOption) (*empty.Empty, error) {
 	out := new(empty.Empty)
-	err := c.cc.Invoke(ctx, "/DevicePluginService/Init", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/plugin.DevicePluginService/Init", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -87,10 +88,10 @@ func (c *devicePluginServiceClient) Init(ctx context.Context, in *DeviceConfig, 
 // All implementations must embed UnimplementedDevicePluginServiceServer
 // for forward compatibility
 type DevicePluginServiceServer interface {
-	SendRawIr(context.Context, *RawIrData) (*empty.Empty, error)
-	ReceiveRawIr(context.Context, *empty.Empty) (*RawIrData, error)
-	GetDeviceInfo(context.Context, *empty.Empty) (*DeviceInfo, error)
-	GetDeviceStatus(context.Context, *empty.Empty) (*DeviceStatus, error)
+	SendRawIr(context.Context, *v1.RawIrData) (*empty.Empty, error)
+	ReceiveRawIr(context.Context, *empty.Empty) (*v1.RawIrData, error)
+	GetDeviceInfo(context.Context, *empty.Empty) (*v1.DeviceInfo, error)
+	GetDeviceStatus(context.Context, *empty.Empty) (*v1.DeviceStatus, error)
 	Init(context.Context, *DeviceConfig) (*empty.Empty, error)
 	mustEmbedUnimplementedDevicePluginServiceServer()
 }
@@ -99,16 +100,16 @@ type DevicePluginServiceServer interface {
 type UnimplementedDevicePluginServiceServer struct {
 }
 
-func (UnimplementedDevicePluginServiceServer) SendRawIr(context.Context, *RawIrData) (*empty.Empty, error) {
+func (UnimplementedDevicePluginServiceServer) SendRawIr(context.Context, *v1.RawIrData) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendRawIr not implemented")
 }
-func (UnimplementedDevicePluginServiceServer) ReceiveRawIr(context.Context, *empty.Empty) (*RawIrData, error) {
+func (UnimplementedDevicePluginServiceServer) ReceiveRawIr(context.Context, *empty.Empty) (*v1.RawIrData, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReceiveRawIr not implemented")
 }
-func (UnimplementedDevicePluginServiceServer) GetDeviceInfo(context.Context, *empty.Empty) (*DeviceInfo, error) {
+func (UnimplementedDevicePluginServiceServer) GetDeviceInfo(context.Context, *empty.Empty) (*v1.DeviceInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetDeviceInfo not implemented")
 }
-func (UnimplementedDevicePluginServiceServer) GetDeviceStatus(context.Context, *empty.Empty) (*DeviceStatus, error) {
+func (UnimplementedDevicePluginServiceServer) GetDeviceStatus(context.Context, *empty.Empty) (*v1.DeviceStatus, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetDeviceStatus not implemented")
 }
 func (UnimplementedDevicePluginServiceServer) Init(context.Context, *DeviceConfig) (*empty.Empty, error) {
@@ -128,7 +129,7 @@ func RegisterDevicePluginServiceServer(s grpc.ServiceRegistrar, srv DevicePlugin
 }
 
 func _DevicePluginService_SendRawIr_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RawIrData)
+	in := new(v1.RawIrData)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -137,10 +138,10 @@ func _DevicePluginService_SendRawIr_Handler(srv interface{}, ctx context.Context
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/DevicePluginService/SendRawIr",
+		FullMethod: "/plugin.DevicePluginService/SendRawIr",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DevicePluginServiceServer).SendRawIr(ctx, req.(*RawIrData))
+		return srv.(DevicePluginServiceServer).SendRawIr(ctx, req.(*v1.RawIrData))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -155,7 +156,7 @@ func _DevicePluginService_ReceiveRawIr_Handler(srv interface{}, ctx context.Cont
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/DevicePluginService/ReceiveRawIr",
+		FullMethod: "/plugin.DevicePluginService/ReceiveRawIr",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(DevicePluginServiceServer).ReceiveRawIr(ctx, req.(*empty.Empty))
@@ -173,7 +174,7 @@ func _DevicePluginService_GetDeviceInfo_Handler(srv interface{}, ctx context.Con
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/DevicePluginService/GetDeviceInfo",
+		FullMethod: "/plugin.DevicePluginService/GetDeviceInfo",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(DevicePluginServiceServer).GetDeviceInfo(ctx, req.(*empty.Empty))
@@ -191,7 +192,7 @@ func _DevicePluginService_GetDeviceStatus_Handler(srv interface{}, ctx context.C
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/DevicePluginService/GetDeviceStatus",
+		FullMethod: "/plugin.DevicePluginService/GetDeviceStatus",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(DevicePluginServiceServer).GetDeviceStatus(ctx, req.(*empty.Empty))
@@ -209,7 +210,7 @@ func _DevicePluginService_Init_Handler(srv interface{}, ctx context.Context, dec
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/DevicePluginService/Init",
+		FullMethod: "/plugin.DevicePluginService/Init",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(DevicePluginServiceServer).Init(ctx, req.(*DeviceConfig))
@@ -221,7 +222,7 @@ func _DevicePluginService_Init_Handler(srv interface{}, ctx context.Context, dec
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var DevicePluginService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "DevicePluginService",
+	ServiceName: "plugin.DevicePluginService",
 	HandlerType: (*DevicePluginServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -246,5 +247,5 @@ var DevicePluginService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "device_plugin.proto",
+	Metadata: "plugin/v1/device_plugin.proto",
 }

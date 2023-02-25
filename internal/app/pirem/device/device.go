@@ -2,13 +2,15 @@ package device
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"os/exec"
 	"sync"
 	"time"
 
 	"github.com/NaKa2355/pirem/internal/app/pirem/usecases"
 
-	apiremv1 "github.com/NaKa2355/pirem/pkg/apirem.v1"
+	apiremv1 "github.com/NaKa2355/pirem/gen/apirem/v1"
 	"github.com/NaKa2355/pirem/pkg/plugin"
 	go_plugin "github.com/hashicorp/go-plugin"
 )
@@ -49,6 +51,39 @@ func New(id string, name string, dev_ctrler plugin.DeviceController, client *go_
 	dev.client = client
 	dev.Information.Name = name
 	return dev, err
+}
+
+func NewFromPlugin(id string, name string, conf json.RawMessage, pluginPath string) (*Device, error) {
+	dev := &Device{}
+	client := go_plugin.NewClient(
+		&go_plugin.ClientConfig{
+			HandshakeConfig: plugin.Handshake,
+			Plugins:         plugin.PluginMap,
+			Cmd:             exec.Command(pluginPath),
+			AllowedProtocols: []go_plugin.Protocol{
+				go_plugin.ProtocolGRPC,
+			},
+		},
+	)
+
+	rpcClient, err := client.Client()
+	if err != nil {
+		return dev, err
+	}
+
+	raw, err := rpcClient.Dispense("device_controller")
+	if err != nil {
+		client.Kill()
+		return dev, err
+	}
+
+	devCtrl, ok := raw.(plugin.DeviceController)
+	if !ok {
+		client.Kill()
+		return dev, plugin.ErrPluginNotSupported
+	}
+
+	return New(id, name, devCtrl, client)
 }
 
 func (d *Device) GetDeviceInfo(ctx context.Context) *apiremv1.DeviceInfo {

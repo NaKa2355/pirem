@@ -4,7 +4,8 @@ import (
 	"context"
 	"encoding/json"
 
-	apiremv1 "github.com/NaKa2355/pirem/pkg/apirem.v1"
+	apiremv1 "github.com/NaKa2355/pirem/gen/apirem/v1"
+	pluginv1 "github.com/NaKa2355/pirem/gen/plugin/v1"
 
 	"github.com/golang/protobuf/ptypes/empty"
 )
@@ -13,7 +14,7 @@ import (
 type GRPCServer struct {
 	// This is the real implementation
 	Impl DeviceController
-	apiremv1.UnimplementedDevicePluginServiceServer
+	pluginv1.UnimplementedDevicePluginServiceServer
 }
 
 func (m *GRPCServer) SendRawIr(ctx context.Context, irData *apiremv1.RawIrData) (*empty.Empty, error) {
@@ -37,7 +38,7 @@ func (m *GRPCServer) Drop() error {
 	return nil
 }
 
-func (m *GRPCServer) Init(ctx context.Context, config *apiremv1.DeviceConfig) (*empty.Empty, error) {
+func (m *GRPCServer) Init(ctx context.Context, config *pluginv1.DeviceConfig) (*empty.Empty, error) {
 	err := m.Impl.Init(ctx, json.RawMessage(config.JsonConfig))
 	return &empty.Empty{}, err
 }

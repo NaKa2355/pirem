@@ -2,11 +2,12 @@ syntax = "proto3";
 
 package apirem;
 
-option go_package = "apirem.v1";
+option go_package = "github.com/NaKa2355/pirem/gen/apirem/v1";
 
-import "device_info.proto";
-import "device_status.proto";
-import "ir_info.proto";
+
+import "apirem/v1/device_info.proto";
+import "apirem/v1/device_status.proto";
+import "apirem/v1/ir_info.proto";
 
 
 //---------- Send IR ----------
