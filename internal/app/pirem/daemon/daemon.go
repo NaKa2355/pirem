@@ -1,6 +1,7 @@
 package daemon
 
 import (
+	"context"
 	"encoding/json"
 	"os"
 	"syscall"
@@ -46,6 +47,11 @@ func loadConfig(filePath string) (*Config, error) {
 func LoadDevice(devConf DeviceConfig, entity *entity.Entity) error {
 	devCtrl, client, err := plugin.LoadPlugin(devConf.PluginPath)
 	if err != nil {
+		return err
+	}
+	err = devCtrl.Init(context.Background(), devConf.Config)
+	if err != nil {
+		client.Kill()
 		return err
 	}
 	dev, err := device.New(devConf.ID, devConf.Name, devCtrl, client)
