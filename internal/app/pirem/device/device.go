@@ -9,14 +9,17 @@ import (
 	"github.com/NaKa2355/pirem/internal/app/pirem/usecases"
 
 	apiremv1 "github.com/NaKa2355/pirem/pkg/apirem.v1"
-	dev_controller "github.com/NaKa2355/pirem/pkg/device_controller"
+	"github.com/NaKa2355/pirem/pkg/plugin"
+	go_plugin "github.com/hashicorp/go-plugin"
 )
+
+var ErrPluginNotSupported error = fmt.Errorf("plugin not supported")
 
 type Device struct {
 	Information *apiremv1.DeviceInfo
-	controller  dev_controller.DeviceController
+	controller  plugin.DeviceController
 	mu          sync.Mutex
-
+	client      *go_plugin.Client
 	usecases.DeviceController
 }
 
@@ -36,13 +39,14 @@ func canReceive(serviceType apiremv1.DeviceInfo_ServiceType) bool {
 	return false
 }
 
-func New(id string, name string, dev_ctrler dev_controller.DeviceController) (*Device, error) {
+func New(id string, name string, dev_ctrler plugin.DeviceController, client *go_plugin.Client) (*Device, error) {
 	dev := &Device{}
 	var err error
 	ctx := context.Background()
 	dev.controller = dev_ctrler
 	dev.Information, err = dev.controller.GetDeviceInfo(ctx)
 	dev.Information.Id = id
+	dev.client = client
 	dev.Information.Name = name
 	return dev, err
 }
@@ -81,7 +85,7 @@ func (d *Device) SendIr(ctx context.Context, ir_data *apiremv1.RawIrData) error 
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
-		err := d.controller.SendIr(ctx, ir_data)
+		err := d.controller.SendRawIr(ctx, ir_data)
 		if err != nil {
 			return err
 		}
@@ -103,13 +107,13 @@ func (d *Device) ReceiveIr(ctx context.Context) (*apiremv1.RawIrData, error) {
 	case <-ctx.Done():
 		return ir_data, ctx.Err()
 	default:
-		return d.controller.ReceiveIr(ctx)
+		return d.controller.ReceiveRawIr(ctx)
 	}
 }
 
 func (d *Device) Drop() error {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	err := d.controller.Drop()
-	return err
+	d.client.Kill()
+	return nil
 }
