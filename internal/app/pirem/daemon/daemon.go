@@ -1,7 +1,6 @@
 package daemon
 
 import (
-	"context"
 	"encoding/json"
 	"os"
 	"syscall"
@@ -11,7 +10,6 @@ import (
 	"github.com/NaKa2355/pirem/internal/app/pirem/entity"
 	server "github.com/NaKa2355/pirem/internal/app/pirem/server"
 
-	plugin "github.com/NaKa2355/pirem/pkg/plugin"
 	"golang.org/x/exp/slog"
 )
 
@@ -34,7 +32,7 @@ type Config struct {
 	EnableReflection bool           `json:"enable_reflection"`
 }
 
-func loadConfig(filePath string) (*Config, error) {
+func readConf(filePath string) (*Config, error) {
 	config := &Config{}
 	config_data, err := os.ReadFile(filePath)
 	if err != nil {
@@ -44,17 +42,8 @@ func loadConfig(filePath string) (*Config, error) {
 	return config, err
 }
 
-func LoadDevice(devConf DeviceConfig, entity *entity.Entity) error {
-	devCtrl, client, err := plugin.LoadPlugin(devConf.PluginPath)
-	if err != nil {
-		return err
-	}
-	err = devCtrl.Init(context.Background(), devConf.Config)
-	if err != nil {
-		client.Kill()
-		return err
-	}
-	dev, err := device.New(devConf.ID, devConf.Name, devCtrl, client)
+func addDevice(devConf DeviceConfig, entity *entity.Entity) error {
+	dev, err := device.NewFromPlugin(devConf.ID, devConf.Name, devConf.Config, devConf.PluginPath)
 	if err != nil {
 		return err
 	}
@@ -69,7 +58,7 @@ func New(logger *slog.Logger, configPath string) (*Daemon, error) {
 	d.entity = entity.New()
 
 	//load config file
-	d.config, err = loadConfig(configPath)
+	d.config, err = readConf(configPath)
 	if err != nil {
 		logger.Error(MsgFaildLoadConfig, err)
 		return d, err
@@ -77,7 +66,7 @@ func New(logger *slog.Logger, configPath string) (*Daemon, error) {
 
 	//load device plugins
 	for _, devConf := range d.config.Devices {
-		err := LoadDevice(devConf, d.entity)
+		err := addDevice(devConf, d.entity)
 		if err != nil {
 			logger.Error(
 				MsgFaildLoadDev,

@@ -3,11 +3,12 @@ package entity
 import (
 	"context"
 	"fmt"
-	"github.com/NaKa2355/pirem/internal/app/pirem/usecases"
-	apiremv1 "github.com/NaKa2355/pirem/pkg/apirem.v1"
-	pirem_err "github.com/NaKa2355/pirem/pkg/error"
 	"regexp"
 	"sync"
+
+	apiremv1 "github.com/NaKa2355/pirem/gen/apirem/v1"
+	"github.com/NaKa2355/pirem/internal/app/pirem/usecases"
+	pirem_err "github.com/NaKa2355/pirem/pkg/error"
 )
 
 const MsgDevNotFound = "device(id=%s) is not exist: %w"

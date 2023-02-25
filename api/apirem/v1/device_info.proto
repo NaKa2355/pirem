@@ -1,6 +1,8 @@
 syntax = "proto3";
 
-option go_package = "apirem.v1";
+package apirem;
+
+option go_package = "github.com/NaKa2355/pirem/gen/apirem/v1";
 
 message DeviceInfo {
     string id = 1;
