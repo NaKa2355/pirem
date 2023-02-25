@@ -27,6 +27,7 @@ CMD_BIN:=$(CMD_PACKAGES:$(MOD_NAME)/cmd/%=$(CMD_BIN_DIR)/%)
 
 BUILD_OPT := -ldflags="-s -w" -trimpath
 
+
 all:
 	@echo $(CMD_BIN)
 .PHONY: clean
