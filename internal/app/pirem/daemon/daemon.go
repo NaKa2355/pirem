@@ -44,7 +44,7 @@ func New(logger hclog.Logger, configPath string) (*Daemon, error) {
 	var err error = nil
 	d := &Daemon{}
 	d.logger = logger
-	d.interactor = interactor.NewInteractor()
+	d.interactor = interactor.New(logger)
 	web := web.New(d.interactor)
 
 	//load config file
@@ -56,7 +56,8 @@ func New(logger hclog.Logger, configPath string) (*Daemon, error) {
 
 	//load device plugins
 	for _, devConf := range d.config.Devices {
-		err := d.interactor.AddDevice(devConf.ID, devConf.Name, devConf.PluginPath, devConf.Config)
+		err := d.interactor.AddDevice(
+			devConf.ID, devConf.Name, devConf.PluginPath, devConf.Config)
 		if err != nil {
 			logger.Error(
 				MsgFaildLoadDev,
