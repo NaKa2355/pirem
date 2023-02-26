@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-var ErrPluginNotSupported error = fmt.Errorf("no supported plugin")
+var ErrPluginNotSupported error = fmt.Errorf("plugin not supported")
 
 var Handshake = plugin.HandshakeConfig{
 	ProtocolVersion:  1,
