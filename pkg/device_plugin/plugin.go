@@ -1,4 +1,4 @@
-package plugin
+package device_plugin
 
 import (
 	"context"

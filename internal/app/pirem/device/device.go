@@ -11,18 +11,18 @@ import (
 	"github.com/NaKa2355/pirem/internal/app/pirem/usecases"
 
 	apiremv1 "github.com/NaKa2355/pirem/gen/apirem/v1"
-	"github.com/NaKa2355/pirem/pkg/device_plugin"
+	dev_plugin "github.com/NaKa2355/pirem/pkg/device_plugin"
 	"github.com/hashicorp/go-hclog"
-	go_plugin "github.com/hashicorp/go-plugin"
+	plugin "github.com/hashicorp/go-plugin"
 )
 
 var ErrPluginNotSupported error = fmt.Errorf("plugin not supported")
 
 type Device struct {
 	Information *apiremv1.DeviceInfo
-	controller  plugin.DeviceController
+	controller  dev_plugin.DeviceController
 	mu          sync.Mutex
-	client      *go_plugin.Client
+	client      *plugin.Client
 	usecases.DeviceController
 }
 
@@ -42,7 +42,7 @@ func canReceive(serviceType apiremv1.DeviceInfo_ServiceType) bool {
 	return false
 }
 
-func New(id string, name string, dev_ctrler plugin.DeviceController, client *go_plugin.Client) (*Device, error) {
+func New(id string, name string, dev_ctrler dev_plugin.DeviceController, client *plugin.Client) (*Device, error) {
 	dev := &Device{}
 	var err error
 	ctx := context.Background()
@@ -56,14 +56,14 @@ func New(id string, name string, dev_ctrler plugin.DeviceController, client *go_
 
 func NewFromPlugin(id string, name string, conf json.RawMessage, pluginPath string, logger hclog.Logger) (*Device, error) {
 	dev := &Device{}
-	client := go_plugin.NewClient(
-		&go_plugin.ClientConfig{
-			HandshakeConfig: plugin.Handshake,
-			Plugins:         plugin.PluginMap,
+	client := plugin.NewClient(
+		&plugin.ClientConfig{
+			HandshakeConfig: dev_plugin.Handshake,
+			Plugins:         dev_plugin.PluginMap,
 			Cmd:             exec.Command(pluginPath),
 			Logger:          logger,
-			AllowedProtocols: []go_plugin.Protocol{
-				go_plugin.ProtocolGRPC,
+			AllowedProtocols: []plugin.Protocol{
+				plugin.ProtocolGRPC,
 			},
 		},
 	)
@@ -79,10 +79,10 @@ func NewFromPlugin(id string, name string, conf json.RawMessage, pluginPath stri
 		return dev, err
 	}
 
-	devCtrl, ok := raw.(plugin.DeviceController)
+	devCtrl, ok := raw.(dev_plugin.DeviceController)
 	if !ok {
 		client.Kill()
-		return dev, plugin.ErrPluginNotSupported
+		return dev, dev_plugin.ErrPluginNotSupported
 	}
 
 	if err := devCtrl.Init(context.Background(), conf); err != nil {
