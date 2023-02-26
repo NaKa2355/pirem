@@ -12,5 +12,6 @@ type DeviceController interface {
 	ReceiveRawIr(context.Context) (*apiremv1.RawIrData, error)
 	GetDeviceInfo(context.Context) (*apiremv1.DeviceInfo, error)
 	GetDeviceStatus(context.Context) (*apiremv1.DeviceStatus, error)
+	IsBusy(context.Context) (bool, error)
 	Init(context.Context, json.RawMessage) error
 }

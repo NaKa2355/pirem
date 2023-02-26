@@ -6,6 +6,7 @@ import (
 
 	apiremv1 "github.com/NaKa2355/pirem/gen/apirem/v1"
 	pluginv1 "github.com/NaKa2355/pirem/gen/plugin/v1"
+	"google.golang.org/protobuf/types/known/emptypb"
 
 	"github.com/golang/protobuf/ptypes/empty"
 )
@@ -34,8 +35,14 @@ func (m *GRPCServer) GetDeviceStatus(ctx context.Context, e *empty.Empty) (*apir
 	return m.Impl.GetDeviceStatus(ctx)
 }
 
-func (m *GRPCServer) Drop() error {
-	return nil
+func (m *GRPCServer) IsBusy(ctx context.Context, e *emptypb.Empty) (*pluginv1.IsBusyResponse, error) {
+	resp := &pluginv1.IsBusyResponse{}
+	isBusy, err := m.Impl.IsBusy(ctx)
+	if err != nil {
+		return resp, err
+	}
+	resp.IsBusy = isBusy
+	return resp, err
 }
 
 func (m *GRPCServer) Init(ctx context.Context, config *pluginv1.DeviceConfig) (*empty.Empty, error) {

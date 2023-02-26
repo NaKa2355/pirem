@@ -28,7 +28,7 @@ type DevicePlugin struct {
 }
 
 func (p *DevicePlugin) GRPCServer(broker *plugin.GRPCBroker, s *grpc.Server) error {
-	pluginv1.RegisterDevicePluginServiceServer(s, &GRPCServer{Impl: p.Impl}) // TODO: impl
+	pluginv1.RegisterDevicePluginServiceServer(s, &GRPCServer{Impl: p.Impl})
 	return nil
 }
 

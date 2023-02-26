@@ -1,13 +1,15 @@
-package entity
+package usecases
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"regexp"
 	"sync"
 
 	apiremv1 "github.com/NaKa2355/pirem/gen/apirem/v1"
-	"github.com/NaKa2355/pirem/internal/app/pirem/usecases"
+	"github.com/NaKa2355/pirem/internal/app/pirem/controller/device"
+	dev_usecases "github.com/NaKa2355/pirem/internal/app/pirem/usecases/device"
 	pirem_err "github.com/NaKa2355/pirem/pkg/error"
 )
 
@@ -15,12 +17,10 @@ const MsgDevNotFound = "device(id=%s) is not exist: %w"
 const MsgDevNotSupported = "device(id*%s) does not support this command"
 const IDRegExp = "^[*-~]*$"
 
-type Entity struct {
+type Interactor struct {
 	mu      sync.RWMutex
-	devices map[string]usecases.DeviceController
+	devices map[string]dev_usecases.DeviceController
 	apiremv1.UnimplementedPiRemServiceServer
-
-	usecases.EntityController
 }
 
 // validate device id
@@ -38,44 +38,51 @@ func validateDeviceID(pattern string, deviceID string) error {
 	return nil
 }
 
-func New() *Entity {
-	e := Entity{}
-	e.devices = make(map[string]usecases.DeviceController)
+func NewInteractor() *Interactor {
+	e := Interactor{}
+	e.devices = make(map[string]dev_usecases.DeviceController)
 	return &e
 }
 
 // add device
-func (e *Entity) AddDevice(dev usecases.DeviceController) error {
-	info := dev.GetDeviceInfo(context.Background())
-	id := info.GetId()
-
+func (e *Interactor) AddDevice(id string, name string, pluginFilePath string, conf json.RawMessage) error {
 	if err := validateDeviceID(IDRegExp, id); err != nil {
+		return err
+	}
+
+	dev, err := device.New(pluginFilePath, conf)
+	if err != nil {
 		return err
 	}
 
 	e.mu.Lock()
 	e.devices[id] = dev
 	e.mu.Unlock()
-
 	return nil
 }
 
 // get all devices information
-func (e *Entity) GetAllDeviceInfo(ctx context.Context) ([]*apiremv1.DeviceInfo, error) {
+func (e *Interactor) GetAllDeviceInfo(ctx context.Context) ([]*apiremv1.DeviceInfo, error) {
 	var err error = nil
-	var deviceInfo = make([]*apiremv1.DeviceInfo, 0, 2)
+	var infoList = make([]*apiremv1.DeviceInfo, 0, 2)
+	var info *apiremv1.DeviceInfo
 
 	e.mu.RLock()
-	for _, device := range e.devices {
-		deviceInfo = append(deviceInfo, device.GetDeviceInfo(ctx))
-	}
-	e.mu.RUnlock()
+	defer e.mu.RUnlock()
 
-	return deviceInfo, err
+	for _, device := range e.devices {
+		info, err = device.GetDeviceInfo(ctx)
+		if err != nil {
+			return infoList, err
+		}
+		infoList = append(infoList, info)
+	}
+
+	return infoList, err
 }
 
 // get device information
-func (e *Entity) GetDeviceInfo(ctx context.Context, id string) (*apiremv1.DeviceInfo, error) {
+func (e *Interactor) GetDeviceInfo(ctx context.Context, id string) (*apiremv1.DeviceInfo, error) {
 	var err error = nil
 	var info *apiremv1.DeviceInfo
 
@@ -92,10 +99,10 @@ func (e *Entity) GetDeviceInfo(ctx context.Context, id string) (*apiremv1.Device
 		return info, err
 	}
 
-	return device.GetDeviceInfo(ctx), err
+	return device.GetDeviceInfo(ctx)
 }
 
-func (e *Entity) GetDeviceStatus(ctx context.Context, id string) (*apiremv1.DeviceStatus, error) {
+func (e *Interactor) GetDeviceStatus(ctx context.Context, id string) (*apiremv1.DeviceStatus, error) {
 	var err error = nil
 	var status *apiremv1.DeviceStatus
 
@@ -119,7 +126,7 @@ func (e *Entity) GetDeviceStatus(ctx context.Context, id string) (*apiremv1.Devi
 	return status, err
 }
 
-func (e *Entity) IsBusy(ctx context.Context, id string) (bool, error) {
+func (e *Interactor) IsBusy(ctx context.Context, id string) (bool, error) {
 	var err error = nil
 	var isBusy bool
 
@@ -143,7 +150,7 @@ func (e *Entity) IsBusy(ctx context.Context, id string) (bool, error) {
 	return isBusy, err
 }
 
-func (e *Entity) SendRawIr(ctx context.Context, id string, ir_data *apiremv1.RawIrData) error {
+func (e *Interactor) SendRawIr(ctx context.Context, id string, ir_data *apiremv1.RawIrData) error {
 	var err error = nil
 
 	if err := validateDeviceID(IDRegExp, id); err != nil {
@@ -159,14 +166,14 @@ func (e *Entity) SendRawIr(ctx context.Context, id string, ir_data *apiremv1.Raw
 		return err
 	}
 
-	err = device.SendIr(ctx, ir_data)
+	err = device.SendRawIr(ctx, ir_data)
 	if err != nil {
 		err = fmt.Errorf("%s: %w", err, pirem_err.ErrDeviceInternal)
 	}
 	return err
 }
 
-func (e *Entity) ReceiveRawIr(ctx context.Context, id string) (*apiremv1.RawIrData, error) {
+func (e *Interactor) ReceiveRawIr(ctx context.Context, id string) (*apiremv1.RawIrData, error) {
 	var err error = nil
 	var irData *apiremv1.RawIrData
 
@@ -183,7 +190,7 @@ func (e *Entity) ReceiveRawIr(ctx context.Context, id string) (*apiremv1.RawIrDa
 		return irData, err
 	}
 
-	irData, err = device.ReceiveIr(ctx)
+	irData, err = device.ReceiveRawIr(ctx)
 	if err != nil {
 		err = fmt.Errorf("%s: %w", err, pirem_err.ErrDeviceInternal)
 	}
@@ -191,7 +198,7 @@ func (e *Entity) ReceiveRawIr(ctx context.Context, id string) (*apiremv1.RawIrDa
 }
 
 // free resources
-func (e *Entity) Drop() {
+func (e *Interactor) Drop() {
 	e.mu.RLock()
 	for deviceId, device := range e.devices {
 		device.Drop()
