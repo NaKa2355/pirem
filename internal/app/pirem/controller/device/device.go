@@ -11,8 +11,6 @@ import (
 	"github.com/hashicorp/go-plugin"
 )
 
-var _ dev_plugin.DeviceController = &Device{}
-
 type Device struct {
 	devCtrl dev_plugin.DeviceController
 	client  *plugin.Client
@@ -68,7 +66,7 @@ func (d *Device) ReceiveRawIr(ctx context.Context) (*apiremv1.RawIrData, error) 
 }
 
 func (d *Device) GetDeviceInfo(ctx context.Context) (*apiremv1.DeviceInfo, error) {
-	return d.devCtrl.GetDeviceInfo(ctx)
+	return d.devCtrl.GetDeviceInfo(context.Background())
 }
 
 func (d *Device) GetDeviceStatus(ctx context.Context) (*apiremv1.DeviceStatus, error) {
