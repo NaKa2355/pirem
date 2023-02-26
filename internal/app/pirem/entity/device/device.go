@@ -8,15 +8,14 @@ import (
 
 	apiremv1 "github.com/NaKa2355/pirem/gen/apirem/v1"
 	dev_usecases "github.com/NaKa2355/pirem/internal/app/pirem/usecases/device"
-	plugin "github.com/hashicorp/go-plugin"
 )
 
 const SendIrInterval = 200 * time.Millisecond
 
 type Device struct {
-	Information *apiremv1.DeviceInfo
-	ctrl        dev_usecases.DeviceController
-	mu          sync.Mutex
+	ctrl dev_usecases.DeviceController
+	info *apiremv1.DeviceInfo
+	mu   sync.Mutex
 }
 
 // check the device supports sending infraread
@@ -35,19 +34,21 @@ func canReceive(serviceType apiremv1.DeviceInfo_ServiceType) bool {
 	return false
 }
 
-func New(name string, devCtrl dev_usecases.DeviceController, client *plugin.Client) (*Device, error) {
+func New(id string, name string, devCtrl dev_usecases.DeviceController) (*Device, error) {
 	dev := &Device{}
 	info, err := devCtrl.GetDeviceInfo(context.Background())
 	if err != nil {
 		return dev, err
 	}
-	dev.Information = info
+	dev.info = info
 	dev.ctrl = devCtrl
+	dev.info.Name = name
+	dev.info.Id = id
 	return dev, nil
 }
 
-func (d *Device) GetDeviceInfo(ctx context.Context) *apiremv1.DeviceInfo {
-	return d.Information
+func (d *Device) GetDeviceInfo(ctx context.Context) (*apiremv1.DeviceInfo, error) {
+	return d.info, nil
 }
 
 func (d *Device) IsBusy(ctx context.Context) (bool, error) {
@@ -60,7 +61,7 @@ func (d *Device) GetDeviceStatus(ctx context.Context) (*apiremv1.DeviceStatus, e
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
-	isBusy, err := d.IsBusy(context.Background())
+	isBusy, err := d.ctrl.IsBusy(context.Background())
 	if err != nil {
 		return devStatus, err
 	}
@@ -76,14 +77,14 @@ func (d *Device) GetDeviceStatus(ctx context.Context) (*apiremv1.DeviceStatus, e
 	}
 }
 
-func (d *Device) SendIr(ctx context.Context, irData *apiremv1.RawIrData) error {
-	if !canSend(d.Information.Service) {
+func (d *Device) SendRawIr(ctx context.Context, irData *apiremv1.RawIrData) error {
+	if !canSend(d.info.Service) {
 		return fmt.Errorf("this device does not support sending")
 	}
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
-	isBusy, err := d.IsBusy(context.Background())
+	isBusy, err := d.ctrl.IsBusy(context.Background())
 	if err != nil {
 		return err
 	}
@@ -106,16 +107,16 @@ func (d *Device) SendIr(ctx context.Context, irData *apiremv1.RawIrData) error {
 	}
 }
 
-func (d *Device) ReceiveIr(ctx context.Context) (*apiremv1.RawIrData, error) {
+func (d *Device) ReceiveRawIr(ctx context.Context) (*apiremv1.RawIrData, error) {
 	var irData *apiremv1.RawIrData
-	if !canReceive(d.Information.Service) {
+	if !canReceive(d.info.Service) {
 		return irData, fmt.Errorf("this device does not support receiving")
 	}
 
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
-	isBusy, err := d.IsBusy(context.Background())
+	isBusy, err := d.ctrl.IsBusy(context.Background())
 	if err != nil {
 		return irData, err
 	}

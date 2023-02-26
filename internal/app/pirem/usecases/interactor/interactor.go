@@ -9,6 +9,7 @@ import (
 
 	apiremv1 "github.com/NaKa2355/pirem/gen/apirem/v1"
 	"github.com/NaKa2355/pirem/internal/app/pirem/controller/device"
+	entity_dev "github.com/NaKa2355/pirem/internal/app/pirem/entity/device"
 	dev_usecases "github.com/NaKa2355/pirem/internal/app/pirem/usecases/device"
 	pirem_err "github.com/NaKa2355/pirem/pkg/error"
 	"github.com/hashicorp/go-hclog"
@@ -52,8 +53,14 @@ func (e *Interactor) AddDevice(id string, name string, pluginFilePath string, co
 		return err
 	}
 
-	dev, err := device.New(pluginFilePath, conf, e.logger)
+	devCtrl, err := device.New(pluginFilePath, conf, e.logger)
 	if err != nil {
+		return err
+	}
+
+	dev, err := entity_dev.New(id, name, devCtrl)
+	if err != nil {
+		devCtrl.Drop()
 		return err
 	}
 
@@ -73,10 +80,8 @@ func (e *Interactor) GetAllDeviceInfo(ctx context.Context) ([]*apiremv1.DeviceIn
 	defer e.mu.RUnlock()
 
 	for _, device := range e.devices {
-		info, err = device.GetDeviceInfo(ctx)
-		if err != nil {
-			return infoList, err
-		}
+		//entityのGetDeviceInfoのerrorは常にnilを返すのでハンドリングしない
+		info, _ = device.GetDeviceInfo(ctx)
 		infoList = append(infoList, info)
 	}
 
