@@ -46,7 +46,10 @@ func addDevice(devConf DeviceConfig, entity *entity.Entity, logger hclog.Logger)
 	if err != nil {
 		return err
 	}
-	entity.AddDevice(dev)
+	if err = entity.AddDevice(dev); err != nil {
+		dev.Drop()
+		return err
+	}
 	return nil
 }
 
