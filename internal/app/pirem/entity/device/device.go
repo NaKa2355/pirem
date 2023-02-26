@@ -60,7 +60,7 @@ func (d *Device) GetDeviceStatus(ctx context.Context) (*apiremv1.DeviceStatus, e
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
-	isBusy, err := d.IsBusy(ctx)
+	isBusy, err := d.IsBusy(context.Background())
 	if err != nil {
 		return devStatus, err
 	}
@@ -83,7 +83,7 @@ func (d *Device) SendIr(ctx context.Context, irData *apiremv1.RawIrData) error {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
-	isBusy, err := d.IsBusy(ctx)
+	isBusy, err := d.IsBusy(context.Background())
 	if err != nil {
 		return err
 	}
@@ -115,7 +115,7 @@ func (d *Device) ReceiveIr(ctx context.Context) (*apiremv1.RawIrData, error) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
-	isBusy, err := d.IsBusy(ctx)
+	isBusy, err := d.IsBusy(context.Background())
 	if err != nil {
 		return irData, err
 	}

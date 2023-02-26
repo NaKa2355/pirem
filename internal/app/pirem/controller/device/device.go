@@ -7,6 +7,7 @@ import (
 
 	apiremv1 "github.com/NaKa2355/pirem/gen/apirem/v1"
 	dev_plugin "github.com/NaKa2355/pirem/pkg/device_plugin"
+	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
 )
 
@@ -17,13 +18,14 @@ type Device struct {
 	client  *plugin.Client
 }
 
-func New(pluginPath string, conf json.RawMessage) (*Device, error) {
+func New(pluginPath string, conf json.RawMessage, logger hclog.Logger) (*Device, error) {
 	dev := &Device{}
 	client := plugin.NewClient(
 		&plugin.ClientConfig{
 			HandshakeConfig: dev_plugin.Handshake,
 			Plugins:         dev_plugin.PluginMap,
 			Cmd:             exec.Command(pluginPath),
+			Logger:          logger,
 			AllowedProtocols: []plugin.Protocol{
 				plugin.ProtocolGRPC,
 			},

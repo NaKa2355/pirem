@@ -11,6 +11,7 @@ import (
 	"github.com/NaKa2355/pirem/internal/app/pirem/controller/device"
 	dev_usecases "github.com/NaKa2355/pirem/internal/app/pirem/usecases/device"
 	pirem_err "github.com/NaKa2355/pirem/pkg/error"
+	"github.com/hashicorp/go-hclog"
 )
 
 const MsgDevNotFound = "device(id=%s) is not exist: %w"
@@ -20,7 +21,7 @@ const IDRegExp = "^[*-~]*$"
 type Interactor struct {
 	mu      sync.RWMutex
 	devices map[string]dev_usecases.DeviceController
-	apiremv1.UnimplementedPiRemServiceServer
+	logger  hclog.Logger
 }
 
 // validate device id
@@ -38,9 +39,10 @@ func validateDeviceID(pattern string, deviceID string) error {
 	return nil
 }
 
-func NewInteractor() *Interactor {
+func New(logger hclog.Logger) *Interactor {
 	e := Interactor{}
 	e.devices = make(map[string]dev_usecases.DeviceController)
+	e.logger = logger
 	return &e
 }
 
@@ -50,7 +52,7 @@ func (e *Interactor) AddDevice(id string, name string, pluginFilePath string, co
 		return err
 	}
 
-	dev, err := device.New(pluginFilePath, conf)
+	dev, err := device.New(pluginFilePath, conf, e.logger)
 	if err != nil {
 		return err
 	}
