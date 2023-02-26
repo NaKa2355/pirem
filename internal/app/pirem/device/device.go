@@ -86,6 +86,7 @@ func NewFromPlugin(id string, name string, conf json.RawMessage, pluginPath stri
 	}
 
 	if err := devCtrl.Init(context.Background(), conf); err != nil {
+		client.Kill()
 		return dev, err
 	}
 	return New(id, name, devCtrl, client)
