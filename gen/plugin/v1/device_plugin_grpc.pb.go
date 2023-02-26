@@ -28,6 +28,7 @@ type DevicePluginServiceClient interface {
 	ReceiveRawIr(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*v1.RawIrData, error)
 	GetDeviceInfo(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*v1.DeviceInfo, error)
 	GetDeviceStatus(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*v1.DeviceStatus, error)
+	IsBusy(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*IsBusyResponse, error)
 	Init(ctx context.Context, in *DeviceConfig, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
@@ -75,6 +76,15 @@ func (c *devicePluginServiceClient) GetDeviceStatus(ctx context.Context, in *emp
 	return out, nil
 }
 
+func (c *devicePluginServiceClient) IsBusy(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*IsBusyResponse, error) {
+	out := new(IsBusyResponse)
+	err := c.cc.Invoke(ctx, "/plugin.DevicePluginService/IsBusy", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *devicePluginServiceClient) Init(ctx context.Context, in *DeviceConfig, opts ...grpc.CallOption) (*empty.Empty, error) {
 	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/plugin.DevicePluginService/Init", in, out, opts...)
@@ -92,6 +102,7 @@ type DevicePluginServiceServer interface {
 	ReceiveRawIr(context.Context, *empty.Empty) (*v1.RawIrData, error)
 	GetDeviceInfo(context.Context, *empty.Empty) (*v1.DeviceInfo, error)
 	GetDeviceStatus(context.Context, *empty.Empty) (*v1.DeviceStatus, error)
+	IsBusy(context.Context, *empty.Empty) (*IsBusyResponse, error)
 	Init(context.Context, *DeviceConfig) (*empty.Empty, error)
 	mustEmbedUnimplementedDevicePluginServiceServer()
 }
@@ -111,6 +122,9 @@ func (UnimplementedDevicePluginServiceServer) GetDeviceInfo(context.Context, *em
 }
 func (UnimplementedDevicePluginServiceServer) GetDeviceStatus(context.Context, *empty.Empty) (*v1.DeviceStatus, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetDeviceStatus not implemented")
+}
+func (UnimplementedDevicePluginServiceServer) IsBusy(context.Context, *empty.Empty) (*IsBusyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IsBusy not implemented")
 }
 func (UnimplementedDevicePluginServiceServer) Init(context.Context, *DeviceConfig) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Init not implemented")
@@ -200,6 +214,24 @@ func _DevicePluginService_GetDeviceStatus_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DevicePluginService_IsBusy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(empty.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DevicePluginServiceServer).IsBusy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/plugin.DevicePluginService/IsBusy",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DevicePluginServiceServer).IsBusy(ctx, req.(*empty.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _DevicePluginService_Init_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeviceConfig)
 	if err := dec(in); err != nil {
@@ -240,6 +272,10 @@ var DevicePluginService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetDeviceStatus",
 			Handler:    _DevicePluginService_GetDeviceStatus_Handler,
+		},
+		{
+			MethodName: "IsBusy",
+			Handler:    _DevicePluginService_IsBusy_Handler,
 		},
 		{
 			MethodName: "Init",

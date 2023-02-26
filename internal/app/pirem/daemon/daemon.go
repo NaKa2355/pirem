@@ -5,18 +5,17 @@ import (
 	"os"
 	"syscall"
 
-	"github.com/NaKa2355/pirem/internal/app/pirem/controller"
-	"github.com/NaKa2355/pirem/internal/app/pirem/device"
-	"github.com/NaKa2355/pirem/internal/app/pirem/entity"
+	"github.com/NaKa2355/pirem/internal/app/pirem/controller/web"
 	server "github.com/NaKa2355/pirem/internal/app/pirem/server"
+	interactor "github.com/NaKa2355/pirem/internal/app/pirem/usecases/interactor"
 	"github.com/hashicorp/go-hclog"
 )
 
 type Daemon struct {
-	srv    *server.Server
-	entity *entity.Entity
-	config *Config
-	logger hclog.Logger
+	srv        *server.Server
+	interactor *interactor.Interactor
+	config     *Config
+	logger     hclog.Logger
 }
 
 type DeviceConfig struct {
@@ -41,23 +40,12 @@ func readConf(filePath string) (*Config, error) {
 	return config, err
 }
 
-func addDevice(devConf DeviceConfig, entity *entity.Entity, logger hclog.Logger) error {
-	dev, err := device.NewFromPlugin(devConf.ID, devConf.Name, devConf.Config, devConf.PluginPath, logger)
-	if err != nil {
-		return err
-	}
-	if err = entity.AddDevice(dev); err != nil {
-		dev.Drop()
-		return err
-	}
-	return nil
-}
-
 func New(logger hclog.Logger, configPath string) (*Daemon, error) {
 	var err error = nil
 	d := &Daemon{}
 	d.logger = logger
-	d.entity = entity.New()
+	d.interactor = interactor.NewInteractor()
+	web := web.New(d.interactor)
 
 	//load config file
 	d.config, err = readConf(configPath)
@@ -68,7 +56,7 @@ func New(logger hclog.Logger, configPath string) (*Daemon, error) {
 
 	//load device plugins
 	for _, devConf := range d.config.Devices {
-		err := addDevice(devConf, d.entity, logger)
+		err := d.interactor.AddDevice(devConf.ID, devConf.Name, devConf.PluginPath, devConf.Config)
 		if err != nil {
 			logger.Error(
 				MsgFaildLoadDev,
@@ -85,8 +73,7 @@ func New(logger hclog.Logger, configPath string) (*Daemon, error) {
 		)
 	}
 
-	controller := controller.New(d.entity)
-	d.srv = server.New(logger, controller, d.config.EnableReflection)
+	d.srv = server.New(logger, web, d.config.EnableReflection)
 	return d, nil
 }
 
@@ -103,7 +90,7 @@ func (d *Daemon) Start(domainSocket string) error {
 
 	d.srv.WaitSigAndStop(syscall.SIGTERM, syscall.SIGKILL, syscall.SIGINT)
 	d.logger.Info(MsgShuttingDownDaemon)
-	defer d.entity.Drop()
+	defer d.interactor.Drop()
 	d.logger.Info(MsgStopDaemon)
 	return nil
 }

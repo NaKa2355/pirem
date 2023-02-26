@@ -13,10 +13,15 @@ message DeviceConfig {
     string json_config = 1;
 }
 
+message IsBusyResponse {
+    bool isBusy = 1;
+}
+
 service DevicePluginService {
     rpc SendRawIr(apirem.RawIrData) returns (google.protobuf.Empty) {}
     rpc ReceiveRawIr(google.protobuf.Empty) returns (apirem.RawIrData) {}
     rpc GetDeviceInfo(google.protobuf.Empty) returns (apirem.DeviceInfo) {}
     rpc GetDeviceStatus(google.protobuf.Empty) returns (apirem.DeviceStatus) {}
+    rpc IsBusy(google.protobuf.Empty) returns (IsBusyResponse) {}
     rpc Init(DeviceConfig) returns (google.protobuf.Empty) {}
 }
