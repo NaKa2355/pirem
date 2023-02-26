@@ -11,7 +11,7 @@ import (
 	"github.com/NaKa2355/pirem/internal/app/pirem/usecases"
 
 	apiremv1 "github.com/NaKa2355/pirem/gen/apirem/v1"
-	"github.com/NaKa2355/pirem/pkg/plugin"
+	"github.com/NaKa2355/pirem/pkg/device_plugin"
 	"github.com/hashicorp/go-hclog"
 	go_plugin "github.com/hashicorp/go-plugin"
 )
