@@ -32,8 +32,9 @@ func (m *GRPCClient) GetDeviceStatus(ctx context.Context) (*apiremv1.DeviceStatu
 	return m.client.GetDeviceStatus(ctx, &empty.Empty{})
 }
 
-func (m *GRPCClient) IsBusy(ctx context.Context, in *empty.Empty) (*pluginv1.IsBusyResponse, error) {
-	return m.client.IsBusy(ctx, &emptypb.Empty{})
+func (m *GRPCClient) IsBusy(ctx context.Context) (bool, error) {
+	resp, err := m.client.IsBusy(ctx, &emptypb.Empty{})
+	return resp.IsBusy, err
 }
 
 func (m *GRPCClient) Init(ctx context.Context, conf json.RawMessage) error {
