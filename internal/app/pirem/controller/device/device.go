@@ -5,7 +5,8 @@ import (
 	"encoding/json"
 	"os/exec"
 
-	apiremv1 "github.com/NaKa2355/pirem/gen/apirem/v1"
+	apiremv1 "github.com/NaKa2355/irdeck-proto/gen/go/pirem/api/v1"
+	irdatav1 "github.com/NaKa2355/irdeck-proto/gen/go/common/irdata/v1"
 	dev_plugin "github.com/NaKa2355/pirem/pkg/device_plugin"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
@@ -57,11 +58,11 @@ func New(pluginPath string, conf json.RawMessage, logger hclog.Logger) (*Device,
 	return dev, nil
 }
 
-func (d *Device) SendRawIr(ctx context.Context, irData *apiremv1.RawIrData) error {
+func (d *Device) SendRawIr(ctx context.Context, irData *irdatav1.RawIrData) error {
 	return d.devCtrl.SendRawIr(ctx, irData)
 }
 
-func (d *Device) ReceiveRawIr(ctx context.Context) (*apiremv1.RawIrData, error) {
+func (d *Device) ReceiveRawIr(ctx context.Context) (*irdatav1.RawIrData, error) {
 	return d.devCtrl.ReceiveRawIr(ctx)
 }
 

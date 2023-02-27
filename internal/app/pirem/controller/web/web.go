@@ -5,7 +5,7 @@ import (
 
 	web_usecases "github.com/NaKa2355/pirem/internal/app/pirem/usecases/web"
 
-	apiremv1 "github.com/NaKa2355/pirem/gen/apirem/v1"
+	apiremv1 "github.com/NaKa2355/irdeck-proto/gen/go/pirem/api/v1"
 )
 
 type Web struct {

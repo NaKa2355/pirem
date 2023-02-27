@@ -8,7 +8,7 @@ import (
 	"errors"
 	"fmt"
 
-	apiremv1 "github.com/NaKa2355/pirem/gen/apirem/v1"
+	apiremv1 "github.com/NaKa2355/irdeck-proto/gen/go/pirem/api/v1"
 	int_cmd "github.com/NaKa2355/pirem/internal/app/pirem/cmd"
 
 	"github.com/spf13/cobra"

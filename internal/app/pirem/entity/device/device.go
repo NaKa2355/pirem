@@ -6,7 +6,8 @@ import (
 	"sync"
 	"time"
 
-	apiremv1 "github.com/NaKa2355/pirem/gen/apirem/v1"
+	irdatav1 "github.com/NaKa2355/irdeck-proto/gen/go/common/irdata/v1"
+	apiremv1 "github.com/NaKa2355/irdeck-proto/gen/go/pirem/api/v1"
 	dev_usecases "github.com/NaKa2355/pirem/internal/app/pirem/usecases/device"
 )
 
@@ -77,7 +78,7 @@ func (d *Device) GetDeviceStatus(ctx context.Context) (*apiremv1.DeviceStatus, e
 	}
 }
 
-func (d *Device) SendRawIr(ctx context.Context, irData *apiremv1.RawIrData) error {
+func (d *Device) SendRawIr(ctx context.Context, irData *irdatav1.RawIrData) error {
 	if !canSend(d.info.Service) {
 		return fmt.Errorf("this device does not support sending")
 	}
@@ -107,8 +108,8 @@ func (d *Device) SendRawIr(ctx context.Context, irData *apiremv1.RawIrData) erro
 	}
 }
 
-func (d *Device) ReceiveRawIr(ctx context.Context) (*apiremv1.RawIrData, error) {
-	var irData *apiremv1.RawIrData
+func (d *Device) ReceiveRawIr(ctx context.Context) (*irdatav1.RawIrData, error) {
+	var irData *irdatav1.RawIrData
 	if !canReceive(d.info.Service) {
 		return irData, fmt.Errorf("this device does not support receiving")
 	}

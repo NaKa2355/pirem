@@ -7,7 +7,8 @@ import (
 	"regexp"
 	"sync"
 
-	apiremv1 "github.com/NaKa2355/pirem/gen/apirem/v1"
+	irdatav1 "github.com/NaKa2355/irdeck-proto/gen/go/common/irdata/v1"
+	apiremv1 "github.com/NaKa2355/irdeck-proto/gen/go/pirem/api/v1"
 	"github.com/NaKa2355/pirem/internal/app/pirem/controller/device"
 	entity_dev "github.com/NaKa2355/pirem/internal/app/pirem/entity/device"
 	dev_usecases "github.com/NaKa2355/pirem/internal/app/pirem/usecases/device"
@@ -157,7 +158,7 @@ func (e *Interactor) IsBusy(ctx context.Context, id string) (bool, error) {
 	return isBusy, err
 }
 
-func (e *Interactor) SendRawIr(ctx context.Context, id string, ir_data *apiremv1.RawIrData) error {
+func (e *Interactor) SendRawIr(ctx context.Context, id string, ir_data *irdatav1.RawIrData) error {
 	var err error = nil
 
 	if err := validateDeviceID(IDRegExp, id); err != nil {
@@ -180,9 +181,9 @@ func (e *Interactor) SendRawIr(ctx context.Context, id string, ir_data *apiremv1
 	return err
 }
 
-func (e *Interactor) ReceiveRawIr(ctx context.Context, id string) (*apiremv1.RawIrData, error) {
+func (e *Interactor) ReceiveRawIr(ctx context.Context, id string) (*irdatav1.RawIrData, error) {
 	var err error = nil
-	var irData *apiremv1.RawIrData
+	var irData *irdatav1.RawIrData
 
 	if err := validateDeviceID(IDRegExp, id); err != nil {
 		return irData, err
