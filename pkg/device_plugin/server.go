@@ -4,8 +4,9 @@ import (
 	"context"
 	"encoding/json"
 
-	apiremv1 "github.com/NaKa2355/pirem/gen/apirem/v1"
-	pluginv1 "github.com/NaKa2355/pirem/gen/plugin/v1"
+	irdatav1 "github.com/NaKa2355/irdeck-proto/gen/go/common/irdata/v1"
+	apiremv1 "github.com/NaKa2355/irdeck-proto/gen/go/pirem/api/v1"
+	pluginv1 "github.com/NaKa2355/irdeck-proto/gen/go/pirem/plugin/v1"
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	"github.com/golang/protobuf/ptypes/empty"
@@ -18,12 +19,12 @@ type GRPCServer struct {
 	pluginv1.UnimplementedDevicePluginServiceServer
 }
 
-func (m *GRPCServer) SendRawIr(ctx context.Context, irData *apiremv1.RawIrData) (*empty.Empty, error) {
+func (m *GRPCServer) SendRawIr(ctx context.Context, irData *irdatav1.RawIrData) (*empty.Empty, error) {
 	err := m.Impl.SendRawIr(ctx, irData)
 	return &empty.Empty{}, err
 }
 
-func (m *GRPCServer) ReceiveRawIr(ctx context.Context, e *empty.Empty) (*apiremv1.RawIrData, error) {
+func (m *GRPCServer) ReceiveRawIr(ctx context.Context, e *empty.Empty) (*irdatav1.RawIrData, error) {
 	return m.Impl.ReceiveRawIr(ctx)
 }
 

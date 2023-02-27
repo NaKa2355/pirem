@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	pluginv1 "github.com/NaKa2355/pirem/gen/plugin/v1"
+	pluginv1 "github.com/NaKa2355/irdeck-proto/gen/go/pirem/plugin/v1"
 
 	"github.com/hashicorp/go-plugin"
 	"google.golang.org/grpc"

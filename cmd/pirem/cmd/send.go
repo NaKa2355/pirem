@@ -9,7 +9,8 @@ import (
 	"fmt"
 	"os"
 
-	apirem_v1 "github.com/NaKa2355/pirem/gen/apirem/v1"
+	irdatav1 "github.com/NaKa2355/irdeck-proto/gen/go/common/irdata/v1"
+	apirem_v1 "github.com/NaKa2355/irdeck-proto/gen/go/pirem/api/v1"
 	int_cmd "github.com/NaKa2355/pirem/internal/app/pirem/cmd"
 
 	"github.com/spf13/cobra"
@@ -25,7 +26,7 @@ var sendCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fileFlag := cmd.Flag("file")
 		devFlag := cmd.Flag("device")
-		var irData = &apirem_v1.RawIrData{}
+		var irData = &irdatav1.RawIrData{}
 
 		if !devFlag.Changed {
 			return errors.New("no input device id")

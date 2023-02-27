@@ -1,13 +1,13 @@
 module github.com/NaKa2355/pirem
 
-go 1.19
+go 1.20
 
 require google.golang.org/protobuf v1.28.1
 
 require (
+	github.com/hashicorp/go-hclog v0.14.1
 	github.com/hashicorp/go-plugin v1.4.8
 	github.com/spf13/cobra v1.6.1
-	golang.org/x/exp v0.0.0-20230224173230-c95f2b4c22f2
 	google.golang.org/grpc v1.53.0
 )
 
@@ -18,8 +18,8 @@ require (
 )
 
 require (
+	github.com/NaKa2355/irdeck-proto v0.0.0-20230227182709-8a749e7ea45a // indirect
 	github.com/fatih/color v1.7.0 // indirect
-	github.com/hashicorp/go-hclog v0.14.1 // indirect
 	github.com/hashicorp/yamux v0.0.0-20180604194846-3520598351bb // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/mattn/go-colorable v0.1.4 // indirect

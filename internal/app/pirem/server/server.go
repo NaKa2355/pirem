@@ -5,7 +5,7 @@ import (
 	"os"
 	"os/signal"
 
-	apiremv1 "github.com/NaKa2355/pirem/gen/apirem/v1"
+	apiremv1 "github.com/NaKa2355/irdeck-proto/gen/go/pirem/api/v1"
 	"github.com/hashicorp/go-hclog"
 
 	"google.golang.org/grpc"
