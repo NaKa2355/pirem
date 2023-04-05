@@ -10,7 +10,7 @@ CONFIG_INSTALL:=/etc/piremd.json
 
 #サービスファイルのインストール先
 SERVICE_FILE:=config/piremd.service
-SERVICE_INSTALL:=/lib/systemd/system/piremd.service
+SERVICE_INSTALL:=/etc/systemd/system/piremd.service
 
 #プラグインのインストール先
 PLUGIN_INSTALL:=/opt/piremd
