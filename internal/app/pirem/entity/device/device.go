@@ -12,8 +12,8 @@ import (
 const SendIrInterval = 200 * time.Millisecond
 
 type Driver interface {
-	SendIR(ir.Data) error
-	ReceiveIR() (ir.Data, error)
+	SendIR(context.Context, ir.Data) error
+	ReceiveIR(context.Context) (ir.Data, error)
 }
 
 type Device struct {
@@ -53,7 +53,7 @@ func (d *Device) SendRawIR(ctx context.Context, irData ir.Data) error {
 			<-d.mu
 		}()
 
-		err := d.driver.SendIR(irData)
+		err := d.driver.SendIR(ctx, irData)
 		if err != nil {
 			return err
 		}
@@ -80,7 +80,7 @@ func (d *Device) ReceiveRawIR(ctx context.Context) (ir.Data, error) {
 		defer func() {
 			<-d.mu
 		}()
-		return d.driver.ReceiveIR()
+		return d.driver.ReceiveIR(ctx)
 	case <-ctx.Done():
 		return irData, ctx.Err()
 	}

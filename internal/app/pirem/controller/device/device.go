@@ -1,6 +1,7 @@
 package device
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"plugin"
@@ -17,6 +18,7 @@ type Device struct {
 	Driver driver.Driver
 }
 
+// デバイスを操作する構造体をプラグインから取得する
 func New(pluginPath string, conf json.RawMessage) (*Device, error) {
 	dev := &Device{}
 	p, err := plugin.Open(pluginPath)
@@ -39,7 +41,7 @@ func New(pluginPath string, conf json.RawMessage) (*Device, error) {
 		return dev, err
 	}
 
-	info, err := d.GetInfo()
+	info, err := d.GetInfo(context.Background())
 	if err != nil {
 		return dev, err
 	}
@@ -55,19 +57,19 @@ func New(pluginPath string, conf json.RawMessage) (*Device, error) {
 	return dev, nil
 }
 
-func (d *Device) SendIR(irData ir.Data) error {
+func (d *Device) SendIR(ctx context.Context, irData ir.Data) error {
 	rawIRData := irData.ConvertToRaw()
 	sendData := driver.IRData{
 		CarrierFreqKiloHz: rawIRData.CarrierFreqKiloHz,
 		PluseNanoSec:      rawIRData.PluseNanoSec,
 	}
 
-	return d.Driver.SendIR(sendData)
+	return d.Driver.SendIR(ctx, sendData)
 }
 
-func (d *Device) ReceiveIR() (ir.Data, error) {
+func (d *Device) ReceiveIR(ctx context.Context) (ir.Data, error) {
 	rawIRData := ir.RawData{}
-	irData, err := d.Driver.ReceiveIR()
+	irData, err := d.Driver.ReceiveIR(ctx)
 	if err != nil {
 		return rawIRData, err
 	}

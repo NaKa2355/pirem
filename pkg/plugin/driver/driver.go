@@ -1,8 +1,10 @@
 package driver
 
+import "context"
+
 // driver must impliment "GetDriver(json.RawMessage) (Driver, Error)"
 type Driver interface {
-	SendIR(IRData) error
-	ReceiveIR() (IRData, error)
-	GetInfo() (DeviceInfo, error)
+	SendIR(context.Context, IRData) error
+	ReceiveIR(context.Context) (IRData, error)
+	GetInfo(context.Context) (DeviceInfo, error)
 }

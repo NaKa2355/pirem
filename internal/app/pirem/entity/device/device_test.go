@@ -14,19 +14,15 @@ type Mock struct{}
 
 var _ Driver = &Mock{}
 
-func (m *Mock) SendIR(irdata ir.Data) error {
+func (m *Mock) SendIR(ctx context.Context, irdata ir.Data) error {
 	time.Sleep(5 * time.Second)
 	fmt.Println("sended")
 	return nil
 }
 
-func (m *Mock) ReceiveIR() (ir.Data, error) {
+func (m *Mock) ReceiveIR(ctx context.Context) (ir.Data, error) {
 	time.Sleep(5 * time.Second)
 	return ir.RawData{}, nil
-}
-
-func (m *Mock) Drop() error {
-	return nil
 }
 
 func TestNew(t *testing.T) {

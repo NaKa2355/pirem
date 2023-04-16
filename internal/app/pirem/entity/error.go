@@ -5,7 +5,6 @@ type ErrCode int
 const (
 	CodeInvaildInput ErrCode = iota
 	CodeTimeout
-	CodeDevice
 	CodeBusy
 	CodeNotSupported
 )
