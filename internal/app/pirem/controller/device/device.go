@@ -86,7 +86,7 @@ func New(pluginPath string, conf json.RawMessage) (*Device, error) {
 
 func (d *Device) SendIR(ctx context.Context, irData ir.Data) error {
 	rawIRData := irData.ConvertToRaw()
-	sendData := driver.IRData{
+	sendData := &driver.IRData{
 		CarrierFreqKiloHz: rawIRData.CarrierFreqKiloHz,
 		PluseNanoSec:      rawIRData.PluseNanoSec,
 	}
