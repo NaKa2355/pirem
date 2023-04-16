@@ -1,3 +1,7 @@
+/*
+設定ファイルを読み込んで、デーモンを立ち上げる
+*/
+
 package daemon
 
 import (
@@ -16,9 +20,7 @@ import (
 )
 
 type Daemon struct {
-	srv        *server.Server
-	interactor *interactor.Interactor
-	config     *Config
+	srv *server.Server
 }
 
 type DeviceConfig struct {
@@ -43,37 +45,23 @@ func readConf(filePath string) (*Config, error) {
 	return config, err
 }
 
-func New(configPath string) (*Daemon, error) {
-	var err error = nil
-	d := &Daemon{}
-	repo := repository.New()
-	d.interactor = interactor.New(repo)
-	web := web.New(d.interactor)
-
-	//load config file
-	d.config, err = readConf(configPath)
-	if err != nil {
-		fmt.Println(err)
-		return d, err
-	}
-
-	//load entdev plugins
-	for _, devConf := range d.config.Devices {
-		driver, err := devctr.New(devConf.PluginPath, devConf.Config)
-		if err != nil {
-			errors.Join(err)
+func loadDevices(repo *repository.Repository, devsConf []DeviceConfig) (err error) {
+	for _, devConf := range devsConf {
+		driver, _err := devctr.New(devConf.PluginPath, devConf.Config)
+		if _err != nil {
+			errors.Join(err, _err)
 			continue
 		}
 
-		dev, err := entdev.New(devConf.ID, devConf.Name, driver.Info, driver)
-		if err != nil {
-			errors.Join(err)
+		dev, _err := entdev.New(devConf.ID, devConf.Name, driver.Info, driver)
+		if _err != nil {
+			errors.Join(err, _err)
 			continue
 		}
 
-		err = repo.CreateDevice(dev)
-		if err != nil {
-			errors.Join(err)
+		_err = repo.CreateDevice(dev)
+		if _err != nil {
+			errors.Join(err, _err)
 			continue
 		}
 
@@ -85,7 +73,29 @@ func New(configPath string) (*Daemon, error) {
 		)
 	}
 
-	d.srv = server.New(web, d.config.EnableReflection)
+	return err
+}
+
+func New(configPath string) (*Daemon, error) {
+	var err error = nil
+	d := &Daemon{}
+	repo := repository.New()
+	interactor := interactor.New(repo)
+	web := web.New(interactor)
+
+	//load config file
+	config, err := readConf(configPath)
+	if err != nil {
+		fmt.Println(err)
+		return d, err
+	}
+
+	err = loadDevices(repo, config.Devices)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	d.srv = server.New(web, config.EnableReflection)
 	return d, nil
 }
 
@@ -102,7 +112,6 @@ func (d *Daemon) Start(domainSocket string) error {
 
 	d.srv.WaitSigAndStop(syscall.SIGTERM, syscall.SIGKILL, syscall.SIGINT)
 	fmt.Println(MsgShuttingDownDaemon)
-	defer d.interactor.Drop()
 	fmt.Println(MsgStopDaemon)
 	return nil
 }
