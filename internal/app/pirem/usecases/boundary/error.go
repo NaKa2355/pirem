@@ -4,10 +4,13 @@ type ErrCode int
 
 const (
 	CodeNotExist ErrCode = iota
+	CodeAlreadyExists
 	CodeInvaildInput
 	CodeTimeout
 	CodeBusy
 	CodeDevice
+	CodeInternal
+	CodeNotSupported
 )
 
 type Error struct {
@@ -15,7 +18,7 @@ type Error struct {
 	Err  error
 }
 
-func Wrap(code ErrCode, err error) error {
+func WrapErr(code ErrCode, err error) error {
 	if err == nil {
 		return nil
 	}

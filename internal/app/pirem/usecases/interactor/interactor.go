@@ -2,7 +2,6 @@ package interactor
 
 import (
 	"context"
-	"errors"
 
 	entir "github.com/NaKa2355/pirem/internal/app/pirem/entity/ir"
 	bdy "github.com/NaKa2355/pirem/internal/app/pirem/usecases/boundary"
@@ -70,14 +69,9 @@ func (i *Interactor) sendIR(ctx context.Context, in bdy.SendIRInput) (err error)
 		return err
 	}
 
-	switch data := in.IRData.(type) {
-	case bdy.RawIRData:
-		irdata = entir.RawData{
-			CarrierFreqKiloHz: data.CarrierFreqKiloHz,
-			PluseNanoSec:      data.PluseNanoSec,
-		}
-	default:
-		return errors.New("unsupported ir data")
+	irdata = entir.RawData{
+		CarrierFreqKiloHz: in.IRData.ConvertToRaw().CarrierFreqKiloHz,
+		PluseNanoSec:      in.IRData.ConvertToRaw().PluseNanoSec,
 	}
 
 	return dev.SendRawIR(ctx, irdata)
@@ -86,7 +80,7 @@ func (i *Interactor) sendIR(ctx context.Context, in bdy.SendIRInput) (err error)
 func (i *Interactor) receiveIR(ctx context.Context, in bdy.ReceiveIRInput) (out bdy.IRData, err error) {
 	device, err := i.devsRepo.ReadDevice(in.ID)
 	if err != nil {
-		return out, errors.New("device not found")
+		return out, err
 	}
 
 	irData, err := device.ReceiveRawIR(ctx)

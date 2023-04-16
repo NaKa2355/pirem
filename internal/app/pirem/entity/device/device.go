@@ -1,3 +1,7 @@
+/*
+赤外線送受信機の機能と排他処理の定義をする
+*/
+
 package device
 
 import (
@@ -17,10 +21,10 @@ type Driver interface {
 }
 
 type Device struct {
-	driver Driver
 	Name   string
 	ID     string
 	info   Info
+	driver Driver
 	mu     chan (struct{})
 }
 
@@ -72,7 +76,10 @@ func (d *Device) SendRawIR(ctx context.Context, irData ir.Data) error {
 func (d *Device) ReceiveRawIR(ctx context.Context) (ir.Data, error) {
 	var irData ir.Data
 	if !d.info.CanReceive {
-		return irData, fmt.Errorf("this device does not support receiving")
+		return irData, entity.WrapErr(
+			entity.CodeNotSupported,
+			fmt.Errorf("this device does not support sending"),
+		)
 	}
 
 	select {

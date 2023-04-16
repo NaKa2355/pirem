@@ -7,6 +7,7 @@ const (
 	CodeTimeout
 	CodeBusy
 	CodeNotSupported
+	CodeInternal
 )
 
 type Error struct {

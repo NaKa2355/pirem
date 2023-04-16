@@ -11,11 +11,3 @@ type GetDevicesInfoOutput struct {
 type GetDeviceInfoOutput struct {
 	Device DeviceInfo
 }
-
-type GetIsBusyOutput struct {
-	IsBusy bool
-}
-
-type GetStatusOutput struct {
-	Status Status
-}
