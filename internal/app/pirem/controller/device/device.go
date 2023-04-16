@@ -1,88 +1,83 @@
 package device
 
 import (
-	"context"
 	"encoding/json"
-	"os/exec"
+	"errors"
+	"plugin"
 
-	apiremv1 "github.com/NaKa2355/irdeck-proto/gen/go/pirem/api/v1"
-	irdatav1 "github.com/NaKa2355/irdeck-proto/gen/go/common/irdata/v1"
-	dev_plugin "github.com/NaKa2355/pirem/pkg/device_plugin"
-	"github.com/hashicorp/go-hclog"
-	"github.com/hashicorp/go-plugin"
+	entdev "github.com/NaKa2355/pirem/internal/app/pirem/entity/device"
+	ir "github.com/NaKa2355/pirem/internal/app/pirem/entity/ir"
+	"github.com/NaKa2355/pirem/pkg/plugin/driver"
 )
 
+var _ entdev.Driver = &Device{}
+
 type Device struct {
-	devCtrl dev_plugin.DeviceController
-	client  *plugin.Client
+	Info   entdev.Info
+	Driver driver.Driver
 }
 
-func New(pluginPath string, conf json.RawMessage, logger hclog.Logger) (*Device, error) {
+func New(pluginPath string, conf json.RawMessage) (*Device, error) {
 	dev := &Device{}
-	client := plugin.NewClient(
-		&plugin.ClientConfig{
-			HandshakeConfig: dev_plugin.Handshake,
-			Plugins:         dev_plugin.PluginMap,
-			Cmd:             exec.Command(pluginPath),
-			Logger:          logger,
-			AllowedProtocols: []plugin.Protocol{
-				plugin.ProtocolGRPC,
-			},
-		},
-	)
-
-	rpcClient, err := client.Client()
+	p, err := plugin.Open(pluginPath)
 	if err != nil {
 		return dev, err
 	}
 
-	raw, err := rpcClient.Dispense("device_controller")
+	s, err := p.Lookup("GetDriver")
 	if err != nil {
-		client.Kill()
 		return dev, err
 	}
 
-	devCtrl, ok := raw.(dev_plugin.DeviceController)
+	GetDriver, ok := s.(func(json.RawMessage) (driver.Driver, error))
 	if !ok {
-		client.Kill()
-		return dev, dev_plugin.ErrPluginNotSupported
+		return dev, errors.New("function type is wrong")
 	}
 
-	if err := devCtrl.Init(context.Background(), conf); err != nil {
-		client.Kill()
+	d, err := GetDriver(conf)
+	if err != nil {
 		return dev, err
 	}
 
-	dev.devCtrl = devCtrl
-	dev.client = client
+	info, err := d.GetInfo()
+	if err != nil {
+		return dev, err
+	}
+
+	dev.Driver = d
+	dev.Info = entdev.Info{
+		CanSend:         info.CanReceive,
+		CanReceive:      info.CanReceive,
+		DriverVersion:   info.DriverVersion,
+		FirmwareVersion: info.FirmwareVersion,
+	}
+
 	return dev, nil
 }
 
-func (d *Device) SendRawIr(ctx context.Context, irData *irdatav1.RawIrData) error {
-	return d.devCtrl.SendRawIr(ctx, irData)
+func (d *Device) SendIR(irData ir.Data) error {
+	rawIRData := irData.ConvertToRaw()
+	sendData := driver.IRData{
+		CarrierFreqKiloHz: rawIRData.CarrierFreqKiloHz,
+		PluseNanoSec:      rawIRData.PluseNanoSec,
+	}
+
+	return d.Driver.SendIR(sendData)
 }
 
-func (d *Device) ReceiveRawIr(ctx context.Context) (*irdatav1.RawIrData, error) {
-	return d.devCtrl.ReceiveRawIr(ctx)
+func (d *Device) ReceiveIR() (ir.Data, error) {
+	rawIRData := ir.RawData{}
+	irData, err := d.Driver.ReceiveIR()
+	if err != nil {
+		return rawIRData, err
+	}
+
+	rawIRData.CarrierFreqKiloHz = irData.CarrierFreqKiloHz
+	rawIRData.PluseNanoSec = irData.PluseNanoSec
+
+	return rawIRData, nil
 }
 
-func (d *Device) GetDeviceInfo(ctx context.Context) (*apiremv1.DeviceInfo, error) {
-	return d.devCtrl.GetDeviceInfo(context.Background())
-}
-
-func (d *Device) GetDeviceStatus(ctx context.Context) (*apiremv1.DeviceStatus, error) {
-	return d.devCtrl.GetDeviceStatus(ctx)
-}
-
-func (d *Device) IsBusy(ctx context.Context) (bool, error) {
-	return d.devCtrl.IsBusy(ctx)
-}
-
-func (d *Device) Init(ctx context.Context, conf json.RawMessage) error {
-	return d.devCtrl.Init(ctx, conf)
-}
-
-func (d *Device) Drop() error {
-	d.client.Kill()
-	return nil
+func (d *Device) GetInfo() (entdev.Info, error) {
+	return d.Info, nil
 }

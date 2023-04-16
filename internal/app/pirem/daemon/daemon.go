@@ -2,20 +2,23 @@ package daemon
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"os"
 	"syscall"
 
+	devctr "github.com/NaKa2355/pirem/internal/app/pirem/controller/device"
+	"github.com/NaKa2355/pirem/internal/app/pirem/controller/repository"
 	"github.com/NaKa2355/pirem/internal/app/pirem/controller/web"
-	server "github.com/NaKa2355/pirem/internal/app/pirem/server"
+	"github.com/NaKa2355/pirem/internal/app/pirem/driver/server"
+	entdev "github.com/NaKa2355/pirem/internal/app/pirem/entity/device"
 	interactor "github.com/NaKa2355/pirem/internal/app/pirem/usecases/interactor"
-	"github.com/hashicorp/go-hclog"
 )
 
 type Daemon struct {
 	srv        *server.Server
 	interactor *interactor.Interactor
 	config     *Config
-	logger     hclog.Logger
 }
 
 type DeviceConfig struct {
@@ -40,58 +43,66 @@ func readConf(filePath string) (*Config, error) {
 	return config, err
 }
 
-func New(logger hclog.Logger, configPath string) (*Daemon, error) {
+func New(configPath string) (*Daemon, error) {
 	var err error = nil
 	d := &Daemon{}
-	d.logger = logger
-	d.interactor = interactor.New(logger)
+	repo := repository.New()
+	d.interactor = interactor.New(repo)
 	web := web.New(d.interactor)
 
 	//load config file
 	d.config, err = readConf(configPath)
 	if err != nil {
-		logger.Error(MsgFaildLoadConfig, "error", err)
+		fmt.Println(err)
 		return d, err
 	}
 
-	//load device plugins
+	//load entdev plugins
 	for _, devConf := range d.config.Devices {
-		err := d.interactor.AddDevice(
-			devConf.ID, devConf.Name, devConf.PluginPath, devConf.Config)
+		driver, err := devctr.New(devConf.PluginPath, devConf.Config)
 		if err != nil {
-			logger.Error(
-				MsgFaildLoadDev,
-				"error", err,
-				"plugin file path", devConf.PluginPath,
-			)
+			errors.Join(err)
 			continue
 		}
-		logger.Info(
+
+		dev, err := entdev.New(devConf.ID, devConf.Name, driver.Info, driver)
+		if err != nil {
+			errors.Join(err)
+			continue
+		}
+
+		err = repo.CreateDevice(dev)
+		if err != nil {
+			errors.Join(err)
+			continue
+		}
+
+		fmt.Println(
 			MsgLoadedDevice,
 			"plugin file path", devConf.PluginPath,
-			"device name", devConf.Name,
-			"device id", devConf.ID,
+			"entdev name", devConf.Name,
+			"entdev id", devConf.ID,
 		)
 	}
 
-	d.srv = server.New(logger, web, d.config.EnableReflection)
+	d.srv = server.New(web, d.config.EnableReflection)
 	return d, nil
 }
 
 // run until signal comes
 func (d *Daemon) Start(domainSocket string) error {
 	if err := d.srv.Start(domainSocket); err != nil {
-		d.logger.Error(MsgFaildStartDaemon, "error", err)
+		fmt.Println(MsgFaildStartDaemon, "error", err)
 		return err
 	}
-	d.logger.Info(
+	fmt.Println(
 		MsgStartDaemon,
 		"unix domain socket path", domainSocket,
 	)
 
 	d.srv.WaitSigAndStop(syscall.SIGTERM, syscall.SIGKILL, syscall.SIGINT)
-	d.logger.Info(MsgShuttingDownDaemon)
+	fmt.Println(MsgShuttingDownDaemon)
 	defer d.interactor.Drop()
-	d.logger.Info(MsgStopDaemon)
+	fmt.Println(MsgStopDaemon)
 	return nil
 }

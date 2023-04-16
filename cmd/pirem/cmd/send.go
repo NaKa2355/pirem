@@ -6,7 +6,6 @@ package cmd
 import (
 	"context"
 	"errors"
-	"fmt"
 	"os"
 
 	irdatav1 "github.com/NaKa2355/irdeck-proto/gen/go/common/irdata/v1"
@@ -26,7 +25,7 @@ var sendCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fileFlag := cmd.Flag("file")
 		devFlag := cmd.Flag("device")
-		var irData = &irdatav1.RawIrData{}
+		var irData = &irdatav1.IrData{}
 
 		if !devFlag.Changed {
 			return errors.New("no input device id")
@@ -56,7 +55,7 @@ var sendCmd = &cobra.Command{
 			return err
 		}
 
-		fmt.Printf("sent %d pluses\n", len(irData.OnOffPluseNs))
+		//fmt.Printf("sent %d pluses\n", len(irData.OnOffPluseNs))
 		return nil
 	},
 }

@@ -1,31 +1,29 @@
 package server
 
 import (
+	"fmt"
 	"net"
 	"os"
 	"os/signal"
 
 	apiremv1 "github.com/NaKa2355/irdeck-proto/gen/go/pirem/api/v1"
-	"github.com/hashicorp/go-hclog"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
 type Server struct {
-	logger hclog.Logger
 	server *grpc.Server
 }
 
-func New(logger hclog.Logger, handler apiremv1.PiRemServiceServer, useReflectiton bool) *Server {
-	piremServer := &Server{}
-	piremServer.logger = logger
-	piremServer.server = grpc.NewServer(grpc.UnaryInterceptor(ErrorWrapping))
-	apiremv1.RegisterPiRemServiceServer(piremServer.server, handler)
+func New(handler apiremv1.PiRemServiceServer, useReflectiton bool) *Server {
+	s := &Server{}
+
+	apiremv1.RegisterPiRemServiceServer(s.server, handler)
 	if useReflectiton {
-		reflection.Register(piremServer.server)
+		reflection.Register(s.server)
 	}
-	return piremServer
+	return s
 }
 
 func (s *Server) Start(domainSocketPath string) error {
@@ -36,12 +34,7 @@ func (s *Server) Start(domainSocketPath string) error {
 	go func() {
 		defer listenPort.Close()
 		err := s.server.Serve(listenPort)
-		if err != nil {
-			s.logger.Error(
-				"server error",
-				"error", err,
-			)
-		}
+		fmt.Println(err)
 	}()
 	return nil
 }
