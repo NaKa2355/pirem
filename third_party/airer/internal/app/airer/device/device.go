@@ -20,6 +20,26 @@ type DeviceConfig struct {
 
 const DriverVersion = "0.1.0"
 
+var _ plugin.Driver = &Device{}
+
+func convertErr(err error) error {
+	if err == nil {
+		return nil
+	}
+	switch err {
+	case driver.ErrDataTooLong:
+		return plugin.WrapErr(plugin.CodeInvaildInput, err)
+	case driver.ErrInvaildData:
+		return plugin.WrapErr(plugin.CodeInvaildInput, err)
+	case driver.ErrReqTimeout:
+		return plugin.WrapErr(plugin.CodeTimeout, err)
+	case driver.ErrUnsupportedData:
+		return plugin.WrapErr(plugin.CodeInvaildInput, err)
+	default:
+		return plugin.WrapErr(plugin.CodeDevice, err)
+	}
+}
+
 func (dev *Device) setInfo() error {
 	var err error = nil
 	dev.info = &plugin.DeviceInfo{}
@@ -37,7 +57,7 @@ func NewDevice(jsonConf json.RawMessage) (dev *Device, err error) {
 	conf := DeviceConfig{}
 	err = json.Unmarshal(jsonConf, &conf)
 	if err != nil {
-		return dev, err
+		return dev, plugin.WrapErr(plugin.CodeInvaildInput, err)
 	}
 
 	d, err := driver.New(conf.SpiDevFile, conf.BusyPin)
@@ -49,7 +69,7 @@ func NewDevice(jsonConf json.RawMessage) (dev *Device, err error) {
 		return dev, err
 	}
 
-	return dev, err
+	return dev, nil
 }
 
 func (dev *Device) GetInfo(ctx context.Context) (*plugin.DeviceInfo, error) {
@@ -57,14 +77,15 @@ func (dev *Device) GetInfo(ctx context.Context) (*plugin.DeviceInfo, error) {
 }
 
 func (dev *Device) SendIR(ctx context.Context, irData *plugin.IRData) error {
-	return dev.d.SendIr(ctx, convertToDriverIrRawData(irData.PluseNanoSec))
+	err := dev.d.SendIr(ctx, convertToDriverIrRawData(irData.PluseNanoSec))
+	return convertErr(err)
 }
 
 func (dev *Device) ReceiveIR(ctx context.Context) (*plugin.IRData, error) {
 	irData := &plugin.IRData{}
 	data, err := dev.d.ReceiveIr(ctx)
 	if err != nil {
-		return irData, err
+		return irData, convertErr(err)
 	}
 	irData.CarrierFreqKiloHz = 40
 	irData.PluseNanoSec = convertToApiIrRawData(data)

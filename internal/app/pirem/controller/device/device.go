@@ -30,7 +30,7 @@ func convertErr(_err error) error {
 		switch err.Code {
 		case driver.CodeBusy:
 			code = entity.CodeBusy
-		case driver.CodeInternal:
+		case driver.CodeDevice:
 			code = entity.CodeInternal
 		case driver.CodeInvaildInput:
 			code = entity.CodeInvaildInput
@@ -47,7 +47,10 @@ func New(pluginPath string, conf json.RawMessage) (*Device, error) {
 	dev := &Device{}
 	p, err := plugin.Open(pluginPath)
 	if err != nil {
-		return dev, fmt.Errorf("faild to open plugin: %w", err)
+		return dev, entity.WrapErr(
+			entity.CodeInvaildInput,
+			fmt.Errorf("faild to open plugin: %w", err),
+		)
 	}
 
 	s, err := p.Lookup("GetDriver")

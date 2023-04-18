@@ -5,8 +5,8 @@ type ErrCode int
 const (
 	CodeInvaildInput ErrCode = iota
 	CodeTimeout
-	CodeInternal
 	CodeBusy
+	CodeDevice
 )
 
 type Error struct {

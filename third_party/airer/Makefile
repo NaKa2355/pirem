@@ -1,14 +1,17 @@
+#main.goがあるディレクトリ
+MAIN:=third_party/airer/cmd/airer
+
 #go.modがあるディレクトリの名前
 MOD_NAME:=$(shell go list -m)
 
 #コマンドのインストール先
 CMD_INSTALL:=/usr/local/bin
 
-#コンフィグファイルのインストール先
+#コンフィグファイルのインストール先とデフォルトのファイルのパス
 CONFIG_FILE:=config/piremd.json
 CONFIG_INSTALL:=/etc/piremd.json
 
-#サービスファイルのインストール先
+#サービスファイルのインストール先とデフォルトのファイルのパス
 SERVICE_FILE:=config/piremd.service
 SERVICE_INSTALL:=/etc/systemd/system/piremd.service
 
@@ -19,13 +22,16 @@ PLUGIN_INSTALL:=/opt/piremd
 CMD_BIN_DIR:=bin
 
 #コマンドのパッケージ名
-CMD_PACKAGES:=$(MOD_NAME)/cmd/pirem
+CMD_PACKAGES:=$(MOD_NAME)/$(MAIN)
+
 #GOのファイル
 GO_FILES:=$(shell find . -type f -name '*.go' -print)
 
+#
 CMD_BIN:=$(CMD_PACKAGES:$(MOD_NAME)/cmd/%=$(CMD_BIN_DIR)/%) 
 
-BUILD_OPT := -ldflags="-s -w" -trimpath
+#ビルドオプションと環境変数
+BUILD_OPT :=-buildmode=plugin -ldflags="-s -w" -trimpath
 BUILD_ENV := CGO_ENABLED=1
 
 .PHONY: clean
@@ -40,21 +46,11 @@ $(CMD_BIN): $(GO_FILES)
 
 .PHONY: install
 install:
-	cp $(CMD_BIN_DIR)/* $(CMD_INSTALL)
-	cp $(CONFIG_FILE) $(CONFIG_INSTALL)
-	cp $(SERVICE_FILE) $(SERVICE_INSTALL)
-	mkdir $(PLUGIN_INSTALL)
+	cp $(CMD_BIN_DIR)/* $(PLUGIN_INSTALL)
 
 .PHONY: update
-update:
-	cp $(CMD_BIN_DIR)/* $(CMD_INSTALL)
+update: install
 
 .PHONY: remove
 remove:
-	rm $(CMD_BIN:$(CMD_BIN_DIR)/%=$(CMD_INSTALL)/%)
-
-.PHONY: purge
-purge: remove
-	rm $(CONFIG_INSTALL)
-	rm $(SERVICE_INSTALL)
-	rm -rf $(PLUGIN_INSTALL)
+	@echo "To remove plugins, please delete appropriate *.so files at (/opt/piremd)"
