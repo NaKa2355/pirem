@@ -14,6 +14,10 @@ type Mock struct{}
 
 var _ Driver = &Mock{}
 
+func (m *Mock) GetDeviceInfo() *Info {
+	return &Info{CanSend: true, CanReceive: true, DriverVersion: "0.0.1", FirmwareVersion: "0.0.1"}
+}
+
 func (m *Mock) SendIR(ctx context.Context, irdata ir.Data) error {
 	time.Sleep(5 * time.Second)
 	fmt.Println("sended")
@@ -26,10 +30,10 @@ func (m *Mock) ReceiveIR(ctx context.Context) (ir.Data, error) {
 	return irdata, nil
 }
 
-func TestNew(t *testing.T) {
+func TestParallelDeviceReq(t *testing.T) {
 	t.Run("device entitiy test", func(t *testing.T) {
 		var wg sync.WaitGroup
-		dev, err := New("1", "mock", Info{CanSend: true, CanReceive: true, DriverVersion: "0.0.1", FirmwareVersion: "0.0.1"}, &Mock{})
+		dev, err := New("1", "mock", &Mock{})
 		if err != nil {
 			return
 		}
@@ -48,5 +52,4 @@ func TestNew(t *testing.T) {
 		wg.Wait()
 		c()
 	})
-
 }

@@ -4,23 +4,23 @@ import (
 	"errors"
 	"sync"
 
-	entdev "github.com/NaKa2355/pirem/internal/app/pirem/entity/device"
+	"github.com/NaKa2355/pirem/internal/app/pirem/entity/device"
 	repo "github.com/NaKa2355/pirem/internal/app/pirem/usecases/repository"
 )
 
 type Repository struct {
-	Devices map[string]*entdev.Device
+	Devices map[string]*device.Device
 	mu      sync.RWMutex
 }
 
 func New() *Repository {
 	return &Repository{
-		Devices: make(map[string]*entdev.Device),
+		Devices: make(map[string]*device.Device),
 		mu:      sync.RWMutex{},
 	}
 }
 
-func (r *Repository) CreateDevice(dev *entdev.Device) error {
+func (r *Repository) CreateDevice(dev *device.Device) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if _, ok := r.Devices[dev.ID]; ok {
@@ -33,7 +33,7 @@ func (r *Repository) CreateDevice(dev *entdev.Device) error {
 	return nil
 }
 
-func (r *Repository) ReadDevice(id string) (*entdev.Device, error) {
+func (r *Repository) ReadDevice(id string) (*device.Device, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	dev, ok := r.Devices[id]
@@ -46,10 +46,10 @@ func (r *Repository) ReadDevice(id string) (*entdev.Device, error) {
 	return dev, nil
 }
 
-func (r *Repository) ReadDevices() ([]*entdev.Device, error) {
+func (r *Repository) ReadDevices() ([]*device.Device, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	devs := make([]*entdev.Device, 0, len(r.Devices))
+	devs := make([]*device.Device, 0, len(r.Devices))
 	for _, d := range r.Devices {
 		devs = append(devs, d)
 	}

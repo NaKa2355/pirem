@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	apiremv1 "github.com/NaKa2355/irdeck-proto/gen/go/pirem/api/v1"
-	v1 "github.com/NaKa2355/irdeck-proto/gen/go/pirem/api/v1"
 	bdy "github.com/NaKa2355/pirem/internal/app/pirem/usecases/boundary"
 )
 
@@ -64,8 +63,8 @@ func (w *Handler) GetDeviceInfo(ctx context.Context, req *apiremv1.GetDeviceInfo
 
 func (w *Handler) SendIr(ctx context.Context, req *apiremv1.SendIrRequest) (res *apiremv1.SendIrResponse, err error) {
 	res = &apiremv1.SendIrResponse{}
-	switch irdata := req.IrData.Data.(type) {
-	case *v1.IrData_Raw:
+	switch irdata := req.GetIrData().GetData().(type) {
+	case *apiremv1.IrData_Raw:
 		err = w.i.SendIR(ctx, bdy.SendIRInput{
 			ID: req.DeviceId,
 			IRData: bdy.RawIRData{
@@ -80,7 +79,7 @@ func (w *Handler) SendIr(ctx context.Context, req *apiremv1.SendIrRequest) (res 
 
 func (w *Handler) ReceiveIr(ctx context.Context, req *apiremv1.ReceiveIrRequest) (res *apiremv1.ReceiveIrResponse, err error) {
 	res = &apiremv1.ReceiveIrResponse{
-		IrData: &v1.IrData{},
+		IrData: &apiremv1.IrData{},
 	}
 
 	out, err := w.i.ReceiveIR(ctx, bdy.ReceiveIRInput{ID: req.DeviceId})
@@ -89,8 +88,8 @@ func (w *Handler) ReceiveIr(ctx context.Context, req *apiremv1.ReceiveIrRequest)
 	}
 
 	irdata := out.ConvertToRaw()
-	res.IrData.Data = &v1.IrData_Raw{
-		Raw: &v1.RawIrData{
+	res.IrData.Data = &apiremv1.IrData_Raw{
+		Raw: &apiremv1.RawIrData{
 			CarrierFreqKhz: irdata.CarrierFreqKiloHz,
 			OnOffPluseNs:   irdata.PluseNanoSec,
 		},

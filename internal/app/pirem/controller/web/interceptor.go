@@ -11,6 +11,10 @@ import (
 )
 
 func errWrapper(err error) error {
+	if err == nil {
+		return err
+	}
+
 	var grpcErrCode codes.Code
 	switch _err := err.(type) {
 	case *bdy.Error:

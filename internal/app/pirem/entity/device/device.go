@@ -18,20 +18,18 @@ const SendIrInterval = 200 * time.Millisecond
 type Driver interface {
 	SendIR(context.Context, ir.Data) error
 	ReceiveIR(context.Context) (ir.Data, error)
+	GetDeviceInfo() *Info
 }
 
 type Device struct {
 	Name   string
 	ID     string
-	info   Info
 	driver Driver
 	mu     chan (struct{})
 }
 
-func New(id string, name string, info Info, driver Driver) (*Device, error) {
+func New(id string, name string, driver Driver) (*Device, error) {
 	dev := &Device{}
-	dev.info = info
-
 	dev.driver = driver
 	dev.Name = name
 	dev.ID = id
@@ -39,12 +37,12 @@ func New(id string, name string, info Info, driver Driver) (*Device, error) {
 	return dev, nil
 }
 
-func (d *Device) GetDeviceInfo(ctx context.Context) Info {
-	return d.info
+func (d *Device) GetDeviceInfo(ctx context.Context) *Info {
+	return d.driver.GetDeviceInfo()
 }
 
 func (d *Device) SendIR(ctx context.Context, irData ir.Data) error {
-	if !d.info.CanSend {
+	if !d.driver.GetDeviceInfo().CanSend {
 		return entity.WrapErr(
 			entity.CodeNotSupported,
 			fmt.Errorf("this device does not support sending"),
@@ -75,7 +73,7 @@ func (d *Device) SendIR(ctx context.Context, irData ir.Data) error {
 
 func (d *Device) ReceiveIR(ctx context.Context) (ir.Data, error) {
 	var irData ir.Data
-	if !d.info.CanReceive {
+	if !d.driver.GetDeviceInfo().CanReceive {
 		return irData, entity.WrapErr(
 			entity.CodeNotSupported,
 			fmt.Errorf("this device does not support sending"),

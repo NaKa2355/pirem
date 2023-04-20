@@ -110,3 +110,7 @@ func (d *Driver) ReceiveIR(ctx context.Context) (ir.Data, error) {
 
 	return rawIRData, nil
 }
+
+func (d *Driver) GetDeviceInfo() *device.Info {
+	return &d.Info
+}
