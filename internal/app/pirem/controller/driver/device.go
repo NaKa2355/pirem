@@ -1,4 +1,4 @@
-package device
+package driver
 
 import (
 	"context"
@@ -10,14 +10,14 @@ import (
 	"github.com/NaKa2355/pirem/internal/app/pirem/entity"
 	entdev "github.com/NaKa2355/pirem/internal/app/pirem/entity/device"
 	ir "github.com/NaKa2355/pirem/internal/app/pirem/entity/ir"
-	"github.com/NaKa2355/pirem/pkg/plugin/driver"
+	devplugin "github.com/NaKa2355/pirem/pkg/plugin/v1"
 )
 
-var _ entdev.Driver = &Device{}
+var _ entdev.Driver = &Driver{}
 
-type Device struct {
+type Driver struct {
 	Info   entdev.Info
-	Driver driver.Driver
+	Driver devplugin.Driver
 }
 
 func convertErr(_err error) error {
@@ -26,15 +26,15 @@ func convertErr(_err error) error {
 	}
 	var code entity.ErrCode
 	switch err := _err.(type) {
-	case *driver.Error:
+	case *devplugin.Error:
 		switch err.Code {
-		case driver.CodeBusy:
+		case devplugin.CodeBusy:
 			code = entity.CodeBusy
-		case driver.CodeDevice:
+		case devplugin.CodeDevice:
 			code = entity.CodeInternal
-		case driver.CodeInvaildInput:
+		case devplugin.CodeInvaildInput:
 			code = entity.CodeInvaildInput
-		case driver.CodeTimeout:
+		case devplugin.CodeTimeout:
 			code = entity.CodeTimeout
 		}
 		return entity.WrapErr(code, err)
@@ -43,8 +43,8 @@ func convertErr(_err error) error {
 }
 
 // デバイスを操作する構造体をプラグインから取得する
-func New(pluginPath string, conf json.RawMessage) (*Device, error) {
-	dev := &Device{}
+func New(pluginPath string, conf json.RawMessage) (*Driver, error) {
+	dev := &Driver{}
 	p, err := plugin.Open(pluginPath)
 	if err != nil {
 		return dev, entity.WrapErr(
@@ -58,7 +58,7 @@ func New(pluginPath string, conf json.RawMessage) (*Device, error) {
 		return dev, err
 	}
 
-	GetDriver, ok := s.(func(json.RawMessage) (driver.Driver, error))
+	GetDriver, ok := s.(func(json.RawMessage) (devplugin.Driver, error))
 	if !ok {
 		return dev, entity.WrapErr(
 			entity.CodeInternal,
@@ -87,9 +87,9 @@ func New(pluginPath string, conf json.RawMessage) (*Device, error) {
 	return dev, nil
 }
 
-func (d *Device) SendIR(ctx context.Context, irData ir.Data) error {
+func (d *Driver) SendIR(ctx context.Context, irData ir.Data) error {
 	rawIRData := irData.ConvertToRaw()
-	sendData := &driver.IRData{
+	sendData := &devplugin.IRData{
 		CarrierFreqKiloHz: rawIRData.CarrierFreqKiloHz,
 		PluseNanoSec:      rawIRData.PluseNanoSec,
 	}
@@ -98,8 +98,8 @@ func (d *Device) SendIR(ctx context.Context, irData ir.Data) error {
 	return convertErr(err)
 }
 
-func (d *Device) ReceiveIR(ctx context.Context) (ir.Data, error) {
-	rawIRData := ir.RawData{}
+func (d *Driver) ReceiveIR(ctx context.Context) (ir.Data, error) {
+	rawIRData := &ir.RawData{}
 	irData, err := d.Driver.ReceiveIR(ctx)
 	if err != nil {
 		return rawIRData, convertErr(err)

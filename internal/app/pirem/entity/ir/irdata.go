@@ -5,10 +5,10 @@ type RawData struct {
 	PluseNanoSec      []uint32
 }
 
-func (r RawData) ConvertToRaw() RawData {
+func (r *RawData) ConvertToRaw() *RawData {
 	return r
 }
 
 type Data interface {
-	ConvertToRaw() RawData
+	ConvertToRaw() *RawData
 }

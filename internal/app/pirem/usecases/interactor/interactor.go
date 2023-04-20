@@ -3,7 +3,7 @@ package interactor
 import (
 	"context"
 
-	entir "github.com/NaKa2355/pirem/internal/app/pirem/entity/ir"
+	"github.com/NaKa2355/pirem/internal/app/pirem/entity/ir"
 	bdy "github.com/NaKa2355/pirem/internal/app/pirem/usecases/boundary"
 	repo "github.com/NaKa2355/pirem/internal/app/pirem/usecases/repository"
 )
@@ -62,19 +62,19 @@ func (i *Interactor) getDeviceInfo(ctx context.Context, in bdy.GetDeviceInput) (
 }
 
 func (i *Interactor) sendIR(ctx context.Context, in bdy.SendIRInput) (err error) {
-	var irdata entir.Data
+	var irdata ir.Data
 
 	dev, err := i.devsRepo.ReadDevice(in.ID)
 	if err != nil {
 		return err
 	}
 
-	irdata = entir.RawData{
+	irdata = &ir.RawData{
 		CarrierFreqKiloHz: in.IRData.ConvertToRaw().CarrierFreqKiloHz,
 		PluseNanoSec:      in.IRData.ConvertToRaw().PluseNanoSec,
 	}
 
-	return dev.SendRawIR(ctx, irdata)
+	return dev.SendIR(ctx, irdata)
 }
 
 func (i *Interactor) receiveIR(ctx context.Context, in bdy.ReceiveIRInput) (out bdy.IRData, err error) {
@@ -83,7 +83,7 @@ func (i *Interactor) receiveIR(ctx context.Context, in bdy.ReceiveIRInput) (out 
 		return out, err
 	}
 
-	irData, err := device.ReceiveRawIR(ctx)
+	irData, err := device.ReceiveIR(ctx)
 	rawIRData := irData.ConvertToRaw()
 	out = bdy.RawIRData{
 		CarrierFreqKiloHz: rawIRData.CarrierFreqKiloHz,

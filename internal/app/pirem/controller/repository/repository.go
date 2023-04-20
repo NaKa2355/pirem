@@ -23,7 +23,7 @@ func New() *Repository {
 func (r *Repository) CreateDevice(dev *entdev.Device) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	if _, ok := r.Devices[dev.ID]; !ok {
+	if _, ok := r.Devices[dev.ID]; ok {
 		return repo.WrapErr(
 			repo.CodeAlreadyExists,
 			errors.New("device is already exists"),

@@ -1,4 +1,4 @@
-package driver
+package plugin
 
 type IRData struct {
 	CarrierFreqKiloHz uint32

@@ -11,7 +11,7 @@ import (
 	"os"
 	"syscall"
 
-	devctr "github.com/NaKa2355/pirem/internal/app/pirem/controller/device"
+	"github.com/NaKa2355/pirem/internal/app/pirem/controller/driver"
 	"github.com/NaKa2355/pirem/internal/app/pirem/controller/repository"
 	"github.com/NaKa2355/pirem/internal/app/pirem/controller/web"
 	"github.com/NaKa2355/pirem/internal/app/pirem/driver/server"
@@ -47,13 +47,13 @@ func readConf(filePath string) (*Config, error) {
 
 func loadDevices(repo *repository.Repository, devsConf []DeviceConfig) (err error) {
 	for _, devConf := range devsConf {
-		driver, _err := devctr.New(devConf.PluginPath, devConf.Config)
+		drv, _err := driver.New(devConf.PluginPath, devConf.Config)
 		if _err != nil {
 			errors.Join(err, _err)
 			continue
 		}
 
-		dev, _err := entdev.New(devConf.ID, devConf.Name, driver.Info, driver)
+		dev, _err := entdev.New(devConf.ID, devConf.Name, drv.Info, drv)
 		if _err != nil {
 			errors.Join(err, _err)
 			continue

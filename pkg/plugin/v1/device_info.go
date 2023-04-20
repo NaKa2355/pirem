@@ -1,6 +1,4 @@
-package driver
-
-type ServiceType int
+package plugin
 
 type DeviceInfo struct {
 	CanSend         bool

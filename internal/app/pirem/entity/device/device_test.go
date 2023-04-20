@@ -22,7 +22,8 @@ func (m *Mock) SendIR(ctx context.Context, irdata ir.Data) error {
 
 func (m *Mock) ReceiveIR(ctx context.Context) (ir.Data, error) {
 	time.Sleep(5 * time.Second)
-	return ir.RawData{}, nil
+	irdata := &ir.RawData{}
+	return irdata, nil
 }
 
 func TestNew(t *testing.T) {
@@ -35,7 +36,7 @@ func TestNew(t *testing.T) {
 
 		sendIR := func(ctx context.Context, w *sync.WaitGroup) {
 			defer w.Done()
-			fmt.Println(dev.SendRawIR(ctx, ir.RawData{}))
+			fmt.Println(dev.ReceiveIR(ctx))
 		}
 
 		ctx, c := context.WithTimeout(context.Background(), time.Second*2)

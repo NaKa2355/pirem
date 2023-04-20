@@ -43,7 +43,7 @@ func (d *Device) GetDeviceInfo(ctx context.Context) Info {
 	return d.info
 }
 
-func (d *Device) SendRawIR(ctx context.Context, irData ir.Data) error {
+func (d *Device) SendIR(ctx context.Context, irData ir.Data) error {
 	if !d.info.CanSend {
 		return entity.WrapErr(
 			entity.CodeNotSupported,
@@ -73,7 +73,7 @@ func (d *Device) SendRawIR(ctx context.Context, irData ir.Data) error {
 
 }
 
-func (d *Device) ReceiveRawIR(ctx context.Context) (ir.Data, error) {
+func (d *Device) ReceiveIR(ctx context.Context) (ir.Data, error) {
 	var irData ir.Data
 	if !d.info.CanReceive {
 		return irData, entity.WrapErr(
