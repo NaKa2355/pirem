@@ -11,7 +11,6 @@ import (
 	"os"
 	"time"
 
-	irdatav1 "github.com/NaKa2355/irdeck-proto/gen/go/common/irdata/v1"
 	apiremv1 "github.com/NaKa2355/irdeck-proto/gen/go/pirem/api/v1"
 	int_cmd "github.com/NaKa2355/pirem/internal/app/pirem/cmd"
 
@@ -27,15 +26,15 @@ var receiveCmd = &cobra.Command{
 	RunE:  cmd,
 }
 
-func receiveRawIr(deviceId string) (*irdatav1.IrData, error) {
-	var irData *irdatav1.IrData
+func receiveRawIr(deviceId string) (*apiremv1.IrData, error) {
+	var irData *apiremv1.IrData
 	conn, client, err := int_cmd.MakeConnection(int_cmd.Protocol, int_cmd.DomainSocketPath)
 	if err != nil {
 		return irData, err
 	}
 	defer conn.Close()
 
-	resp, err := client.ReceiveRawIr(context.Background(), &apiremv1.ReceiveRawIrRequest{DeviceId: deviceId})
+	resp, err := client.ReceiveIr(context.Background(), &apiremv1.ReceiveIrRequest{DeviceId: deviceId})
 	if err != nil {
 		return irData, err
 	}

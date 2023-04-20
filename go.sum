@@ -10,6 +10,8 @@ github.com/NaKa2355/irdeck-proto v0.0.0-20230407220047-6e5275c033b3 h1:BP7GYOrsy
 github.com/NaKa2355/irdeck-proto v0.0.0-20230407220047-6e5275c033b3/go.mod h1:8K5eQhsukZOxCj9DFuf1NfckwMIvg6P9f/AETl89rfI=
 github.com/NaKa2355/irdeck-proto v0.0.0-20230416105531-c363b97b9615 h1:wa6t9FKK/HlPzR23VKeA3NkyulG8xdwnjxntTPORG+s=
 github.com/NaKa2355/irdeck-proto v0.0.0-20230416105531-c363b97b9615/go.mod h1:8K5eQhsukZOxCj9DFuf1NfckwMIvg6P9f/AETl89rfI=
+github.com/NaKa2355/irdeck-proto v0.0.0-20230420004118-86ccb7e2a0d4 h1:JYjjNnV0sV3Xr1VpIBCm9Y8Gc9X5DJZNabYFe6ZYW4o=
+github.com/NaKa2355/irdeck-proto v0.0.0-20230420004118-86ccb7e2a0d4/go.mod h1:8K5eQhsukZOxCj9DFuf1NfckwMIvg6P9f/AETl89rfI=
 github.com/cpuguy83/go-md2man/v2 v2.0.2/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

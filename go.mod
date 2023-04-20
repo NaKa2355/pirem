@@ -18,7 +18,7 @@ require (
 )
 
 require (
-	github.com/NaKa2355/irdeck-proto v0.0.0-20230416105531-c363b97b9615 // indirect
+	github.com/NaKa2355/irdeck-proto v0.0.0-20230420004118-86ccb7e2a0d4 // indirect
 	github.com/fatih/color v1.7.0 // indirect
 	github.com/hashicorp/yamux v0.0.0-20180604194846-3520598351bb // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect

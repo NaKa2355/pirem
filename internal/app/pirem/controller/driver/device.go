@@ -8,15 +8,15 @@ import (
 	"plugin"
 
 	"github.com/NaKa2355/pirem/internal/app/pirem/entity"
-	entdev "github.com/NaKa2355/pirem/internal/app/pirem/entity/device"
-	ir "github.com/NaKa2355/pirem/internal/app/pirem/entity/ir"
+	"github.com/NaKa2355/pirem/internal/app/pirem/entity/device"
+	"github.com/NaKa2355/pirem/internal/app/pirem/entity/ir"
 	devplugin "github.com/NaKa2355/pirem/pkg/plugin/v1"
 )
 
-var _ entdev.Driver = &Driver{}
+var _ device.Driver = &Driver{}
 
 type Driver struct {
-	Info   entdev.Info
+	Info   device.Info
 	Driver devplugin.Driver
 }
 
@@ -77,7 +77,7 @@ func New(pluginPath string, conf json.RawMessage) (*Driver, error) {
 	}
 
 	dev.Driver = d
-	dev.Info = entdev.Info{
+	dev.Info = device.Info{
 		CanSend:         info.CanReceive,
 		CanReceive:      info.CanReceive,
 		DriverVersion:   info.DriverVersion,

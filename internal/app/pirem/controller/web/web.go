@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	v1 "github.com/NaKa2355/irdeck-proto/gen/go/common/irdata/v1"
 	apiremv1 "github.com/NaKa2355/irdeck-proto/gen/go/pirem/api/v1"
+	v1 "github.com/NaKa2355/irdeck-proto/gen/go/pirem/api/v1"
 	bdy "github.com/NaKa2355/pirem/internal/app/pirem/usecases/boundary"
 )
 
@@ -26,6 +26,8 @@ func New(interactor Interactor) *Handler {
 		i: interactor,
 	}
 }
+
+var _ apiremv1.PiRemServiceServer = &Handler{}
 
 func (w *Handler) GetAllDeviceInfo(ctx context.Context, req *apiremv1.GetAllDeviceInfoRequest) (res *apiremv1.GetAllDeviceInfoResponse, err error) {
 	res = &apiremv1.GetAllDeviceInfoResponse{}
@@ -60,8 +62,24 @@ func (w *Handler) GetDeviceInfo(ctx context.Context, req *apiremv1.GetDeviceInfo
 	return res, err
 }
 
-func (w *Handler) ReceiveRawIr(ctx context.Context, req *apiremv1.ReceiveRawIrRequest) (res *apiremv1.ReceiveRawIrResponse, err error) {
-	res = &apiremv1.ReceiveRawIrResponse{
+func (w *Handler) SendIr(ctx context.Context, req *apiremv1.SendIrRequest) (res *apiremv1.SendIrResponse, err error) {
+	res = &apiremv1.SendIrResponse{}
+	switch irdata := req.IrData.Data.(type) {
+	case *v1.IrData_Raw:
+		err = w.i.SendIR(ctx, bdy.SendIRInput{
+			ID: req.DeviceId,
+			IRData: bdy.RawIRData{
+				CarrierFreqKiloHz: irdata.Raw.GetCarrierFreqKhz(),
+				PluseNanoSec:      irdata.Raw.GetOnOffPluseNs(),
+			}})
+	default:
+		err = errors.New("unsupported error")
+	}
+	return res, err
+}
+
+func (w *Handler) ReceiveIr(ctx context.Context, req *apiremv1.ReceiveIrRequest) (res *apiremv1.ReceiveIrResponse, err error) {
+	res = &apiremv1.ReceiveIrResponse{
 		IrData: &v1.IrData{},
 	}
 
@@ -70,16 +88,12 @@ func (w *Handler) ReceiveRawIr(ctx context.Context, req *apiremv1.ReceiveRawIrRe
 		return res, err
 	}
 
-	switch irdata := out.(type) {
-	case bdy.RawIRData:
-		res.IrData.Data = &v1.IrData_Raw{
-			Raw: &v1.RawIrData{
-				CarrierFreqKhz: irdata.CarrierFreqKiloHz,
-				OnOffPluseNs:   irdata.PluseNanoSec,
-			},
-		}
-	default:
-		return res, errors.New("unsupported irdata")
+	irdata := out.ConvertToRaw()
+	res.IrData.Data = &v1.IrData_Raw{
+		Raw: &v1.RawIrData{
+			CarrierFreqKhz: irdata.CarrierFreqKiloHz,
+			OnOffPluseNs:   irdata.PluseNanoSec,
+		},
 	}
 
 	return res, err
