@@ -53,7 +53,7 @@ func loadDevices(repo *repository.Repository, devsConf []DeviceConfig) (err erro
 			continue
 		}
 
-		dev, _err := entdev.New(devConf.ID, devConf.Name, drv.Info, drv)
+		dev, _err := entdev.New(devConf.ID, devConf.Name, drv)
 		if _err != nil {
 			errors.Join(err, _err)
 			continue

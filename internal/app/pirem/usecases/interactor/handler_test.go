@@ -21,7 +21,7 @@ func TestNew(t *testing.T) {
 			fmt.Println(err)
 			return
 		}
-		dev, err := device.New("1", "test", device.Info{CanSend: true, CanReceive: true, DriverVersion: "0.1.0", FirmwareVersion: "0.0.1"}, driv)
+		dev, err := device.New("1", "test", driv)
 		if err != nil {
 			fmt.Println(err)
 			return
