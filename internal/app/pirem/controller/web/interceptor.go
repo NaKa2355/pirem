@@ -15,31 +15,31 @@ func errWrapper(err error) error {
 		return err
 	}
 
-	var grpcErrCode codes.Code
+	var code codes.Code
 	switch _err := err.(type) {
 	case *bdy.Error:
 		switch _err.Code {
 		case bdy.CodeTimeout:
-			grpcErrCode = codes.Canceled
+			code = codes.Canceled
 		case bdy.CodeNotExist:
-			grpcErrCode = codes.NotFound
+			code = codes.NotFound
 		case bdy.CodeAlreadyExists:
-			grpcErrCode = codes.AlreadyExists
+			code = codes.AlreadyExists
 		case bdy.CodeBusy:
-			grpcErrCode = codes.ResourceExhausted
+			code = codes.ResourceExhausted
 		case bdy.CodeDevice:
-			grpcErrCode = codes.FailedPrecondition
+			code = codes.FailedPrecondition
 		case bdy.CodeInternal:
-			grpcErrCode = codes.Internal
+			code = codes.Internal
 		case bdy.CodeInvaildInput:
-			grpcErrCode = codes.InvalidArgument
+			code = codes.InvalidArgument
 		case bdy.CodeNotSupported:
-			grpcErrCode = codes.Unimplemented
+			code = codes.Unimplemented
 		default:
-			grpcErrCode = codes.Unknown
+			code = codes.Unknown
 		}
 	}
-	return status.Errorf(grpcErrCode, err.Error())
+	return status.Errorf(code, err.Error())
 }
 
 func ErrorUnaryServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {

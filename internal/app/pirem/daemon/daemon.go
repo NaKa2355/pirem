@@ -17,10 +17,12 @@ import (
 	"github.com/NaKa2355/pirem/internal/app/pirem/driver/server"
 	entdev "github.com/NaKa2355/pirem/internal/app/pirem/entity/device"
 	interactor "github.com/NaKa2355/pirem/internal/app/pirem/usecases/interactor"
+	"golang.org/x/exp/slog"
 )
 
 type Daemon struct {
-	srv *server.Server
+	srv    *server.Server
+	logger slog.Logger
 }
 
 type DeviceConfig struct {
@@ -35,7 +37,7 @@ type Config struct {
 	EnableReflection bool           `json:"enable_reflection"`
 }
 
-func readConf(filePath string) (*Config, error) {
+func (d *Daemon) readConf(filePath string) (*Config, error) {
 	config := &Config{}
 	config_data, err := os.ReadFile(filePath)
 	if err != nil {
@@ -45,7 +47,7 @@ func readConf(filePath string) (*Config, error) {
 	return config, err
 }
 
-func loadDevices(repo *repository.Repository, devsConf []DeviceConfig) (err error) {
+func (d *Daemon) loadDevices(repo *repository.Repository, devsConf []DeviceConfig) (err error) {
 	for _, devConf := range devsConf {
 		drv, _err := driver.New(devConf.PluginPath, devConf.Config)
 		if _err != nil {
@@ -65,8 +67,8 @@ func loadDevices(repo *repository.Repository, devsConf []DeviceConfig) (err erro
 			continue
 		}
 
-		fmt.Println(
-			MsgLoadedDevice,
+		d.logger.Info(
+			"device loaded",
 			"plugin file path", devConf.PluginPath,
 			"entdev name", devConf.Name,
 			"entdev id", devConf.ID,
@@ -78,21 +80,22 @@ func loadDevices(repo *repository.Repository, devsConf []DeviceConfig) (err erro
 
 func New(configPath string) (*Daemon, error) {
 	var err error = nil
+	logger := slog.New(slog.Default().Handler())
 	d := &Daemon{}
 	repo := repository.New()
 	interactor := interactor.New(repo)
 	web := web.New(interactor)
 
 	//load config file
-	config, err := readConf(configPath)
+	config, err := d.readConf(configPath)
 	if err != nil {
-		fmt.Println(err)
+		logger.Error(err.Error())
 		return d, err
 	}
 
-	err = loadDevices(repo, config.Devices)
+	err = d.loadDevices(repo, config.Devices)
 	if err != nil {
-		fmt.Println(err)
+		logger.Error(err.Error())
 	}
 
 	d.srv = server.New(web, config.EnableReflection)
@@ -105,13 +108,14 @@ func (d *Daemon) Start(domainSocket string) error {
 		fmt.Println(MsgFaildStartDaemon, "error", err)
 		return err
 	}
-	fmt.Println(
-		MsgStartDaemon,
+
+	d.logger.Info(
+		"daemon started",
 		"unix domain socket path", domainSocket,
 	)
 
+	d.logger.Info("shutting down daemon...")
 	d.srv.WaitSigAndStop(syscall.SIGTERM, syscall.SIGKILL, syscall.SIGINT)
-	fmt.Println(MsgShuttingDownDaemon)
-	fmt.Println(MsgStopDaemon)
+	d.logger.Info("stopped daemon")
 	return nil
 }
