@@ -5,6 +5,7 @@ import (
 
 	"github.com/NaKa2355/pirem/internal/app/pirem/entity"
 	bdy "github.com/NaKa2355/pirem/internal/app/pirem/usecases/boundary"
+	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/driver"
 	repo "github.com/NaKa2355/pirem/internal/app/pirem/usecases/repository"
 )
 
@@ -29,18 +30,22 @@ func convertErr(err error) error {
 			code = bdy.CodeNotExist
 		}
 
+	case *driver.Error:
+		switch _err.Code {
+		case driver.CodeBusy:
+			code = bdy.CodeBusy
+		case driver.CodeInternal:
+			code = bdy.CodeInternal
+		case driver.CodeInvaildInput:
+			code = bdy.CodeInvaildInput
+		case driver.CodeTimeout:
+			code = bdy.CodeTimeout
+		}
+
 	case *entity.Error:
 		switch _err.Code {
-		case entity.CodeBusy:
-			code = bdy.CodeBusy
-		case entity.CodeInternal:
-			code = bdy.CodeInternal
-		case entity.CodeInvaildInput:
-			code = bdy.CodeInvaildInput
 		case entity.CodeNotSupported:
 			code = bdy.CodeNotSupported
-		case entity.CodeTimeout:
-			code = bdy.CodeTimeout
 		}
 	}
 

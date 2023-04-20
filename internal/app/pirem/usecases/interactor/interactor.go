@@ -84,6 +84,10 @@ func (i *Interactor) receiveIR(ctx context.Context, in bdy.ReceiveIRInput) (out 
 	}
 
 	irData, err := device.ReceiveIR(ctx)
+	if err != nil {
+		return out, err
+	}
+
 	rawIRData := irData.ConvertToRaw()
 	out = bdy.RawIRData{
 		CarrierFreqKiloHz: rawIRData.CarrierFreqKiloHz,

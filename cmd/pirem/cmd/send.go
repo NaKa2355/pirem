@@ -6,6 +6,7 @@ package cmd
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 
 	apirem_v1 "github.com/NaKa2355/irdeck-proto/gen/go/pirem/api/v1"
@@ -55,7 +56,7 @@ var sendCmd = &cobra.Command{
 			return err
 		}
 
-		//fmt.Printf("sent %d pluses\n", len(irData.OnOffPluseNs))
+		fmt.Println("sent IR signal!")
 		return nil
 	},
 }

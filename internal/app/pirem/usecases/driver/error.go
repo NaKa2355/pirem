@@ -1,10 +1,13 @@
-package entity
+package driver
 
 type ErrCode int
 
 const (
-	CodeInvaildInput ErrCode = iota
-	CodeNotSupported
+	CodeUnknown ErrCode = iota
+	CodeInvaildInput
+	CodeTimeout
+	CodeBusy
+	CodeInternal
 )
 
 type Error struct {
@@ -14,7 +17,7 @@ type Error struct {
 
 func WrapErr(code ErrCode, err error) error {
 	if err == nil {
-		return err
+		return nil
 	}
 
 	return &Error{

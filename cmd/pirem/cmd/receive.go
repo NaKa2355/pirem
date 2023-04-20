@@ -103,11 +103,9 @@ func cmd(cmd *cobra.Command, args []string) error {
 		binary.Write(os.Stdout, binary.LittleEndian, result)
 	}
 
-	/*
-		if progFlag.Changed {
-			fmt.Printf("\nreceived %d pluses!\n", len(irData.OnOffPluseNs))
-		}
-	*/
+	if progFlag.Changed {
+		fmt.Println("\nReceived IR signal!")
+	}
 	return nil
 }
 

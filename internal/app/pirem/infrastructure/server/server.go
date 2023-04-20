@@ -1,3 +1,7 @@
+/*
+grpcのサーバーをunixドメインソケットで立ち上げる
+*/
+
 package server
 
 import (

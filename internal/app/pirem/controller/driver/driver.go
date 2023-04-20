@@ -10,6 +10,7 @@ import (
 	"github.com/NaKa2355/pirem/internal/app/pirem/entity"
 	"github.com/NaKa2355/pirem/internal/app/pirem/entity/device"
 	"github.com/NaKa2355/pirem/internal/app/pirem/entity/ir"
+	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/driver"
 	devplugin "github.com/NaKa2355/pirem/pkg/plugin/v1"
 )
 
@@ -24,20 +25,22 @@ func convertErr(_err error) error {
 	if _err == nil {
 		return nil
 	}
-	var code entity.ErrCode
+	var code driver.ErrCode
 	switch err := _err.(type) {
 	case *devplugin.Error:
 		switch err.Code {
 		case devplugin.CodeBusy:
-			code = entity.CodeBusy
+			code = driver.CodeBusy
 		case devplugin.CodeDevice:
-			code = entity.CodeInternal
+			code = driver.CodeInternal
 		case devplugin.CodeInvaildInput:
-			code = entity.CodeInvaildInput
+			code = driver.CodeInvaildInput
 		case devplugin.CodeTimeout:
-			code = entity.CodeTimeout
+			code = driver.CodeTimeout
+		default:
+			code = driver.CodeUnknown
 		}
-		return entity.WrapErr(code, err)
+		return driver.WrapErr(code, err)
 	}
 	return _err
 }
@@ -60,8 +63,8 @@ func New(pluginPath string, conf json.RawMessage) (*Driver, error) {
 
 	GetDriver, ok := s.(func(json.RawMessage) (devplugin.Driver, error))
 	if !ok {
-		return dev, entity.WrapErr(
-			entity.CodeInternal,
+		return dev, driver.WrapErr(
+			driver.CodeInternal,
 			errors.New("function type is wrong"),
 		)
 	}

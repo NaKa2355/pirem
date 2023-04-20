@@ -47,6 +47,8 @@ func (dev *Device) setInfo() error {
 	if err != nil {
 		return err
 	}
+	dev.info.CanReceive = true
+	dev.info.CanReceive = true
 	dev.info.FirmwareVersion = firmVersion
 	dev.info.DriverVersion = DriverVersion
 	return nil

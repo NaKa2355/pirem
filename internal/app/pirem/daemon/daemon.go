@@ -13,8 +13,8 @@ import (
 	"github.com/NaKa2355/pirem/internal/app/pirem/controller/driver"
 	"github.com/NaKa2355/pirem/internal/app/pirem/controller/repository"
 	"github.com/NaKa2355/pirem/internal/app/pirem/controller/web"
-	"github.com/NaKa2355/pirem/internal/app/pirem/driver/server"
 	"github.com/NaKa2355/pirem/internal/app/pirem/entity/device"
+	"github.com/NaKa2355/pirem/internal/app/pirem/infrastructure/server"
 	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/interactor"
 	"golang.org/x/exp/slog"
 )
@@ -116,8 +116,8 @@ func (d *Daemon) Start(domainSocket string) error {
 		"unix domain socket path", domainSocket,
 	)
 
-	d.logger.Info("shutting down daemon...")
 	d.srv.WaitSigAndStop(syscall.SIGTERM, syscall.SIGKILL, syscall.SIGINT)
+	d.logger.Info("shutting down daemon...")
 	d.logger.Info("stopped daemon")
 	return nil
 }
