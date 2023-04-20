@@ -7,7 +7,6 @@ package daemon
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"os"
 	"syscall"
 
@@ -15,14 +14,14 @@ import (
 	"github.com/NaKa2355/pirem/internal/app/pirem/controller/repository"
 	"github.com/NaKa2355/pirem/internal/app/pirem/controller/web"
 	"github.com/NaKa2355/pirem/internal/app/pirem/driver/server"
-	entdev "github.com/NaKa2355/pirem/internal/app/pirem/entity/device"
-	interactor "github.com/NaKa2355/pirem/internal/app/pirem/usecases/interactor"
+	"github.com/NaKa2355/pirem/internal/app/pirem/entity/device"
+	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/interactor"
 	"golang.org/x/exp/slog"
 )
 
 type Daemon struct {
 	srv    *server.Server
-	logger slog.Logger
+	logger *slog.Logger
 }
 
 type DeviceConfig struct {
@@ -55,7 +54,7 @@ func (d *Daemon) loadDevices(repo *repository.Repository, devsConf []DeviceConfi
 			continue
 		}
 
-		dev, _err := entdev.New(devConf.ID, devConf.Name, drv)
+		dev, _err := device.New(devConf.ID, devConf.Name, drv)
 		if _err != nil {
 			errors.Join(err, _err)
 			continue
@@ -70,8 +69,8 @@ func (d *Daemon) loadDevices(repo *repository.Repository, devsConf []DeviceConfi
 		d.logger.Info(
 			"device loaded",
 			"plugin file path", devConf.PluginPath,
-			"entdev name", devConf.Name,
-			"entdev id", devConf.ID,
+			"device name", devConf.Name,
+			"device id", devConf.ID,
 		)
 	}
 
@@ -80,8 +79,8 @@ func (d *Daemon) loadDevices(repo *repository.Repository, devsConf []DeviceConfi
 
 func New(configPath string) (*Daemon, error) {
 	var err error = nil
-	logger := slog.New(slog.Default().Handler())
 	d := &Daemon{}
+	d.logger = slog.New(slog.Default().Handler())
 	repo := repository.New()
 	interactor := interactor.New(repo)
 	web := web.New(interactor)
@@ -89,13 +88,16 @@ func New(configPath string) (*Daemon, error) {
 	//load config file
 	config, err := d.readConf(configPath)
 	if err != nil {
-		logger.Error(err.Error())
+		d.logger.Error("faild to read config file",
+			"config file path", configPath,
+			"error", err.Error())
 		return d, err
 	}
 
 	err = d.loadDevices(repo, config.Devices)
 	if err != nil {
-		logger.Error(err.Error())
+		d.logger.Error("faild to load plugin(s)",
+			"error", err.Error())
 	}
 
 	d.srv = server.New(web, config.EnableReflection)
@@ -105,7 +107,7 @@ func New(configPath string) (*Daemon, error) {
 // run until signal comes
 func (d *Daemon) Start(domainSocket string) error {
 	if err := d.srv.Start(domainSocket); err != nil {
-		fmt.Println(MsgFaildStartDaemon, "error", err)
+		d.logger.Error("faild to start daemon", "error", err)
 		return err
 	}
 
