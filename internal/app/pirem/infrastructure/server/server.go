@@ -5,7 +5,6 @@ grpcのサーバーをunixドメインソケットで立ち上げる
 package server
 
 import (
-	"fmt"
 	"net"
 	"os"
 	"os/signal"
@@ -31,17 +30,11 @@ func New(handler apiremv1.PiRemServiceServer, useReflectiton bool) *Server {
 	return s
 }
 
-func (s *Server) Start(domainSocketPath string) error {
-	listenPort, err := net.Listen("unix", domainSocketPath)
-	if err != nil {
-		return err
-	}
+func (s *Server) Start(listener net.Listener) {
 	go func() {
-		defer listenPort.Close()
-		err := s.server.Serve(listenPort)
-		fmt.Println(err)
+		defer listener.Close()
+		s.server.Serve(listener)
 	}()
-	return nil
 }
 
 func (s *Server) WaitSigAndStop(sig ...os.Signal) {

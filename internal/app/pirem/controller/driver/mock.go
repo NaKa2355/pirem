@@ -24,6 +24,8 @@ func NewMock(sendErr error, receiveErr error) *Mock {
 			DriverVersion:   "0.1",
 			FirmwareVersion: "0.1",
 		},
+		sendErr:    sendErr,
+		receiveErr: receiveErr,
 	}
 }
 

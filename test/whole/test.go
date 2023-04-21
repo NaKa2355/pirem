@@ -12,6 +12,7 @@ import (
 	"github.com/NaKa2355/pirem/internal/app/pirem/controller/repository"
 	"github.com/NaKa2355/pirem/internal/app/pirem/controller/web"
 	"github.com/NaKa2355/pirem/internal/app/pirem/entity/device"
+	ud "github.com/NaKa2355/pirem/internal/app/pirem/usecases/driver"
 	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/interactor"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -25,8 +26,12 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	errDev, _ := device.New("2", "error device", driver.NewMock(
+		ud.WrapErr(ud.CodeBusy, fmt.Errorf("error")),
+		ud.WrapErr(ud.CodeTimeout, fmt.Errorf("error"))))
 
 	repo.CreateDevice(dev)
+	repo.CreateDevice(errDev)
 	h := web.New(i)
 
 	port := 8080

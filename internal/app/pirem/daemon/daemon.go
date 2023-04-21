@@ -7,6 +7,7 @@ package daemon
 import (
 	"encoding/json"
 	"errors"
+	"net"
 	"os"
 	"syscall"
 
@@ -106,10 +107,13 @@ func New(configPath string) (*Daemon, error) {
 
 // run until signal comes
 func (d *Daemon) Start(domainSocket string) error {
-	if err := d.srv.Start(domainSocket); err != nil {
-		d.logger.Error("faild to start daemon", "error", err)
+	listener, err := net.Listen("unix", domainSocket)
+	if err != nil {
+		d.logger.Error("faild to make a socket", "error", err)
 		return err
 	}
+
+	d.srv.Start(listener)
 
 	d.logger.Info(
 		"daemon started",

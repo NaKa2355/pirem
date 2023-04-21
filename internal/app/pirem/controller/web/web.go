@@ -2,13 +2,14 @@ package web
 
 import (
 	"context"
-	"errors"
 
 	apiremv1 "github.com/NaKa2355/irdeck-proto/gen/go/pirem/api/v1"
 	bdy "github.com/NaKa2355/pirem/internal/app/pirem/usecases/boundary"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
-type Interactor interface {
+type Boudnary interface {
 	bdy.IRSender
 	bdy.IRReceiver
 	bdy.DeviceInfoGetter
@@ -17,10 +18,10 @@ type Interactor interface {
 
 type Handler struct {
 	apiremv1.UnimplementedPiRemServiceServer
-	i Interactor
+	i Boudnary
 }
 
-func New(interactor Interactor) *Handler {
+func New(interactor Boudnary) *Handler {
 	return &Handler{
 		i: interactor,
 	}
@@ -72,7 +73,7 @@ func (w *Handler) SendIr(ctx context.Context, req *apiremv1.SendIrRequest) (res 
 				PluseNanoSec:      irdata.Raw.GetOnOffPluseNs(),
 			}})
 	default:
-		err = errors.New("unsupported error")
+		err = status.Errorf(codes.Unimplemented, "unsupported data type")
 	}
 	return res, err
 }
