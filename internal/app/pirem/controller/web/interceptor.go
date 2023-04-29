@@ -20,7 +20,7 @@ func errWrapper(err error) error {
 	case *bdy.Error:
 		switch _err.Code {
 		case bdy.CodeTimeout:
-			code = codes.Canceled
+			code = codes.DeadlineExceeded
 		case bdy.CodeNotExist:
 			code = codes.NotFound
 		case bdy.CodeAlreadyExists:
