@@ -38,6 +38,8 @@ func (w *Handler) GetAllDeviceInfo(ctx context.Context, req *apiremv1.GetAllDevi
 			Id:              d.ID,
 			Name:            d.Name,
 			BufferSize:      int32(d.BufferSize),
+			CanSend:         d.CanSend,
+			CanReceive:      d.CanReceive,
 			DriverVersion:   d.DriverVersion,
 			FirmwareVersion: d.FirmwareVersion,
 		}
@@ -50,14 +52,16 @@ func (w *Handler) GetDeviceInfo(ctx context.Context, req *apiremv1.GetDeviceInfo
 	if err != nil {
 		return res, err
 	}
-	dev := out.Device
+	d := out.Device
 
 	res = &apiremv1.DeviceInfo{
-		Id:              dev.ID,
-		Name:            dev.Name,
-		BufferSize:      int32(dev.BufferSize),
-		DriverVersion:   dev.DriverVersion,
-		FirmwareVersion: dev.FirmwareVersion,
+		Id:              d.ID,
+		Name:            d.Name,
+		BufferSize:      int32(d.BufferSize),
+		CanSend:         d.CanSend,
+		CanReceive:      d.CanReceive,
+		DriverVersion:   d.DriverVersion,
+		FirmwareVersion: d.FirmwareVersion,
 	}
 	return res, err
 }
