@@ -7,16 +7,19 @@ package daemon
 import (
 	"encoding/json"
 	"errors"
+
 	"net"
 	"os"
 	"syscall"
 
+	"github.com/NaKa2355/pirem/build"
 	"github.com/NaKa2355/pirem/internal/app/pirem/controller/driver"
 	"github.com/NaKa2355/pirem/internal/app/pirem/controller/repository"
 	"github.com/NaKa2355/pirem/internal/app/pirem/controller/web"
 	"github.com/NaKa2355/pirem/internal/app/pirem/entity/device"
 	"github.com/NaKa2355/pirem/internal/app/pirem/infrastructure/server"
 	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/interactor"
+
 	"golang.org/x/exp/slog"
 )
 
@@ -28,7 +31,7 @@ type Daemon struct {
 type DeviceConfig struct {
 	Name       string          `json:"name"`
 	ID         string          `json:"id"`
-	PluginPath string          `json:"plugin_path"`
+	PluginName string          `json:"plugin_name"`
 	Config     json.RawMessage `json:"config"`
 }
 
@@ -49,7 +52,8 @@ func (d *Daemon) readConf(filePath string) (*Config, error) {
 
 func (d *Daemon) loadDevices(repo *repository.Repository, devsConf []DeviceConfig) (err error) {
 	for _, devConf := range devsConf {
-		drv, _err := driver.New(devConf.PluginPath, devConf.Config)
+		drv, _err := driver.New(devConf.PluginName, devConf.Config, build.Plugins)
+
 		if _err != nil {
 			errors.Join(err, _err)
 			continue
@@ -69,7 +73,7 @@ func (d *Daemon) loadDevices(repo *repository.Repository, devsConf []DeviceConfi
 
 		d.logger.Info(
 			"device loaded",
-			"plugin file path", devConf.PluginPath,
+			"plugin name", devConf.PluginName,
 			"device name", devConf.Name,
 			"device id", devConf.ID,
 		)

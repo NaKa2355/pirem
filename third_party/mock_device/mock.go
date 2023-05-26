@@ -1,4 +1,4 @@
-package main
+package mockdevice
 
 import (
 	"context"
@@ -8,11 +8,14 @@ import (
 	plugin "github.com/NaKa2355/pirem/pkg/plugin/v1"
 )
 
-type MockDev struct{}
+type Plugin struct {
+}
 
-func GetDriver(conf json.RawMessage) (plugin.Driver, error) {
+func (p *Plugin) NewDriver(conf json.RawMessage) (plugin.Driver, error) {
 	return &MockDev{}, nil
 }
+
+type MockDev struct{}
 
 func (m *MockDev) SendIR(ctx context.Context, irdata *plugin.IRData) error {
 	fmt.Println("send ir")

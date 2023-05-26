@@ -3,22 +3,20 @@ package driver
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"plugin"
 
 	"github.com/NaKa2355/pirem/internal/app/pirem/entity"
 	"github.com/NaKa2355/pirem/internal/app/pirem/entity/device"
 	"github.com/NaKa2355/pirem/internal/app/pirem/entity/ir"
 	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/driver"
-	devplugin "github.com/NaKa2355/pirem/pkg/plugin/v1"
+	"github.com/NaKa2355/pirem/pkg/plugin/v1"
 )
 
 var _ device.Driver = &Driver{}
 
 type Driver struct {
 	Info   device.Info
-	Driver devplugin.Driver
+	Driver plugin.Driver
 }
 
 func convertErr(_err error) error {
@@ -27,15 +25,15 @@ func convertErr(_err error) error {
 	}
 	var code driver.ErrCode
 	switch err := _err.(type) {
-	case *devplugin.Error:
+	case *plugin.Error:
 		switch err.Code {
-		case devplugin.CodeBusy:
+		case plugin.CodeBusy:
 			code = driver.CodeBusy
-		case devplugin.CodeDevice:
+		case plugin.CodeDevice:
 			code = driver.CodeInternal
-		case devplugin.CodeInvaildInput:
+		case plugin.CodeInvaildInput:
 			code = driver.CodeInvaildInput
-		case devplugin.CodeTimeout:
+		case plugin.CodeTimeout:
 			code = driver.CodeTimeout
 		default:
 			code = driver.CodeUnknown
@@ -46,30 +44,18 @@ func convertErr(_err error) error {
 }
 
 // デバイスを操作する構造体をプラグインから取得する
-func New(pluginPath string, conf json.RawMessage) (*Driver, error) {
+func New(pluginName string, devConf json.RawMessage, plugins map[string]plugin.Plugin) (*Driver, error) {
 	dev := &Driver{}
-	p, err := plugin.Open(pluginPath)
-	if err != nil {
+
+	p, ok := plugins[pluginName]
+	if !ok {
 		return dev, entity.WrapErr(
 			entity.CodeInvaildInput,
-			fmt.Errorf("faild to open plugin: %w", err),
+			fmt.Errorf("pluin not found"),
 		)
 	}
 
-	s, err := p.Lookup("GetDriver")
-	if err != nil {
-		return dev, err
-	}
-
-	GetDriver, ok := s.(func(json.RawMessage) (devplugin.Driver, error))
-	if !ok {
-		return dev, driver.WrapErr(
-			driver.CodeInternal,
-			errors.New("function type is wrong"),
-		)
-	}
-
-	d, err := GetDriver(conf)
+	d, err := p.NewDriver(devConf)
 	if err != nil {
 		return dev, err
 	}
@@ -92,7 +78,7 @@ func New(pluginPath string, conf json.RawMessage) (*Driver, error) {
 
 func (d *Driver) SendIR(ctx context.Context, irData ir.Data) error {
 	rawIRData := irData.ConvertToRaw()
-	sendData := &devplugin.IRData{
+	sendData := &plugin.IRData{
 		CarrierFreqKiloHz: rawIRData.CarrierFreqKiloHz,
 		PluseNanoSec:      rawIRData.PluseNanoSec,
 	}

@@ -10,13 +10,15 @@ import (
 	"github.com/NaKa2355/pirem/internal/app/pirem/controller/repository"
 	"github.com/NaKa2355/pirem/internal/app/pirem/entity/device"
 	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/boundary"
+	"github.com/NaKa2355/pirem/pkg/plugin/v1"
+	mockdevice "github.com/NaKa2355/pirem/third_party/mock_device"
 )
 
 func TestNew(t *testing.T) {
 	t.Run("test", func(tt *testing.T) {
 		fmt.Println("hello")
 		repo := repository.New()
-		driv, err := driver.New("/home/rasp/programs/pirem/third_party/mock_device/mock.so", json.RawMessage{})
+		driv, err := driver.New("mock", json.RawMessage{}, map[string]plugin.Plugin{"mock": &mockdevice.Plugin{}})
 		if err != nil {
 			fmt.Println(err)
 			return
