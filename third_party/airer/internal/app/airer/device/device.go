@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
-	plugin "github.com/NaKa2355/pirem/pkg/plugin/v1"
+	plugin "github.com/NaKa2355/pirem/pkg/module/v1"
 	"github.com/NaKa2355/pirem/third_party/airer/internal/app/airer/driver"
 )
 

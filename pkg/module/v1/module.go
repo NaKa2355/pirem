@@ -1,7 +1,7 @@
-package plugin
+package module
 
 import "encoding/json"
 
-type Plugin interface {
+type Module interface {
 	NewDriver(json.RawMessage) (Driver, error)
 }

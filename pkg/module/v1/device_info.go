@@ -1,4 +1,4 @@
-package plugin
+package module
 
 type DeviceInfo struct {
 	CanSend         bool

@@ -52,7 +52,7 @@ func (d *Daemon) readConf(filePath string) (*Config, error) {
 
 func (d *Daemon) loadDevices(repo *repository.Repository, devsConf []DeviceConfig) (err error) {
 	for _, devConf := range devsConf {
-		drv, _err := driver.New(devConf.PluginName, devConf.Config, build.Plugins)
+		drv, _err := driver.New(devConf.PluginName, devConf.Config, build.Modules)
 
 		if _err != nil {
 			errors.Join(err, _err)

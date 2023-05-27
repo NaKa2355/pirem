@@ -9,14 +9,14 @@ import (
 	"github.com/NaKa2355/pirem/internal/app/pirem/entity/device"
 	"github.com/NaKa2355/pirem/internal/app/pirem/entity/ir"
 	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/driver"
-	"github.com/NaKa2355/pirem/pkg/plugin/v1"
+	"github.com/NaKa2355/pirem/pkg/module/v1"
 )
 
 var _ device.Driver = &Driver{}
 
 type Driver struct {
 	Info   device.Info
-	Driver plugin.Driver
+	Driver module.Driver
 }
 
 func convertErr(_err error) error {
@@ -25,15 +25,15 @@ func convertErr(_err error) error {
 	}
 	var code driver.ErrCode
 	switch err := _err.(type) {
-	case *plugin.Error:
+	case *module.Error:
 		switch err.Code {
-		case plugin.CodeBusy:
+		case module.CodeBusy:
 			code = driver.CodeBusy
-		case plugin.CodeDevice:
+		case module.CodeDevice:
 			code = driver.CodeInternal
-		case plugin.CodeInvaildInput:
+		case module.CodeInvaildInput:
 			code = driver.CodeInvaildInput
-		case plugin.CodeTimeout:
+		case module.CodeTimeout:
 			code = driver.CodeTimeout
 		default:
 			code = driver.CodeUnknown
@@ -44,10 +44,10 @@ func convertErr(_err error) error {
 }
 
 // デバイスを操作する構造体をプラグインから取得する
-func New(pluginName string, devConf json.RawMessage, plugins map[string]plugin.Plugin) (*Driver, error) {
+func New(pluginName string, devConf json.RawMessage, modules map[string]module.Module) (*Driver, error) {
 	dev := &Driver{}
 
-	p, ok := plugins[pluginName]
+	m, ok := modules[pluginName]
 	if !ok {
 		return dev, entity.WrapErr(
 			entity.CodeInvaildInput,
@@ -55,7 +55,7 @@ func New(pluginName string, devConf json.RawMessage, plugins map[string]plugin.P
 		)
 	}
 
-	d, err := p.NewDriver(devConf)
+	d, err := m.NewDriver(devConf)
 	if err != nil {
 		return dev, err
 	}
@@ -78,7 +78,7 @@ func New(pluginName string, devConf json.RawMessage, plugins map[string]plugin.P
 
 func (d *Driver) SendIR(ctx context.Context, irData ir.Data) error {
 	rawIRData := irData.ConvertToRaw()
-	sendData := &plugin.IRData{
+	sendData := &module.IRData{
 		CarrierFreqKiloHz: rawIRData.CarrierFreqKiloHz,
 		PluseNanoSec:      rawIRData.PluseNanoSec,
 	}
