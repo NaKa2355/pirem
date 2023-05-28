@@ -8,8 +8,6 @@ import (
 	"time"
 
 	"periph.io/x/conn/v3/driver/driverreg"
-	"periph.io/x/conn/v3/gpio"
-	"periph.io/x/conn/v3/gpio/gpioreg"
 	"periph.io/x/conn/v3/spi"
 	"periph.io/x/conn/v3/spi/spireg"
 	"periph.io/x/host/v3"
@@ -19,10 +17,9 @@ type Driver struct {
 	buf           *bytes.Buffer
 	spiPortCloser spi.PortCloser
 	spiConn       spi.Conn
-	busyPin       gpio.PinIO
 }
 
-func New(devFile string, busyPinNum int) (*Driver, error) {
+func New(devFile string) (*Driver, error) {
 	d := &Driver{}
 	d.buf = &bytes.Buffer{}
 	if _, err := host.Init(); err != nil {
@@ -31,12 +28,6 @@ func New(devFile string, busyPinNum int) (*Driver, error) {
 	if _, err := driverreg.Init(); err != nil {
 		return d, err
 	}
-
-	busyPin := gpioreg.ByName(fmt.Sprintf("GPIO%d", busyPinNum))
-	if err := busyPin.In(gpio.PullUp, gpio.NoEdge); err != nil {
-		return d, err
-	}
-	d.busyPin = busyPin
 
 	p, err := spireg.Open(devFile)
 	if err != nil {
@@ -159,7 +150,9 @@ func (d *Driver) GetBufSize() (uint16, error) {
 }
 
 func (d *Driver) IsBusy() bool {
-	return d.busyPin.Read() == gpio.High
+	bufSize, _ := d.GetBufSize()
+	return bufSize != 600
+	//return d.busyPin.Read() == gpio.High
 }
 
 func (d *Driver) SendIr(ctx context.Context, irData []int16) error {
@@ -174,7 +167,7 @@ func (d *Driver) SendIr(ctx context.Context, irData []int16) error {
 	}
 	//wait until becoming busy
 	time.Sleep(100 * time.Millisecond)
-	t := time.NewTicker(100 * time.Millisecond)
+	t := time.NewTicker(300 * time.Millisecond)
 	defer t.Stop()
 
 BusyWait:

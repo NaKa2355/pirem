@@ -31,7 +31,7 @@ type Daemon struct {
 type DeviceConfig struct {
 	Name       string          `json:"name"`
 	ID         string          `json:"id"`
-	PluginName string          `json:"plugin_name"`
+	ModuleName string          `json:"module_name"`
 	Config     json.RawMessage `json:"config"`
 }
 
@@ -52,7 +52,7 @@ func (d *Daemon) readConf(filePath string) (*Config, error) {
 
 func (d *Daemon) loadDevices(repo *repository.Repository, devsConf []DeviceConfig) (err error) {
 	for _, devConf := range devsConf {
-		drv, _err := driver.New(devConf.PluginName, devConf.Config, build.Modules)
+		drv, _err := driver.New(devConf.ModuleName, devConf.Config, build.Modules)
 
 		if _err != nil {
 			errors.Join(err, _err)
@@ -73,7 +73,7 @@ func (d *Daemon) loadDevices(repo *repository.Repository, devsConf []DeviceConfi
 
 		d.logger.Info(
 			"device loaded",
-			"plugin name", devConf.PluginName,
+			"module name", devConf.ModuleName,
 			"device name", devConf.Name,
 			"device id", devConf.ID,
 		)

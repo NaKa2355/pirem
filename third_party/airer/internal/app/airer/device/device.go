@@ -15,7 +15,6 @@ type Device struct {
 
 type DeviceConfig struct {
 	SpiDevFile string `json:"spi_dev_file"`
-	BusyPin    int    `json:"busy_pin"`
 }
 
 const DriverVersion = "0.1.0"
@@ -62,7 +61,7 @@ func NewDevice(jsonConf json.RawMessage) (dev *Device, err error) {
 		return dev, plugin.WrapErr(plugin.CodeInvaildInput, err)
 	}
 
-	d, err := driver.New(conf.SpiDevFile, conf.BusyPin)
+	d, err := driver.New(conf.SpiDevFile)
 	if err != nil {
 		return dev, err
 	}

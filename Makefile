@@ -9,7 +9,7 @@ GO_FILES:=$(shell find . -type f -name '*.go' -print)
 BIN:=bin/pirem
 #ビルドオプション
 BUILD_OPT := -ldflags="-s -w" -trimpath
-BUILD_ENV := CGO_ENABLED=1
+
 
 #------------------インストール系----------------
 #コマンドのインストール先
@@ -28,7 +28,7 @@ PLUGIN_INSTALL:=/opt/piremd
 
 #-----------------Makefile----------------------
 .PHONY: all
-all:
+all: build
 
 .PHONY: clean
 clean:
@@ -38,7 +38,7 @@ clean:
 build: $(BIN)
 
 $(BIN): $(GO_FILES)
-	$(BUILD_ENV) go build $(BUILD_OPT) -o $(BIN_DIR) $(@:$(BIN_DIR)/%=$(MOD_NAME)/cmd/%)
+	go build $(BUILD_OPT) -o $(BIN_DIR) $(@:$(BIN_DIR)/%=$(MOD_NAME)/cmd/%)
 
 .PHONY: install
 install:
