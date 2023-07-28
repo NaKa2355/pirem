@@ -8,10 +8,10 @@ import (
 	"github.com/NaKa2355/pirem/pkg/module/v1"
 )
 
-type Plugin struct {
+type Module struct {
 }
 
-func (p *Plugin) NewDriver(conf json.RawMessage) (module.Driver, error) {
+func (p *Module) NewDriver(conf json.RawMessage) (module.Driver, error) {
 	return &MockDev{}, nil
 }
 
