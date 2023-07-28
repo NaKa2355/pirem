@@ -55,19 +55,19 @@ func (d *Daemon) loadDevices(repo *repository.Repository, devsConf []DeviceConfi
 		drv, _err := driver.New(devConf.ModuleName, devConf.Config, build.Modules)
 
 		if _err != nil {
-			errors.Join(err, _err)
+			err = errors.Join(err, _err)
 			continue
 		}
 
 		dev, _err := device.New(devConf.ID, devConf.Name, drv)
 		if _err != nil {
-			errors.Join(err, _err)
+			err = errors.Join(err, _err)
 			continue
 		}
 
 		_err = repo.CreateDevice(dev)
 		if _err != nil {
-			errors.Join(err, _err)
+			err = errors.Join(err, _err)
 			continue
 		}
 
@@ -114,6 +114,12 @@ func (d *Daemon) Start(domainSocket string) error {
 	listener, err := net.Listen("unix", domainSocket)
 	if err != nil {
 		d.logger.Error("faild to make a socket", "error", err)
+		return err
+	}
+
+	err = os.Chmod(domainSocket, 0770)
+	if err != nil {
+		d.logger.Error("faild to change permisson", "error", err)
 		return err
 	}
 
