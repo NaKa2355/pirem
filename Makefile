@@ -23,8 +23,6 @@ CONFIG_INSTALL:=/etc/piremd.json
 SERVICE_FILE:=config/piremd.service
 SERVICE_INSTALL:=/etc/systemd/system/piremd.service
 
-#プラグインのインストール先
-PLUGIN_INSTALL:=/opt/piremd
 
 #-----------------Makefile----------------------
 .PHONY: all
@@ -45,7 +43,6 @@ install:
 	cp $(BIN_DIR)/* $(CMD_INSTALL)
 	cp $(CONFIG_FILE) $(CONFIG_INSTALL)
 	cp $(SERVICE_FILE) $(SERVICE_INSTALL)
-	mkdir $(PLUGIN_INSTALL)
 
 .PHONY: update
 update:
@@ -59,4 +56,3 @@ remove:
 purge: remove
 	rm $(CONFIG_INSTALL)
 	rm $(SERVICE_INSTALL)
-	rm -rf $(PLUGIN_INSTALL)
