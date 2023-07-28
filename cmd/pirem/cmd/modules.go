@@ -14,8 +14,8 @@ import (
 // sendCmd represents the send command
 var modulesCmd = &cobra.Command{
 	Use:   "modules",
-	Short: "get modules name which loaed",
-	Long:  `get module names which loaed. You can write module names to json config file`,
+	Short: "get modules name which loaded",
+	Long:  `get module names which loaded. You can write module names to json config file`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		for k := range build.Modules {
 			fmt.Printf("%s\n", k)
