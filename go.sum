@@ -1,5 +1,9 @@
 github.com/NaKa2355/irdeck-proto v0.0.0-20230420004118-86ccb7e2a0d4 h1:JYjjNnV0sV3Xr1VpIBCm9Y8Gc9X5DJZNabYFe6ZYW4o=
 github.com/NaKa2355/irdeck-proto v0.0.0-20230420004118-86ccb7e2a0d4/go.mod h1:8K5eQhsukZOxCj9DFuf1NfckwMIvg6P9f/AETl89rfI=
+github.com/NaKa2355/pirem_airer_module v0.0.0-20230728080157-36ede2950d5b h1:D3DVW/WycxiiYIy+AfxQjlCjg42zNndAx5bnyr/OuiY=
+github.com/NaKa2355/pirem_airer_module v0.0.0-20230728080157-36ede2950d5b/go.mod h1:ZiRcHyO4FPfV/b7sdwivmRvPNi0cDHamib4SI5O6KUo=
+github.com/NaKa2355/pirem_mock_module v0.0.0-20230728081612-f82c32a529ab h1:8Vzw9t3Wz0tyyUpW+6pBZud+O+Umsvccy1iACQ71yFU=
+github.com/NaKa2355/pirem_mock_module v0.0.0-20230728081612-f82c32a529ab/go.mod h1:HICVjb+wbo/kT2WLib1qU5Q6EAPvBpxhp9IqDPbk9j4=
 github.com/cpuguy83/go-md2man/v2 v2.0.2/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
 github.com/golang/protobuf v1.5.0/go.mod h1:FsONVRAS9T7sI+LIUmWTfcYkHO4aIWwzhcaSAoJOfIk=
 github.com/golang/protobuf v1.5.2 h1:ROPKBNFfQgOUMifHyP+KYbvpjbdoFNs+aK7DXlji0Tw=
@@ -32,3 +36,7 @@ google.golang.org/protobuf v1.28.1 h1:d0NfwRgPtno5B1Wa6L2DAG+KivqkdutMf1UhdNx175
 google.golang.org/protobuf v1.28.1/go.mod h1:HV8QOd/L58Z+nl8r43ehVNZIU/HEI6OcFqwMG9pJV4I=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/yaml.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
+periph.io/x/conn/v3 v3.7.0 h1:f1EXLn4pkf7AEWwkol2gilCNZ0ElY+bxS4WE2PQXfrA=
+periph.io/x/conn/v3 v3.7.0/go.mod h1:ypY7UVxgDbP9PJGwFSVelRRagxyXYfttVh7hJZUHEhg=
+periph.io/x/host/v3 v3.8.2 h1:ayKUDzgUCN0g8+/xM9GTkWaOBhSLVcVHGTfjAOi8OsQ=
+periph.io/x/host/v3 v3.8.2/go.mod h1:yFL76AesNHR68PboofSWYaQTKmvPXsQH2Apvp/ls/K4=

@@ -23,6 +23,9 @@ CONFIG_INSTALL:=/etc/piremd.json
 SERVICE_FILE:=config/piremd.service
 SERVICE_INSTALL:=/etc/systemd/system/piremd.service
 
+#ソケットファイルのインストール先
+SOCK_DIR:=/tmp/pirem
+
 
 #-----------------Makefile----------------------
 .PHONY: all
@@ -43,6 +46,7 @@ install:
 	cp $(BIN_DIR)/* $(CMD_INSTALL)
 	cp $(CONFIG_FILE) $(CONFIG_INSTALL)
 	cp $(SERVICE_FILE) $(SERVICE_INSTALL)
+	mkdir $(SOCK_DIR)
 
 .PHONY: update
 update:
@@ -56,3 +60,4 @@ remove:
 purge: remove
 	rm $(CONFIG_INSTALL)
 	rm $(SERVICE_INSTALL)
+	rm -rf $(SOCK_DIR)
