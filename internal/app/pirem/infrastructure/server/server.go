@@ -10,7 +10,7 @@ import (
 	"os/signal"
 
 	apiremv1 "github.com/NaKa2355/irdeck-proto/gen/go/pirem/api/v1"
-	"github.com/NaKa2355/pirem/internal/app/pirem/controller/web"
+	"github.com/NaKa2355/pirem/pkg/logger"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -18,11 +18,13 @@ import (
 
 type Server struct {
 	server *grpc.Server
+	logger logger.Logger
 }
 
-func New(handler apiremv1.PiRemServiceServer, useReflectiton bool) *Server {
+func New(handler apiremv1.PiRemServiceServer, useReflectiton bool, logger logger.Logger) *Server {
 	s := &Server{}
-	s.server = grpc.NewServer(grpc.UnaryInterceptor(web.ErrorUnaryServerInterceptor))
+	s.logger = logger
+	s.server = grpc.NewServer(grpc.UnaryInterceptor(s.UnaryServerInterceptor))
 	apiremv1.RegisterPiRemServiceServer(s.server, handler)
 	if useReflectiton {
 		reflection.Register(s.server)

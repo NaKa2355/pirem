@@ -1,4 +1,4 @@
-package web
+package server
 
 import (
 	"context"
@@ -42,7 +42,8 @@ func errWrapper(err error) error {
 	return status.Errorf(code, err.Error())
 }
 
-func ErrorUnaryServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+func (s *Server) UnaryServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	res, err := handler(ctx, req)
+	s.logger.Debug("grpc called", "method", info.FullMethod, "req", req, "res", res)
 	return res, errWrapper(err)
 }

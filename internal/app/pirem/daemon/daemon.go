@@ -19,13 +19,14 @@ import (
 	"github.com/NaKa2355/pirem/internal/app/pirem/entity/device"
 	"github.com/NaKa2355/pirem/internal/app/pirem/infrastructure/server"
 	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/interactor"
+	"github.com/NaKa2355/pirem/pkg/logger"
 
 	"golang.org/x/exp/slog"
 )
 
 type Daemon struct {
 	srv    *server.Server
-	logger *slog.Logger
+	logger logger.Logger
 }
 
 type DeviceConfig struct {
@@ -105,7 +106,7 @@ func New(configPath string) (*Daemon, error) {
 			"error", err.Error())
 	}
 
-	d.srv = server.New(web, config.EnableReflection)
+	d.srv = server.New(web, config.EnableReflection, d.logger)
 	return d, nil
 }
 
