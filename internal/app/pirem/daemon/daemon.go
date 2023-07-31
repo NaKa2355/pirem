@@ -39,6 +39,7 @@ type DeviceConfig struct {
 type Config struct {
 	Devices          []DeviceConfig `json:"devices"`
 	EnableReflection bool           `json:"enable_reflection"`
+	Debug            bool           `json:"debug"`
 }
 
 func (d *Daemon) readConf(filePath string) (*Config, error) {
@@ -83,10 +84,15 @@ func (d *Daemon) loadDevices(repo *repository.Repository, devsConf []DeviceConfi
 	return err
 }
 
-func New(configPath string) (*Daemon, error) {
-	var err error = nil
-	d := &Daemon{}
-	d.logger = slog.New(slog.Default().Handler())
+func New(configPath string) (d *Daemon, err error) {
+	d = &Daemon{}
+
+	level := new(slog.LevelVar)
+	handler := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+		Level: level,
+	})
+	d.logger = slog.New(handler)
+
 	repo := repository.New()
 	interactor := interactor.New(repo)
 	web := web.New(interactor)
@@ -98,6 +104,10 @@ func New(configPath string) (*Daemon, error) {
 			"config file path", configPath,
 			"error", err.Error())
 		return d, err
+	}
+
+	if config.Debug {
+		level.Set(slog.LevelDebug)
 	}
 
 	err = d.loadDevices(repo, config.Devices)
