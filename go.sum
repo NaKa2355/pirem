@@ -1,7 +1,7 @@
 github.com/NaKa2355/irdeck-proto v0.0.0-20230519115636-608876b2a615 h1:tJX9OibcYA8XKzsFu/4lLMgNfUqwTw7+88BaYGnWAME=
 github.com/NaKa2355/irdeck-proto v0.0.0-20230519115636-608876b2a615/go.mod h1:8K5eQhsukZOxCj9DFuf1NfckwMIvg6P9f/AETl89rfI=
-github.com/NaKa2355/pirem-mock-module v0.0.0-20230731105556-3457e1152e23 h1:6fos6pJdCp3Qcf3+rD7ptp0cLWWS1u+wWFblCpIlMW4=
-github.com/NaKa2355/pirem-mock-module v0.0.0-20230731105556-3457e1152e23/go.mod h1:a1BMBf2nKSuu0LDDHxvUeva2Q8nkTAI4keGYlEbQM+0=
+github.com/NaKa2355/pirem-mock-module v0.0.0-20230731113809-54471d95b8c3 h1:Lhghqm8l8RNWwo8PjoBNBrK8CvcUEA2FU+hXTCDsanY=
+github.com/NaKa2355/pirem-mock-module v0.0.0-20230731113809-54471d95b8c3/go.mod h1:a1BMBf2nKSuu0LDDHxvUeva2Q8nkTAI4keGYlEbQM+0=
 github.com/cpuguy83/go-md2man/v2 v2.0.2/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
 github.com/golang/protobuf v1.5.0/go.mod h1:FsONVRAS9T7sI+LIUmWTfcYkHO4aIWwzhcaSAoJOfIk=
 github.com/golang/protobuf v1.5.3 h1:KhyjKVUg7Usr/dYsdSqoFveMYd5ko72D+zANwlG1mmg=
