@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"os"
-	"os/signal"
+	"syscall"
 
 	"github.com/NaKa2355/pirem/internal/app/pirem/controller/driver"
 	"github.com/NaKa2355/pirem/internal/app/pirem/controller/repository"
@@ -41,14 +40,9 @@ func main() {
 
 	srv := server.New(h, true, logger)
 
-	go func() {
-		log.Printf("start gRPC server port: %v", port)
-		srv.Start(listener)
-	}()
+	log.Printf("start gRPC server port: %v", port)
+	srv.Start(listener)
 
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt)
-	<-quit
+	srv.WaitSigAndStop(syscall.SIGTERM, syscall.SIGKILL, syscall.SIGINT)
 	log.Println("stopping gRPC server...")
-	srv.WaitSigAndStop(<-quit)
 }
