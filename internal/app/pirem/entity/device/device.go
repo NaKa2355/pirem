@@ -76,7 +76,7 @@ func (d *Device) ReceiveIR(ctx context.Context) (ir.Data, error) {
 	if !d.driver.GetDeviceInfo().CanReceive {
 		return irData, entity.WrapErr(
 			entity.CodeNotSupported,
-			fmt.Errorf("this device does not support sending"),
+			fmt.Errorf("this device does not support receiving"),
 		)
 	}
 

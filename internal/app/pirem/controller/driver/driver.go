@@ -67,7 +67,7 @@ func New(pluginName string, devConf json.RawMessage, modules map[string]module.M
 
 	dev.Driver = d
 	dev.Info = device.Info{
-		CanSend:         info.CanReceive,
+		CanSend:         info.CanSend,
 		CanReceive:      info.CanReceive,
 		DriverVersion:   info.DriverVersion,
 		FirmwareVersion: info.FirmwareVersion,
