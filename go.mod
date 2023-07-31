@@ -6,6 +6,7 @@ require google.golang.org/protobuf v1.28.1
 
 require (
 	github.com/NaKa2355/irdeck-proto v0.0.0-20230420004118-86ccb7e2a0d4
+	github.com/NaKa2355/pirem-mock-module v0.0.0-20230731105556-3457e1152e23
 	github.com/spf13/cobra v1.6.1
 	golang.org/x/exp v0.0.0-20230419192730-864b3d6c5c2c
 	google.golang.org/grpc v1.53.0
@@ -18,12 +19,8 @@ require (
 )
 
 require (
-	github.com/NaKa2355/pirem_airer_module v0.0.0-20230728080157-36ede2950d5b // indirect
-	github.com/NaKa2355/pirem_mock_module v0.0.0-20230728081612-f82c32a529ab // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/text v0.7.0 // indirect
-	periph.io/x/conn/v3 v3.7.0 // indirect
-	periph.io/x/host/v3 v3.8.2 // indirect
 )

@@ -7,8 +7,8 @@ package build
 */
 
 import (
+	mock "github.com/NaKa2355/pirem-mock-module"
 	"github.com/NaKa2355/pirem/pkg/module/v1"
-	mock "github.com/NaKa2355/pirem_mock_module"
 )
 
 var Modules map[string]module.Module = map[string]module.Module{
