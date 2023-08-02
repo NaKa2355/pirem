@@ -24,7 +24,7 @@ SERVICE_FILE:=config/piremd.service
 SERVICE_INSTALL:=/etc/systemd/system/piremd.service
 
 #ソケットファイルのインストール先
-SOCK_DIR:=/tmp/pirem
+SOCK_DIR:=/tmp/piremd
 
 
 #-----------------Makefile----------------------
