@@ -6,7 +6,7 @@ require google.golang.org/protobuf v1.31.0
 
 require (
 	github.com/NaKa2355/irdeck-proto v0.0.0-20230801192630-22e0db2aecde
-	github.com/NaKa2355/pirem-mock-module v0.0.0-20230731130618-5d68c5fe369b
+	github.com/NaKa2355/pirem-mock-module v0.0.0-20230802164515-421a215ee3e5
 	github.com/spf13/cobra v1.7.0
 	golang.org/x/exp v0.0.0-20230801115018-d63ba01acd4b
 	google.golang.org/grpc v1.57.0
