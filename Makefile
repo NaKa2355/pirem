@@ -24,7 +24,7 @@ SERVICE_FILE:=config/piremd.service
 SERVICE_INSTALL:=/etc/systemd/system/piremd.service
 
 #ソケットファイルのインストール先
-SOCK_DIR:=/tmp/piremd
+SOCK_DIR:=/var/run/piremd
 
 
 #-----------------Makefile----------------------
@@ -45,8 +45,9 @@ $(BIN): $(GO_FILES)
 install:
 	cp $(BIN_DIR)/* $(CMD_INSTALL)
 	cp $(CONFIG_FILE) $(CONFIG_INSTALL)
-	cp $(SERVICE_FILE) $(SERVICE_INSTALL)
 	mkdir $(SOCK_DIR)
+	chmod 777 $(SOCK_DIR)
+	cp $(SERVICE_FILE) $(SERVICE_INSTALL)
 
 .PHONY: update
 update:

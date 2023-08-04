@@ -34,7 +34,7 @@ func startDaemon() error {
 		fmt.Fprintf(os.Stderr, "faild to start daemon: %s\n", err)
 		return err
 	}
-	d.Start(int_cmd.DomainSocketPath, int_cmd.DomainSocketDir)
+	d.Start(int_cmd.DomainSocketPath)
 	return nil
 }
 

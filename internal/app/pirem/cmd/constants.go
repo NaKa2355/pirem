@@ -1,6 +1,5 @@
 package cmd
 
 const Protocol = "unix"
-const DomainSocketPath = "/tmp/piremd/piremd.sock"
-const DomainSocketDir = "/tmp/piremd"
+const DomainSocketPath = "/var/run/piremd/piremd.sock"
 const ConfigFilePath = "/etc/piremd.json"

@@ -121,13 +121,7 @@ func New(configPath string) (d *Daemon, err error) {
 }
 
 // run until signal comes
-func (d *Daemon) Start(domainSocket string, sockDir string) error {
-	err := os.MkdirAll(sockDir, os.ModePerm)
-	if err != nil {
-		d.logger.Error("faild to make directory", "error", err)
-		return err
-	}
-
+func (d *Daemon) Start(domainSocket string) error {
 	listener, err := net.Listen("unix", domainSocket)
 	if err != nil {
 		d.logger.Error("faild to make a socket", "error", err)
