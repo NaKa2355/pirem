@@ -3,6 +3,7 @@ package interactor
 import (
 	"context"
 
+	"github.com/NaKa2355/pirem/internal/app/pirem/entity/device"
 	"github.com/NaKa2355/pirem/internal/app/pirem/entity/ir"
 	bdy "github.com/NaKa2355/pirem/internal/app/pirem/usecases/boundary"
 	repo "github.com/NaKa2355/pirem/internal/app/pirem/usecases/repository"
@@ -95,4 +96,23 @@ func (i *Interactor) receiveIR(ctx context.Context, in bdy.ReceiveIRInput) (out 
 	}
 
 	return out, err
+}
+
+func (i *Interactor) addDevice(ctx context.Context, in bdy.AddDeviceInput) error {
+	md, err := in.Module.NewDriver(in.Config)
+	if err != nil {
+		return err
+	}
+
+	d, err := NewDriver(md)
+	if err != nil {
+		return err
+	}
+
+	ed, err := device.New(in.ID, in.DeviceName, d)
+	if err != nil {
+		return err
+	}
+
+	return i.devsRepo.CreateDevice(ed)
 }

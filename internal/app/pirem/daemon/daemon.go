@@ -5,19 +5,20 @@
 package daemon
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"net"
 	"os"
 	"syscall"
 
-	"github.com/NaKa2355/pirem/build"
-	"github.com/NaKa2355/pirem/internal/app/pirem/controller/driver"
+	modules "github.com/NaKa2355/pirem/build"
 	"github.com/NaKa2355/pirem/internal/app/pirem/controller/repository"
 	"github.com/NaKa2355/pirem/internal/app/pirem/controller/web"
-	"github.com/NaKa2355/pirem/internal/app/pirem/entity/device"
 	"github.com/NaKa2355/pirem/internal/app/pirem/infrastructure/server"
+	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/boundary"
 	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/interactor"
 	"github.com/NaKa2355/pirem/pkg/logger"
 
@@ -52,22 +53,23 @@ func (d *Daemon) readConf(filePath string) (*Config, error) {
 	return config, err
 }
 
-func (d *Daemon) loadDevices(repo *repository.Repository, devsConf []DeviceConfig) (err error) {
+func (d *Daemon) loadDevices(interactor *interactor.Interactor, devsConf []DeviceConfig) (err error) {
 	for _, devConf := range devsConf {
-		drv, _err := driver.New(devConf.ModuleName, devConf.Config, build.Modules)
 
-		if _err != nil {
-			err = errors.Join(err, _err)
+		module, ok := modules.Modules[devConf.ModuleName]
+		if !ok {
+			err = errors.Join(err, fmt.Errorf("module \"%s\" not found", devConf.ModuleName))
 			continue
 		}
 
-		dev, _err := device.New(devConf.ID, devConf.Name, drv)
-		if _err != nil {
-			err = errors.Join(err, _err)
-			continue
+		addDevReq := boundary.AddDeviceInput{
+			ID:         devConf.ID,
+			DeviceName: devConf.Name,
+			Config:     devConf.Config,
+			Module:     module,
 		}
 
-		_err = repo.CreateDevice(dev)
+		_err := interactor.AddDevice(context.Background(), addDevReq)
 		if _err != nil {
 			err = errors.Join(err, _err)
 			continue
@@ -110,7 +112,7 @@ func New(configPath string) (d *Daemon, err error) {
 		level.Set(slog.LevelDebug)
 	}
 
-	err = d.loadDevices(repo, config.Devices)
+	err = d.loadDevices(interactor, config.Devices)
 	if err != nil {
 		d.logger.Error("faild to load plugin(s)",
 			"error", err.Error())

@@ -5,8 +5,8 @@ import (
 
 	"github.com/NaKa2355/pirem/internal/app/pirem/entity"
 	bdy "github.com/NaKa2355/pirem/internal/app/pirem/usecases/boundary"
-	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/driver"
 	repo "github.com/NaKa2355/pirem/internal/app/pirem/usecases/repository"
+	"github.com/NaKa2355/pirem/pkg/module/v1"
 )
 
 func New(repo Repository) *Interactor {
@@ -30,15 +30,13 @@ func convertErr(err error) error {
 			code = bdy.CodeNotExist
 		}
 
-	case *driver.Error:
+	case *module.Error:
 		switch _err.Code {
-		case driver.CodeBusy:
+		case module.CodeBusy:
 			code = bdy.CodeBusy
-		case driver.CodeInternal:
-			code = bdy.CodeInternal
-		case driver.CodeInvaildInput:
+		case module.CodeInvaildInput:
 			code = bdy.CodeInvaildInput
-		case driver.CodeTimeout:
+		case module.CodeTimeout:
 			code = bdy.CodeTimeout
 		}
 
@@ -70,4 +68,9 @@ func (i *Interactor) SendIR(ctx context.Context, in bdy.SendIRInput) (err error)
 func (i *Interactor) ReceiveIR(ctx context.Context, in bdy.ReceiveIRInput) (out bdy.IRData, err error) {
 	out, err = i.receiveIR(ctx, in)
 	return out, convertErr(err)
+}
+
+func (i *Interactor) AddDevice(ctx context.Context, in bdy.AddDeviceInput) (err error) {
+	err = i.addDevice(ctx, in)
+	return convertErr(err)
 }
