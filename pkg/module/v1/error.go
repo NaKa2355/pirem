@@ -6,7 +6,7 @@ const (
 	CodeInvaildInput ErrCode = iota
 	CodeTimeout
 	CodeBusy
-	CodeDevice
+	CodeUnknown
 )
 
 type Error struct {
