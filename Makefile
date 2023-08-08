@@ -42,7 +42,7 @@ $(BIN): $(GO_FILES)
 install:
 	cp $(BIN_DIR)/* $(CMD_INSTALL)
 	cp $(CONFIG_FILE) $(CONFIG_INSTALL)
-	cp $(SERVICE_FILE) $(SERVICE_INSTALL)
+	-@cp $(SERVICE_FILE) $(SERVICE_INSTALL)
 
 .PHONY: update
 update:
@@ -55,4 +55,4 @@ remove:
 .PHONY: purge
 purge: remove
 	rm $(CONFIG_INSTALL)
-	rm $(SERVICE_INSTALL)
+	-@rm $(SERVICE_INSTALL)
