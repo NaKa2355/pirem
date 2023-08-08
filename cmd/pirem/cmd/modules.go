@@ -6,7 +6,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/NaKa2355/pirem/build"
+	"github.com/NaKa2355/pirem/tools/modules"
 
 	"github.com/spf13/cobra"
 )
@@ -17,7 +17,7 @@ var modulesCmd = &cobra.Command{
 	Short: "get modules name which loaded",
 	Long:  `get module names which loaded. You can write module names to json config file`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		for k := range build.Modules {
+		for k := range modules.Modules {
 			fmt.Printf("%s\n", k)
 		}
 		return nil

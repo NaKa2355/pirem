@@ -1,4 +1,4 @@
-package build
+package modules
 
 /*
 静的モジュールを設定する。

@@ -14,13 +14,13 @@ import (
 	"os"
 	"syscall"
 
-	modules "github.com/NaKa2355/pirem/build"
 	"github.com/NaKa2355/pirem/internal/app/pirem/controller/repository"
 	"github.com/NaKa2355/pirem/internal/app/pirem/controller/web"
 	"github.com/NaKa2355/pirem/internal/app/pirem/infrastructure/server"
 	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/boundary"
 	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/interactor"
 	"github.com/NaKa2355/pirem/pkg/logger"
+	"github.com/NaKa2355/pirem/tools/modules"
 
 	"golang.org/x/exp/slog"
 )
