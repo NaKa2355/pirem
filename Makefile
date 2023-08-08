@@ -16,11 +16,11 @@ BUILD_OPT := -ldflags="-s -w" -trimpath
 CMD_INSTALL:=/usr/local/bin
 
 #コンフィグファイルのインストール先
-CONFIG_FILE:=config/piremd.json
+CONFIG_FILE:=config/default/piremd.json
 CONFIG_INSTALL:=/etc/piremd.json
 
 #サービスファイルのインストール先
-SERVICE_FILE:=config/piremd.service
+SERVICE_FILE:=config/default/piremd.service
 SERVICE_INSTALL:=/etc/systemd/system/piremd.service
 
 
