@@ -1,0 +1,18 @@
+FROM golang:1.20.7-alpine3.18
+
+RUN apk update && \
+    apk add bash make && \
+    apk add --upgrade grep
+
+WORKDIR ./pirem
+COPY ../../ ./
+RUN make build
+RUN make install
+COPY ./piremd.json /etc/piremd.json
+
+WORKDIR ../
+RUN rm -rf ./pirem
+RUN go clean --modcache
+RUN mkdir /var/run/piremd
+
+CMD ["pirem",  "daemon"]
