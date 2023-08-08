@@ -5,7 +5,7 @@ RUN apk update && \
     apk add --upgrade grep
 
 WORKDIR ./pirem
-COPY ../../ ./
+COPY ../../../pirem ./
 RUN make build
 RUN make install
 COPY ./piremd.json /etc/piremd.json
