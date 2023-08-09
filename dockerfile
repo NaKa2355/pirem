@@ -14,5 +14,6 @@ WORKDIR ../
 RUN rm -rf ./pirem
 RUN go clean --modcache
 RUN mkdir /var/run/piremd
+RUN chmod 755 /var/run/piremd
 
 CMD ["pirem",  "daemon"]
