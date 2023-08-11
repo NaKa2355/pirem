@@ -8,7 +8,7 @@ WORKDIR ./pirem
 COPY ./ ./
 RUN make build
 RUN make install
-COPY ./config/mock_config/piremd.json /etc/piremd.json
+COPY ./config/piremd.json /etc/piremd.json
 
 WORKDIR ../
 RUN rm -rf ./pirem
