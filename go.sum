@@ -2,6 +2,8 @@ github.com/NaKa2355/irdeck-proto v0.0.0-20230801192630-22e0db2aecde h1:uFJ0/3M+y
 github.com/NaKa2355/irdeck-proto v0.0.0-20230801192630-22e0db2aecde/go.mod h1:8K5eQhsukZOxCj9DFuf1NfckwMIvg6P9f/AETl89rfI=
 github.com/NaKa2355/irdeck-proto v0.0.0-20230806051503-b4f197fafe2f h1:bJWvjq5TIg1tcH2WWc6jAYjGDyDbVeMEvyV4zdeDSw0=
 github.com/NaKa2355/irdeck-proto v0.0.0-20230806051503-b4f197fafe2f/go.mod h1:8K5eQhsukZOxCj9DFuf1NfckwMIvg6P9f/AETl89rfI=
+github.com/NaKa2355/irdeck-proto v0.0.0-20230820063959-11b0e9714357 h1:UOw6EulEfsFNmDthHQ1XDwJS9GxSSWfsvB2pcx+WfuY=
+github.com/NaKa2355/irdeck-proto v0.0.0-20230820063959-11b0e9714357/go.mod h1:8K5eQhsukZOxCj9DFuf1NfckwMIvg6P9f/AETl89rfI=
 github.com/NaKa2355/pirem-mock-module v0.0.0-20230802171319-9808f9c38a6e h1:cDvZ+vWTabS5+E3Q7eoEWoOG8Qvt4/wkWy0nysFTj4Q=
 github.com/NaKa2355/pirem-mock-module v0.0.0-20230802171319-9808f9c38a6e/go.mod h1:a1BMBf2nKSuu0LDDHxvUeva2Q8nkTAI4keGYlEbQM+0=
 github.com/NaKa2355/pirem-mock-module v0.0.0-20230808021753-a66fd956dc56 h1:vsvtgIDkjNQbDk8MRFyJBOPTfrYMM+PJdd50MHcmZlg=

@@ -5,7 +5,7 @@ go 1.20
 require google.golang.org/protobuf v1.31.0
 
 require (
-	github.com/NaKa2355/irdeck-proto v0.0.0-20230806051503-b4f197fafe2f
+	github.com/NaKa2355/irdeck-proto v0.0.0-20230820063959-11b0e9714357
 	github.com/NaKa2355/pirem-mock-module v0.0.0-20230808021753-a66fd956dc56
 	github.com/spf13/cobra v1.7.0
 	golang.org/x/exp v0.0.0-20230807204917-050eac23e9de
