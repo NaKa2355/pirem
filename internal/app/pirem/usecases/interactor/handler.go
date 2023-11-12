@@ -2,6 +2,7 @@ package interactor
 
 import (
 	"context"
+	"time"
 
 	"github.com/NaKa2355/pirem/internal/app/pirem/entity"
 	bdy "github.com/NaKa2355/pirem/internal/app/pirem/usecases/boundary"
@@ -9,8 +10,9 @@ import (
 	"github.com/NaKa2355/pirem/pkg/module/v1"
 )
 
-func New(repo Repository) *Interactor {
+func New(repo Repository, mutexLockDeadline time.Duration) *Interactor {
 	i := &Interactor{}
+	i.mutexLockDeadline = mutexLockDeadline
 	i.devsRepo = repo
 	return i
 }
@@ -44,6 +46,8 @@ func convertErr(err error) error {
 		switch _err.Code {
 		case entity.CodeNotSupported:
 			code = bdy.CodeNotSupported
+		case entity.CodeDeviceBusy:
+			code = bdy.CodeBusy
 		}
 	}
 
@@ -71,6 +75,6 @@ func (i *Interactor) ReceiveIR(ctx context.Context, in bdy.ReceiveIRInput) (out 
 }
 
 func (i *Interactor) AddDevice(ctx context.Context, in bdy.AddDeviceInput) (err error) {
-	err = i.addDevice(ctx, in)
+	err = i.addDevice(ctx, in, i.mutexLockDeadline)
 	return convertErr(err)
 }

@@ -2,6 +2,7 @@ package interactor
 
 import (
 	"context"
+	"time"
 
 	"github.com/NaKa2355/pirem/internal/app/pirem/entity/device"
 	"github.com/NaKa2355/pirem/internal/app/pirem/entity/ir"
@@ -17,7 +18,8 @@ type Repository interface {
 }
 
 type Interactor struct {
-	devsRepo Repository
+	devsRepo          Repository
+	mutexLockDeadline time.Duration
 }
 
 // get all devices information
@@ -98,7 +100,7 @@ func (i *Interactor) receiveIR(ctx context.Context, in bdy.ReceiveIRInput) (out 
 	return out, err
 }
 
-func (i *Interactor) addDevice(ctx context.Context, in bdy.AddDeviceInput) error {
+func (i *Interactor) addDevice(ctx context.Context, in bdy.AddDeviceInput, mutexLockDeadline time.Duration) error {
 	md, err := in.Module.NewDriver(in.Config)
 	if err != nil {
 		return err
@@ -109,7 +111,7 @@ func (i *Interactor) addDevice(ctx context.Context, in bdy.AddDeviceInput) error
 		return err
 	}
 
-	ed, err := device.New(in.ID, in.DeviceName, d)
+	ed, err := device.New(in.ID, in.DeviceName, d, mutexLockDeadline)
 	if err != nil {
 		return err
 	}

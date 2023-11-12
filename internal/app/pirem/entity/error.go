@@ -5,6 +5,7 @@ type ErrCode int
 const (
 	CodeInvaildInput ErrCode = iota
 	CodeNotSupported
+	CodeDeviceBusy
 )
 
 type Error struct {

@@ -15,6 +15,10 @@ import (
 
 const SendIrInterval = 200 * time.Millisecond
 
+var errDeviceBussy = fmt.Errorf("faild to get access admission because of too many requests")
+var errNotSupportSending = fmt.Errorf("this device does not support sending")
+var errNotSupportReceiving = fmt.Errorf("this device does not support receiving")
+
 type Driver interface {
 	SendIR(context.Context, ir.Data) error
 	ReceiveIR(context.Context) (ir.Data, error)
@@ -22,17 +26,19 @@ type Driver interface {
 }
 
 type Device struct {
-	Name   string
-	ID     string
-	driver Driver
-	mu     chan (struct{})
+	Name              string
+	ID                string
+	driver            Driver
+	mutexLockDeadline time.Duration
+	mu                chan (struct{})
 }
 
-func New(id string, name string, driver Driver) (*Device, error) {
+func New(id string, name string, driver Driver, mutexLockDeadline time.Duration) (*Device, error) {
 	dev := &Device{}
 	dev.driver = driver
 	dev.Name = name
 	dev.ID = id
+	dev.mutexLockDeadline = mutexLockDeadline
 	dev.mu = make(chan struct{}, 1)
 	return dev, nil
 }
@@ -45,7 +51,7 @@ func (d *Device) SendIR(ctx context.Context, irData ir.Data) error {
 	if !d.driver.GetDeviceInfo().CanSend {
 		return entity.WrapErr(
 			entity.CodeNotSupported,
-			fmt.Errorf("this device does not support sending"),
+			errNotSupportSending,
 		)
 	}
 
@@ -64,6 +70,12 @@ func (d *Device) SendIR(ctx context.Context, irData ir.Data) error {
 		time.Sleep(SendIrInterval)
 		return nil
 
+	case <-time.After(d.mutexLockDeadline):
+		return entity.WrapErr(
+			entity.CodeDeviceBusy,
+			errDeviceBussy,
+		)
+
 	case <-ctx.Done():
 		ctx.Deadline()
 		return ctx.Err()
@@ -76,7 +88,7 @@ func (d *Device) ReceiveIR(ctx context.Context) (ir.Data, error) {
 	if !d.driver.GetDeviceInfo().CanReceive {
 		return irData, entity.WrapErr(
 			entity.CodeNotSupported,
-			fmt.Errorf("this device does not support receiving"),
+			errNotSupportReceiving,
 		)
 	}
 
@@ -86,6 +98,13 @@ func (d *Device) ReceiveIR(ctx context.Context) (ir.Data, error) {
 			<-d.mu
 		}()
 		return d.driver.ReceiveIR(ctx)
+
+	case <-time.After(d.mutexLockDeadline):
+		return irData, entity.WrapErr(
+			entity.CodeDeviceBusy,
+			errDeviceBussy,
+		)
+
 	case <-ctx.Done():
 		return irData, ctx.Err()
 	}

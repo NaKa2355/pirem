@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 
 	"net"
 	"os"
@@ -38,9 +39,10 @@ type DeviceConfig struct {
 }
 
 type Config struct {
-	Devices          []DeviceConfig `json:"devices"`
-	EnableReflection bool           `json:"enable_reflection"`
-	Debug            bool           `json:"debug"`
+	Devices                 []DeviceConfig `json:"devices"`
+	DeviceMutexLockDeadline int            `json:"device_mutex_lock_deadline"`
+	EnableReflection        bool           `json:"enable_reflection"`
+	Debug                   bool           `json:"debug"`
 }
 
 func (d *Daemon) readConf(filePath string) (*Config, error) {
@@ -95,10 +97,6 @@ func New(configPath string) (d *Daemon, err error) {
 	})
 	d.logger = slog.New(handler)
 
-	repo := repository.New()
-	interactor := interactor.New(repo)
-	web := web.New(interactor)
-
 	//load config file
 	config, err := d.readConf(configPath)
 	if err != nil {
@@ -107,6 +105,10 @@ func New(configPath string) (d *Daemon, err error) {
 			"error", err.Error())
 		return d, err
 	}
+
+	repo := repository.New()
+	interactor := interactor.New(repo, time.Duration(config.DeviceMutexLockDeadline)*time.Second)
+	web := web.New(interactor)
 
 	if config.Debug {
 		level.Set(slog.LevelDebug)
