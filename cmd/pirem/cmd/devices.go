@@ -15,8 +15,8 @@ import (
 )
 
 // infoCmd represents the info command
-var infoCmd = &cobra.Command{
-	Use:   "info",
+var devicesCmd = &cobra.Command{
+	Use:   "devices",
 	Short: "get device(s) information",
 	Long:  `get device(s) information`,
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -63,7 +63,7 @@ func getDeviceInfo(deviceID string) error {
 }
 
 func init() {
-	rootCmd.AddCommand(infoCmd)
+	rootCmd.AddCommand(devicesCmd)
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
@@ -72,5 +72,5 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	infoCmd.Flags().StringP("device", "d", "", "device id")
+	devicesCmd.Flags().StringP("device", "d", "", "device id")
 }
