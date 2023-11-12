@@ -1,7 +1,7 @@
 FROM golang:1.20.7-alpine3.18
 
 RUN apk update && \
-    apk add bash make && \
+    apk add bash make git && \
     apk add --upgrade grep
 
 WORKDIR ./pirem
