@@ -2,119 +2,112 @@ package interactor
 
 import (
 	"context"
-	"time"
 
-	"github.com/NaKa2355/pirem/internal/app/pirem/entity/device"
-	"github.com/NaKa2355/pirem/internal/app/pirem/entity/ir"
+	"github.com/NaKa2355/pirem/internal/app/pirem/domain/button"
+	"github.com/NaKa2355/pirem/internal/app/pirem/domain/device"
+	"github.com/NaKa2355/pirem/internal/app/pirem/domain/irdata"
+	"github.com/NaKa2355/pirem/internal/app/pirem/domain/remote"
 	bdy "github.com/NaKa2355/pirem/internal/app/pirem/usecases/boundary"
-	repo "github.com/NaKa2355/pirem/internal/app/pirem/usecases/repository"
+	gateway "github.com/NaKa2355/pirem/internal/app/pirem/usecases/gateways"
+	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/irdevice"
 )
 
-type Repository interface {
-	repo.DeviceCreator
-	repo.DeviceReader
-	repo.DevicesReader
-	repo.DeviceDeleter
+type InputBoundary interface {
+	bdy.ButtonGetter
+	bdy.ButtonPusher
+
+	bdy.RemoteCreator
+	bdy.RemoteGetter
+	bdy.RemoteLister
+	bdy.RemoteUpdater
+	bdy.RemoteDeleter
+	bdy.IRLearner
+
+	bdy.DeviceGetter
+	bdy.DevicesLister
+	bdy.IRSender
+	bdy.IRReceiver
 }
 
 type Interactor struct {
-	devsRepo          Repository
-	mutexLockDeadline time.Duration
+	repo   gateway.Repository
+	device irdevice.IRDevice
 }
 
-// get all devices information
-func (i *Interactor) getDevicesInfo(ctx context.Context) (out bdy.GetDevicesInfoOutput, err error) {
-	devs, err := i.devsRepo.ReadDevices()
-	if err != nil {
-		return out, err
-	}
+var _ InputBoundary = &Interactor{}
 
-	out.Devices = make([]bdy.DeviceInfo, 0, len(devs))
-	for _, d := range devs {
-		info := d.GetDeviceInfo(ctx)
-		out.Devices = append(out.Devices, bdy.DeviceInfo{
-			ID:              d.ID,
-			Name:            d.Name,
-			CanSend:         info.CanSend,
-			CanReceive:      info.CanReceive,
-			DriverVersion:   info.DriverVersion,
-			FirmwareVersion: info.FirmwareVersion,
-		})
+func NewInteractor(repo gateway.Repository, device irdevice.IRDevice) *Interactor {
+	return &Interactor{
+		repo:   repo,
+		device: device,
 	}
-	return out, err
 }
 
-// get device information
-func (i *Interactor) getDeviceInfo(ctx context.Context, in bdy.GetDeviceInput) (out bdy.GetDeviceInfoOutput, err error) {
-	dev, err := i.devsRepo.ReadDevice(in.ID)
-	if err != nil {
-		return out, err
-	}
-
-	info := dev.GetDeviceInfo(ctx)
-	out.Device = bdy.DeviceInfo{
-		ID:              dev.ID,
-		Name:            dev.Name,
-		CanSend:         info.CanSend,
-		CanReceive:      info.CanReceive,
-		DriverVersion:   info.DriverVersion,
-		FirmwareVersion: info.FirmwareVersion,
-	}
-
-	return out, err
+func (i *Interactor) GetButton(ctx context.Context, input bdy.GetButtonInput) (*button.Button, error) {
+	return i.repo.ReadButton(ctx, input.ButtonID)
 }
 
-func (i *Interactor) sendIR(ctx context.Context, in bdy.SendIRInput) (err error) {
-	var irdata ir.Data
-
-	dev, err := i.devsRepo.ReadDevice(in.ID)
+func (i *Interactor) PushRemote(ctx context.Context, input bdy.PushButtonInput) error {
+	button, err := i.repo.ReadButton(ctx, input.ButtonId)
 	if err != nil {
 		return err
 	}
-
-	irdata = &ir.RawData{
-		CarrierFreqKiloHz: in.IRData.ConvertToRaw().CarrierFreqKiloHz,
-		PluseNanoSec:      in.IRData.ConvertToRaw().PluseNanoSec,
-	}
-
-	return dev.SendIR(ctx, irdata)
+	return i.device.SendIR(ctx, button.DeviceID, button.IRData)
 }
 
-func (i *Interactor) receiveIR(ctx context.Context, in bdy.ReceiveIRInput) (out bdy.IRData, err error) {
-	device, err := i.devsRepo.ReadDevice(in.ID)
-	if err != nil {
-		return out, err
+func (i *Interactor) CreateRemote(ctx context.Context, input bdy.CreateRemoteInput) (*remote.Remote, error) {
+	buttons := []*button.Button{}
+	for _, b := range input.Buttons {
+		buttons = append(buttons, button.Factory(b.Name, b.Tag))
 	}
-
-	irData, err := device.ReceiveIR(ctx)
-	if err != nil {
-		return out, err
-	}
-
-	rawIRData := irData.ConvertToRaw()
-	out = bdy.RawIRData{
-		CarrierFreqKiloHz: rawIRData.CarrierFreqKiloHz,
-		PluseNanoSec:      rawIRData.PluseNanoSec,
-	}
-
-	return out, err
+	return i.repo.CreateRemote(
+		ctx,
+		remote.RemoteFactory(input.Name, input.DeviveID, input.Tag, buttons),
+	)
 }
 
-func (i *Interactor) addDevice(ctx context.Context, in bdy.AddDeviceInput, mutexLockDeadline time.Duration) error {
-	md, err := in.Module.NewDriver(in.Config)
+func (i *Interactor) GetRemote(ctx context.Context, input bdy.GetRemoteInput) (*remote.Remote, error) {
+	return i.repo.ReadRemote(ctx, input.RemoteID)
+}
+
+func (i *Interactor) ListRemotes(ctx context.Context) ([]*remote.Remote, error) {
+	return i.repo.ReadRemotes(ctx)
+}
+
+func (i *Interactor) UpdateRemote(ctx context.Context, input bdy.UpdateRemoteInput) error {
+	remote, err := i.repo.ReadRemote(ctx, input.RemoteID)
 	if err != nil {
 		return err
 	}
+	remote.UpdateRemote(input.RemoteName, input.DeviceID)
+	return i.repo.UpdateRemote(ctx, remote)
+}
 
-	d, err := NewDriver(md)
+func (i *Interactor) DeleteRemote(ctx context.Context, input bdy.DeleteRemoteInput) error {
+	return i.repo.DeleteRemote(ctx, input.RemoteID)
+}
+
+func (i *Interactor) LearnIR(ctx context.Context, input bdy.LearnIRInput) error {
+	button, err := i.repo.ReadButton(ctx, input.ButtonID)
 	if err != nil {
 		return err
 	}
+	button.LearnIR(input.IRData)
+	return i.repo.UpdateButton(ctx, button)
+}
 
-	ed, err := device.New(in.ID, in.DeviceName, d, mutexLockDeadline)
-	if err != nil {
-		return err
-	}
+func (i *Interactor) GetDevice(ctx context.Context, input bdy.GetDeivceInput) (*device.Device, error) {
+	return i.device.ReadDevice(ctx, input.DeviceID)
+}
 
-	return i.devsRepo.CreateDevice(ed)
+func (i *Interactor) ListDevices(ctx context.Context) ([]*device.Device, error) {
+	return i.device.ReadDevices(ctx)
+}
+
+func (i *Interactor) SendIR(ctx context.Context, input bdy.SendIRInput) error {
+	return i.device.SendIR(ctx, input.ID, input.IRData)
+}
+
+func (i *Interactor) ReceiveIR(ctx context.Context, input bdy.ReceiveIRInput) (irdata.IRData, error) {
+	return i.device.ReceiveIR(ctx, input.ID)
 }

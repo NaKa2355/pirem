@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package pirem;
+
+option go_package = "github.com/NaKa2355/irdeck-proto/gen/go/api/v1";
+
+message Device {
+    string id = 1;
+
+    string name = 2;
+
+    int32 buffer_size = 3;
+
+    bool can_send = 4;
+    
+    bool can_receive = 5;
+
+    string driver_version = 7;
+
+    string firmware_version = 8;
+}
