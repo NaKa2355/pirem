@@ -3,13 +3,12 @@ package boundary
 import (
 	"context"
 
-	"github.com/NaKa2355/pirem/internal/app/pirem/domain/button"
-	"github.com/NaKa2355/pirem/internal/app/pirem/domain/irdata"
+	"github.com/NaKa2355/pirem/internal/app/pirem/domain"
 )
 
 type LearnIRInput struct {
-	ButtonID button.ID
-	IRData   irdata.IRData
+	ButtonID domain.ButtonID
+	IRData   domain.IRData
 }
 
 type IRLearner interface {

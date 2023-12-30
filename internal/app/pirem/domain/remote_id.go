@@ -1,4 +1,4 @@
-package remote
+package domain
 
 import (
 	"math/rand"
@@ -7,11 +7,11 @@ import (
 	"github.com/oklog/ulid"
 )
 
-type ID string
+type RemoteID string
 
-func NewID() ID {
+func NewRemoteID() RemoteID {
 	t := time.Now()
 	entropy := ulid.Monotonic(rand.New(rand.NewSource(t.UnixNano())), 0)
 	id := ulid.MustNew(ulid.Timestamp(t), entropy)
-	return ID(id.String())
+	return RemoteID(id.String())
 }

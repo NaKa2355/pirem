@@ -9,7 +9,7 @@ import (
 
 	int_cmd "github.com/NaKa2355/pirem/internal/app/pirem/cmd"
 
-	apiremv1 "github.com/NaKa2355/irdeck-proto/gen/go/pirem/api/v1"
+	pirem "github.com/NaKa2355/pirem/api/gen/go/api/v1"
 
 	"github.com/spf13/cobra"
 )
@@ -35,7 +35,7 @@ func getAllDevsinfo() error {
 	}
 	defer conn.Close()
 
-	resp, err := client.GetAllDeviceInfo(context.Background(), &apiremv1.GetAllDeviceInfoRequest{})
+	resp, err := client.ListDevices(context.Background(), &pirem.ListDevicesRequest{})
 	if err != nil {
 		return err
 	}
@@ -52,7 +52,7 @@ func getDeviceInfo(deviceID string) error {
 	}
 	defer conn.Close()
 
-	resp, err := client.GetDeviceInfo(context.Background(), &apiremv1.GetDeviceInfoRequest{DeviceId: deviceID})
+	resp, err := client.GetDevice(context.Background(), &pirem.GetDeviceRequest{DeviceId: deviceID})
 	if err != nil {
 		return err
 	}

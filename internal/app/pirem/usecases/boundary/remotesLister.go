@@ -3,9 +3,9 @@ package boundary
 import (
 	"context"
 
-	"github.com/NaKa2355/pirem/internal/app/pirem/domain/remote"
+	"github.com/NaKa2355/pirem/internal/app/pirem/domain"
 )
 
 type RemoteLister interface {
-	ListRemotes(context.Context) ([]*remote.Remote, error)
+	ListRemotes(context.Context) ([]*domain.Remote, error)
 }

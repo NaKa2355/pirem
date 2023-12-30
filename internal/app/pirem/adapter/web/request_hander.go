@@ -1,35 +1,23 @@
-package web
+package adapter
 
 import (
 	"context"
 
 	api "github.com/NaKa2355/pirem/api/gen/go/api/v1"
 	adapter "github.com/NaKa2355/pirem/internal/app/pirem/adapter/proto"
-	"github.com/NaKa2355/pirem/internal/app/pirem/domain/button"
-	"github.com/NaKa2355/pirem/internal/app/pirem/domain/remote"
+	"github.com/NaKa2355/pirem/internal/app/pirem/domain"
 	bdy "github.com/NaKa2355/pirem/internal/app/pirem/usecases/boundary"
 )
 
-type InputBoundary interface {
-	bdy.ButtonGetter
-	bdy.ButtonPusher
-
-	bdy.RemoteCreator
-	bdy.RemoteGetter
-	bdy.RemoteLister
-	bdy.RemoteUpdater
-	bdy.RemoteDeleter
-	bdy.IRLearner
-
-	bdy.DeviceGetter
-	bdy.DevicesLister
-	bdy.IRSender
-	bdy.IRReceiver
+type RequestHander struct {
+	port bdy.Boundary
+	api.UnimplementedPiRemServiceServer
 }
 
-type RequestHander struct {
-	port InputBoundary
-	api.UnimplementedPiRemServiceServer
+func NewRequestHandler(port bdy.Boundary) *RequestHander {
+	return &RequestHander{
+		port: port,
+	}
 }
 
 func (h *RequestHander) SendIr(ctx context.Context, req *api.SendIrRequest) (*api.SendIrResponse, error) {
@@ -91,25 +79,25 @@ func (h *RequestHander) GetDevice(ctx context.Context, req *api.GetDeviceRequest
 
 // remotes
 func (h *RequestHander) CreateRemote(ctx context.Context, req *api.Remote) (res *api.Remote, err error) {
-	name, err := remote.NewName(req.Name)
+	name, err := domain.NewRemoteName(req.Name)
 	if err != nil {
 		return
 	}
 	buttons := []struct {
-		Name button.Name
-		Tag  button.Tag
+		Name domain.ButtonName
+		Tag  domain.ButtonTag
 	}{}
 	for _, createButtonsReq := range req.Buttons {
-		name, err := button.NewName(createButtonsReq.Name)
+		name, err := domain.NewButtonName(createButtonsReq.Name)
 		if err != nil {
 			return res, err
 		}
 		buttons = append(buttons, struct {
-			Name button.Name
-			Tag  button.Tag
+			Name domain.ButtonName
+			Tag  domain.ButtonTag
 		}{
 			Name: name,
-			Tag:  button.Tag(createButtonsReq.Tag),
+			Tag:  domain.ButtonTag(createButtonsReq.Tag),
 		})
 	}
 
@@ -148,7 +136,7 @@ func (h *RequestHander) ListRemotes(ctx context.Context, req *api.ListRemotesReq
 
 func (h *RequestHander) GetRemote(ctx context.Context, req *api.GetRemoteRequest) (res *api.Remote, err error) {
 	remote, err := h.port.GetRemote(ctx, bdy.GetRemoteInput{
-		RemoteID: remote.ID(req.RemoteId),
+		RemoteID: domain.RemoteID(req.RemoteId),
 	})
 	if err != nil {
 		return
@@ -171,12 +159,12 @@ func (h *RequestHander) GetRemote(ctx context.Context, req *api.GetRemoteRequest
 }
 
 func (h *RequestHander) UpdateRemote(ctx context.Context, req *api.UpdateRemoteRequest) (res *api.Empty, err error) {
-	name, err := remote.NewName(req.Name)
+	name, err := domain.NewRemoteName(req.Name)
 	if err != nil {
 		return
 	}
 	err = h.port.UpdateRemote(ctx, bdy.UpdateRemoteInput{
-		RemoteID:   remote.ID(req.RemoteId),
+		RemoteID:   domain.RemoteID(req.RemoteId),
 		RemoteName: name,
 		DeviceID:   req.DeviceId,
 	})
@@ -185,14 +173,14 @@ func (h *RequestHander) UpdateRemote(ctx context.Context, req *api.UpdateRemoteR
 
 func (h *RequestHander) DeleteRemote(ctx context.Context, req *api.DeleteRemoteRequest) (*api.Empty, error) {
 	return &api.Empty{}, h.port.DeleteRemote(ctx, bdy.DeleteRemoteInput{
-		RemoteID: remote.ID(req.RemoteId),
+		RemoteID: domain.RemoteID(req.RemoteId),
 	})
 }
 
 // buttons
 func (h *RequestHander) GetButton(ctx context.Context, req *api.GetButtonRequest) (res *api.Button, err error) {
 	button, err := h.port.GetButton(ctx, bdy.GetButtonInput{
-		ButtonID: button.ID(req.ButtonId),
+		ButtonID: domain.ButtonID(req.ButtonId),
 	})
 	if err != nil {
 		return
@@ -207,13 +195,13 @@ func (h *RequestHander) GetButton(ctx context.Context, req *api.GetButtonRequest
 
 func (h *RequestHander) LearnIrData(ctx context.Context, req *api.LearnIrDataRequest) (*api.Empty, error) {
 	return &api.Empty{}, h.port.LearnIR(ctx, bdy.LearnIRInput{
-		ButtonID: button.ID(req.ButtonId),
+		ButtonID: domain.ButtonID(req.ButtonId),
 		IRData:   adapter.UnMarshalIRData(req.IrData),
 	})
 }
 
 func (h *RequestHander) PushButton(ctx context.Context, req *api.PushButtonRequest) (*api.Empty, error) {
 	return &api.Empty{}, h.port.PushRemote(ctx, bdy.PushButtonInput{
-		ButtonId: button.ID(req.ButtonId),
+		ButtonId: domain.ButtonID(req.ButtonId),
 	})
 }

@@ -8,21 +8,21 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/NaKa2355/pirem/internal/app/pirem/domain/remote"
+	"github.com/NaKa2355/pirem/internal/app/pirem/domain"
 	"github.com/NaKa2355/pirem/internal/app/pirem/usecases"
 	"modernc.org/sqlite"
 	sqlite3 "modernc.org/sqlite/lib"
 )
 
-func InsertIntoRemotes(ctx context.Context, tx *sql.Tx, r *remote.Remote) (*remote.Remote, error) {
-	r.ID = remote.ID(genID())
+func InsertIntoRemotes(ctx context.Context, tx *sql.Tx, r *domain.Remote) (*domain.Remote, error) {
+	r.ID = domain.RemoteID(genID())
 	_, err := tx.ExecContext(ctx, `INSERT INTO remotes(remote_id, name, device_id, tag) VALUES(?, ?, ?, ?)`, r.ID, r.Name, r.DeviceID, r.Tag)
 
 	if sqlErr, ok := err.(*sqlite.Error); ok {
 		if sqlErr.Code() == sqlite3.SQLITE_CONSTRAINT_UNIQUE {
 			err = usecases.WrapError(
 				usecases.CodeAlreadyExists,
-				fmt.Errorf("same name remote already exists: %w", err),
+				fmt.Errorf("same name domain already exists: %w", err),
 			)
 			return r, err
 		}
@@ -31,8 +31,8 @@ func InsertIntoRemotes(ctx context.Context, tx *sql.Tx, r *remote.Remote) (*remo
 	return r, err
 }
 
-func SelectFromRemotesWhere(ctx context.Context, tx *sql.Tx, id remote.ID) (r *remote.Remote, err error) {
-	r = &remote.Remote{}
+func SelectFromRemotesWhere(ctx context.Context, tx *sql.Tx, id domain.RemoteID) (r *domain.Remote, err error) {
+	r = &domain.Remote{}
 
 	rows, err := tx.QueryContext(ctx, `SELECT * FROM remotes a WHERE a.remote_id = ?`, id)
 	if err != nil {
@@ -43,7 +43,7 @@ func SelectFromRemotesWhere(ctx context.Context, tx *sql.Tx, id remote.ID) (r *r
 	if !rows.Next() {
 		err = usecases.WrapError(
 			usecases.CodeNotFound,
-			errors.New("remote not found"),
+			errors.New("domain not found"),
 		)
 		return
 	}
@@ -61,7 +61,7 @@ func selectCountFromRemotes(ctx context.Context, tx *sql.Tx) (count int, err err
 	return
 }
 
-func SelectFromRemotes(ctx context.Context, tx *sql.Tx) (remos []*remote.Remote, err error) {
+func SelectFromRemotes(ctx context.Context, tx *sql.Tx) (remotes []*domain.Remote, err error) {
 	count, err := selectCountFromRemotes(ctx, tx)
 	if err != nil {
 		return
@@ -73,27 +73,27 @@ func SelectFromRemotes(ctx context.Context, tx *sql.Tx) (remos []*remote.Remote,
 	}
 	defer rows.Close()
 
-	remos = make([]*remote.Remote, 0, count)
+	remotes = make([]*domain.Remote, 0, count)
 
 	for rows.Next() {
-		remo := remote.Remote{}
-		err = rows.Scan(&remo.ID, &remo.Name, &remo.DeviceID, &remo.Tag)
+		r := domain.Remote{}
+		err = rows.Scan(&r.ID, &r.Name, &r.DeviceID, &r.Tag)
 		if err != nil {
 			return
 		}
-		remos = append(remos, &remo)
+		remotes = append(remotes, &r)
 	}
 
-	return remos, err
+	return remotes, err
 }
 
-func UpdateRemote(ctx context.Context, tx *sql.Tx, r *remote.Remote) (err error) {
+func UpdateRemote(ctx context.Context, tx *sql.Tx, r *domain.Remote) (err error) {
 	_, err = tx.ExecContext(ctx, `UPDATE remotes SET name=?, device_id=? WHERE remote_id=?`, r.Name, r.DeviceID, r.ID)
 	if sqlErr, ok := err.(*sqlite.Error); ok {
 		if sqlErr.Code() == sqlite3.SQLITE_CONSTRAINT_UNIQUE {
 			err = usecases.WrapError(
 				usecases.CodeAlreadyExists,
-				fmt.Errorf("same name remote already exists: %w", err),
+				fmt.Errorf("same name domain already exists: %w", err),
 			)
 			return
 		}
@@ -101,7 +101,7 @@ func UpdateRemote(ctx context.Context, tx *sql.Tx, r *remote.Remote) (err error)
 	return
 }
 
-func DeleteFromRemoteWhere(ctx context.Context, tx *sql.Tx, id remote.ID) (err error) {
+func DeleteFromRemoteWhere(ctx context.Context, tx *sql.Tx, id domain.RemoteID) (err error) {
 	_, err = tx.ExecContext(ctx, `DELETE FROM remotes WHERE remote_id=?`, id)
 	return
 }

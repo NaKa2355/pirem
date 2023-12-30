@@ -3,13 +3,13 @@ package boundary
 import (
 	"context"
 
-	"github.com/NaKa2355/pirem/internal/app/pirem/domain/remote"
+	"github.com/NaKa2355/pirem/internal/app/pirem/domain"
 )
 
 type GetRemoteInput struct {
-	RemoteID remote.ID
+	RemoteID domain.RemoteID
 }
 
 type RemoteGetter interface {
-	GetRemote(context.Context, GetRemoteInput) (*remote.Remote, error)
+	GetRemote(context.Context, GetRemoteInput) (*domain.Remote, error)
 }

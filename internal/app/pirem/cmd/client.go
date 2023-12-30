@@ -5,7 +5,7 @@ import (
 	"net"
 	"time"
 
-	apiremv1 "github.com/NaKa2355/irdeck-proto/gen/go/pirem/api/v1"
+	pirem "github.com/NaKa2355/pirem/api/gen/go/api/v1"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -13,9 +13,9 @@ import (
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
-func MakeConnection(protocol string, addr string) (*grpc.ClientConn, apiremv1.PiRemServiceClient, error) {
+func MakeConnection(protocol string, addr string) (*grpc.ClientConn, pirem.PiRemServiceClient, error) {
 	var conn *grpc.ClientConn
-	var client apiremv1.PiRemServiceClient
+	var client pirem.PiRemServiceClient
 	credentials := insecure.NewCredentials()
 
 	dialer := func(ctx context.Context, addr string) (net.Conn, error) {
@@ -35,7 +35,7 @@ func MakeConnection(protocol string, addr string) (*grpc.ClientConn, apiremv1.Pi
 	if err != nil {
 		return conn, client, err
 	}
-	client = apiremv1.NewPiRemServiceClient(conn)
+	client = pirem.NewPiRemServiceClient(conn)
 	return conn, client, nil
 }
 

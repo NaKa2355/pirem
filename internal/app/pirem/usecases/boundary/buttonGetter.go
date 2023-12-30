@@ -3,13 +3,13 @@ package boundary
 import (
 	"context"
 
-	"github.com/NaKa2355/pirem/internal/app/pirem/domain/button"
+	"github.com/NaKa2355/pirem/internal/app/pirem/domain"
 )
 
 type GetButtonInput struct {
-	ButtonID button.ID
+	ButtonID domain.ButtonID
 }
 
 type ButtonGetter interface {
-	GetButton(context.Context, GetButtonInput) (*button.Button, error)
+	GetButton(context.Context, GetButtonInput) (*domain.Button, error)
 }

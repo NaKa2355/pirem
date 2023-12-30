@@ -2,23 +2,21 @@
 設定ファイルを読み込んで、デーモンを立ち上げる
 */
 
-package daemon
+package registry
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"time"
+	"os/signal"
 
 	"net"
 	"os"
 	"syscall"
 
-	"github.com/NaKa2355/pirem/internal/app/pirem/controller/repository"
-	"github.com/NaKa2355/pirem/internal/app/pirem/controller/web"
-	"github.com/NaKa2355/pirem/internal/app/pirem/infrastructure/server"
-	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/boundary"
+	dataAccess "github.com/NaKa2355/pirem/internal/app/pirem/infra/db"
+	"github.com/NaKa2355/pirem/internal/app/pirem/infra/irdevice"
+	"github.com/NaKa2355/pirem/internal/app/pirem/infra/web"
 	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/interactor"
 	"github.com/NaKa2355/pirem/pkg/logger"
 	"github.com/NaKa2355/pirem/tools/modules"
@@ -27,7 +25,7 @@ import (
 )
 
 type Daemon struct {
-	srv    *server.Server
+	i      *interactor.Interactor
 	logger logger.Logger
 }
 
@@ -55,7 +53,7 @@ func (d *Daemon) readConf(filePath string) (*Config, error) {
 	return config, err
 }
 
-func (d *Daemon) loadDevices(interactor *interactor.Interactor, devsConf []DeviceConfig) (err error) {
+func (d *Daemon) loadDevices(devices *irdevice.IRDevices, devsConf []DeviceConfig) (err error) {
 	for _, devConf := range devsConf {
 
 		module, ok := modules.Modules[devConf.ModuleName]
@@ -64,19 +62,17 @@ func (d *Daemon) loadDevices(interactor *interactor.Interactor, devsConf []Devic
 			continue
 		}
 
-		addDevReq := boundary.AddDeviceInput{
-			ID:         devConf.ID,
-			DeviceName: devConf.Name,
-			Config:     devConf.Config,
-			Module:     module,
-		}
-
-		_err := interactor.AddDevice(context.Background(), addDevReq)
+		driver, _err := module.NewDriver(devConf.Config)
 		if _err != nil {
 			err = errors.Join(err, _err)
 			continue
 		}
 
+		_err = devices.AddDevice(devConf.ID, devConf.Name, driver, 100, 5000)
+		if _err != nil {
+			err = errors.Join(err, _err)
+			continue
+		}
 		d.logger.Info(
 			"device loaded",
 			"module name", devConf.ModuleName,
@@ -84,7 +80,6 @@ func (d *Daemon) loadDevices(interactor *interactor.Interactor, devsConf []Devic
 			"device id", devConf.ID,
 		)
 	}
-
 	return err
 }
 
@@ -106,21 +101,24 @@ func New(configPath string) (d *Daemon, err error) {
 		return d, err
 	}
 
-	repo := repository.New()
-	interactor := interactor.New(repo, time.Duration(config.DeviceMutexLockDeadline)*time.Second)
-	web := web.New(interactor)
-
-	if config.Debug {
-		level.Set(slog.LevelDebug)
+	homeDirectory, err := os.UserHomeDir()
+	if err != nil {
+		panic(fmt.Errorf("faild to get home directory: %w", err))
 	}
 
-	err = d.loadDevices(interactor, config.Devices)
+	repo, err := dataAccess.New(homeDirectory + "/.pirem")
+	if err != nil {
+		panic(fmt.Errorf("faild to create repository: %w", err))
+	}
+
+	devices := irdevice.NewIRDevices()
+	err = d.loadDevices(devices, config.Devices)
 	if err != nil {
 		d.logger.Error("faild to load plugin(s)",
 			"error", err.Error())
 	}
 
-	d.srv = server.New(web, config.EnableReflection, d.logger)
+	d.i = interactor.NewInteractor(repo, devices)
 	return d, nil
 }
 
@@ -138,14 +136,18 @@ func (d *Daemon) Start(domainSocket string) error {
 		return err
 	}
 
-	d.srv.Start(listener)
+	server := web.NewServer(listener, d.i)
 
+	go server.StartListen()
 	d.logger.Info(
 		"daemon started",
 		"unix domain socket path", domainSocket,
 	)
 
-	d.srv.WaitSigAndStop(syscall.SIGTERM, syscall.SIGKILL, syscall.SIGINT)
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	server.Quit()
 	d.logger.Info("shutting down daemon...")
 	d.logger.Info("stopped daemon")
 	return nil

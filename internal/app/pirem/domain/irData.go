@@ -1,4 +1,4 @@
-package irdata
+package domain
 
 type RawData struct {
 	CarrierFreqKiloHz uint32

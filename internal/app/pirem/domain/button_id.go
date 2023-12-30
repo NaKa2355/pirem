@@ -1,4 +1,4 @@
-package button
+package domain
 
 import (
 	"math/rand"
@@ -7,11 +7,11 @@ import (
 	"github.com/oklog/ulid"
 )
 
-type ID string
+type ButtonID string
 
-func NewID() ID {
+func NewButtonID() ButtonID {
 	t := time.Now()
 	entropy := ulid.Monotonic(rand.New(rand.NewSource(t.UnixNano())), 0)
 	id := ulid.MustNew(ulid.Timestamp(t), entropy)
-	return ID(id.String())
+	return ButtonID(id.String())
 }

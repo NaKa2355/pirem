@@ -7,14 +7,13 @@ import (
 	"fmt"
 
 	adapter "github.com/NaKa2355/pirem/internal/app/pirem/adapter/proto"
-	"github.com/NaKa2355/pirem/internal/app/pirem/domain/button"
-	"github.com/NaKa2355/pirem/internal/app/pirem/domain/remote"
+	"github.com/NaKa2355/pirem/internal/app/pirem/domain"
 	"github.com/NaKa2355/pirem/internal/app/pirem/usecases"
 	"modernc.org/sqlite"
 	sqlite3 "modernc.org/sqlite/lib"
 )
 
-func InsertIntoButton(ctx context.Context, tx *sql.Tx, remoteID remote.ID, b *button.Button) (*button.Button, error) {
+func InsertIntoButton(ctx context.Context, tx *sql.Tx, remoteID domain.RemoteID, b *domain.Button) (*domain.Button, error) {
 	stmt, err := tx.PrepareContext(ctx, `INSERT INTO buttons(button_id, remote_id, name, tag, irdata) VALUES(?, ?, ?, ?, ?)`)
 	if err != nil {
 		return b, err
@@ -23,7 +22,7 @@ func InsertIntoButton(ctx context.Context, tx *sql.Tx, remoteID remote.ID, b *bu
 
 	var sqliteErr *sqlite.Error
 
-	b.ID = button.ID(genID())
+	b.ID = domain.ButtonID(genID())
 
 	_, err = stmt.Exec(b.ID, remoteID, b.Name, b.Tag, []byte{})
 	if err == nil {
@@ -46,7 +45,7 @@ func InsertIntoButton(ctx context.Context, tx *sql.Tx, remoteID remote.ID, b *bu
 	return b, err
 }
 
-func UpdateButton(ctx context.Context, tx *sql.Tx, b *button.Button) (err error) {
+func UpdateButton(ctx context.Context, tx *sql.Tx, b *domain.Button) (err error) {
 	irdata, err := adapter.MarshalIRDataToBinary(b.IRData)
 	if err != nil {
 		return err
@@ -65,19 +64,19 @@ func UpdateButton(ctx context.Context, tx *sql.Tx, b *button.Button) (err error)
 	return
 }
 
-func SelectCountFromButtonsWhere(ctx context.Context, tx *sql.Tx, remoteID remote.ID) (count int, err error) {
+func SelectCountFromButtonsWhere(ctx context.Context, tx *sql.Tx, remoteID domain.RemoteID) (count int, err error) {
 	row := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM buttons WHERE remote_id=?`, remoteID)
 	err = row.Scan(&count)
 	return
 }
 
-func SelectFromButtons(ctx context.Context, tx *sql.Tx, remoteID remote.ID) (buttons []*button.Button, err error) {
+func SelectFromButtons(ctx context.Context, tx *sql.Tx, remoteID domain.RemoteID) (buttons []*domain.Button, err error) {
 	count, err := SelectCountFromButtonsWhere(ctx, tx, remoteID)
 	if err != nil {
 		return
 	}
 
-	buttons = make([]*button.Button, 0, count)
+	buttons = make([]*domain.Button, 0, count)
 
 	rows, err := tx.QueryContext(
 		ctx,
@@ -90,7 +89,7 @@ func SelectFromButtons(ctx context.Context, tx *sql.Tx, remoteID remote.ID) (but
 	defer rows.Close()
 
 	for rows.Next() {
-		var b = button.Button{}
+		var b = domain.Button{}
 		binaryIRData := []byte{}
 		err = rows.Scan(&b.Name, binaryIRData, &b.ID, &b.Tag, &b.DeviceID)
 		if err != nil {
@@ -105,8 +104,8 @@ func SelectFromButtons(ctx context.Context, tx *sql.Tx, remoteID remote.ID) (but
 	return
 }
 
-func SelectFromButtonsWhere(ctx context.Context, tx *sql.Tx, buttonID button.ID) (b *button.Button, err error) {
-	b = &button.Button{}
+func SelectFromButtonsWhere(ctx context.Context, tx *sql.Tx, buttonID domain.ButtonID) (b *domain.Button, err error) {
+	b = &domain.Button{}
 
 	rows, err := tx.QueryContext(
 		ctx,

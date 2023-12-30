@@ -3,11 +3,11 @@ package boundary
 import (
 	"context"
 
-	"github.com/NaKa2355/pirem/internal/app/pirem/domain/remote"
+	"github.com/NaKa2355/pirem/internal/app/pirem/domain"
 )
 
 type DeleteRemoteInput struct {
-	RemoteID remote.ID
+	RemoteID domain.RemoteID
 }
 
 type RemoteDeleter interface {

@@ -3,13 +3,13 @@ package boundary
 import (
 	"context"
 
-	"github.com/NaKa2355/pirem/internal/app/pirem/domain/device"
+	"github.com/NaKa2355/pirem/internal/app/pirem/domain"
 )
 
 type GetDeivceInput struct {
-	DeviceID device.ID
+	DeviceID domain.DeviceID
 }
 
 type DeviceGetter interface {
-	GetDevice(context.Context, GetDeivceInput) (*device.Device, error)
+	GetDevice(context.Context, GetDeivceInput) (*domain.Device, error)
 }

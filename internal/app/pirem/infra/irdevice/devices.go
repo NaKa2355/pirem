@@ -6,32 +6,21 @@ import (
 	"sync"
 	"time"
 
-	"github.com/NaKa2355/pirem/internal/app/pirem/domain/device"
-	"github.com/NaKa2355/pirem/internal/app/pirem/domain/irdata"
+	adapter "github.com/NaKa2355/pirem/internal/app/pirem/adapter/device_module"
+	"github.com/NaKa2355/pirem/internal/app/pirem/domain"
 	"github.com/NaKa2355/pirem/internal/app/pirem/usecases"
-	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/irdevice"
+	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/controllers"
 	"github.com/NaKa2355/pirem/pkg/module/v1"
 )
 
 var ErrDeviceNotFound = fmt.Errorf("device not found")
-
-type IRData struct {
-	irdata *module.IRData
-}
-
-func (i *IRData) ConvertToRaw() *irdata.RawData {
-	return &irdata.RawData{
-		CarrierFreqKiloHz: i.irdata.CarrierFreqKiloHz,
-		PluseNanoSec:      i.irdata.PluseNanoSec,
-	}
-}
 
 type IRDevices struct {
 	mu      *sync.RWMutex
 	devices map[string]*DriverManager
 }
 
-var _ irdevice.IRDevice = &IRDevices{}
+var _ controllers.IRDevice = &IRDevices{}
 
 func convertError(err *error) {
 	if *err == nil {
@@ -70,13 +59,13 @@ func (devices *IRDevices) AddDevice(deviceId string, name string, driver module.
 	return err
 }
 
-func (devices *IRDevices) ReadDevices(ctx context.Context) (fetchedDevices []*device.Device, err error) {
+func (devices *IRDevices) ReadDevices(ctx context.Context) (fetchedDevices []*domain.Device, err error) {
 	devices.mu.RLock()
 	defer convertError(&err)
 	defer devices.mu.RUnlock()
 	err = nil
 	for id, d := range devices.devices {
-		fetchedDevices = append(fetchedDevices, &device.Device{
+		fetchedDevices = append(fetchedDevices, &domain.Device{
 			ID:              id,
 			Name:            d.name,
 			CanSend:         d.info.CanSend,
@@ -88,7 +77,7 @@ func (devices *IRDevices) ReadDevices(ctx context.Context) (fetchedDevices []*de
 	return
 }
 
-func (devices *IRDevices) ReadDevice(ctx context.Context, id device.ID) (result *device.Device, err error) {
+func (devices *IRDevices) ReadDevice(ctx context.Context, id domain.DeviceID) (result *domain.Device, err error) {
 	devices.mu.RLock()
 	defer convertError(&err)
 	defer devices.mu.RUnlock()
@@ -98,7 +87,7 @@ func (devices *IRDevices) ReadDevice(ctx context.Context, id device.ID) (result 
 	}
 	info := fetchedDevice.info
 
-	result = &device.Device{
+	result = &domain.Device{
 		ID:              id,
 		CanSend:         info.CanSend,
 		CanReceive:      info.CanReceive,
@@ -108,7 +97,7 @@ func (devices *IRDevices) ReadDevice(ctx context.Context, id device.ID) (result 
 	return
 }
 
-func (devices *IRDevices) SendIR(ctx context.Context, deviceID device.ID, data irdata.IRData) (err error) {
+func (devices *IRDevices) SendIR(ctx context.Context, deviceID domain.DeviceID, data domain.IRData) (err error) {
 	devices.mu.RLock()
 	defer convertError(&err)
 	defer devices.mu.RUnlock()
@@ -123,7 +112,7 @@ func (devices *IRDevices) SendIR(ctx context.Context, deviceID device.ID, data i
 	})
 }
 
-func (devices *IRDevices) ReceiveIR(ctx context.Context, deviceID device.ID) (irdata irdata.IRData, err error) {
+func (devices *IRDevices) ReceiveIR(ctx context.Context, deviceID domain.DeviceID) (irData domain.IRData, err error) {
 	devices.mu.RLock()
 	defer convertError(&err)
 	defer devices.mu.RUnlock()
@@ -131,6 +120,6 @@ func (devices *IRDevices) ReceiveIR(ctx context.Context, deviceID device.ID) (ir
 	if !ok {
 		return nil, usecases.WrapError(usecases.CodeDeviceNotFound, ErrDeviceNotFound)
 	}
-	llIRdata, err := device.ReceiveIR(ctx)
-	return &IRData{irdata: llIRdata}, err
+	d, err := device.ReceiveIR(ctx)
+	return adapter.UnMarshalIRData(d), err
 }

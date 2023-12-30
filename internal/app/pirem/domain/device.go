@@ -1,7 +1,7 @@
-package device
+package domain
 
 type Device struct {
-	ID              ID
+	ID              DeviceID
 	Name            string
 	CanSend         bool
 	CanReceive      bool

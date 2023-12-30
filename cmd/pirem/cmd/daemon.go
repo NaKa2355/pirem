@@ -8,7 +8,7 @@ import (
 	"os"
 
 	int_cmd "github.com/NaKa2355/pirem/internal/app/pirem/cmd"
-	"github.com/NaKa2355/pirem/internal/app/pirem/daemon"
+	"github.com/NaKa2355/pirem/internal/app/pirem/registry"
 
 	"github.com/spf13/cobra"
 )
@@ -29,7 +29,7 @@ var daemonCmd = &cobra.Command{
 }
 
 func startDaemon() error {
-	d, err := daemon.New(int_cmd.ConfigFilePath)
+	d, err := registry.New(int_cmd.ConfigFilePath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "faild to start daemon: %s\n", err)
 		return err

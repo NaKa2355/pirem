@@ -3,84 +3,64 @@ package interactor
 import (
 	"context"
 
-	"github.com/NaKa2355/pirem/internal/app/pirem/domain/button"
-	"github.com/NaKa2355/pirem/internal/app/pirem/domain/device"
-	"github.com/NaKa2355/pirem/internal/app/pirem/domain/irdata"
-	"github.com/NaKa2355/pirem/internal/app/pirem/domain/remote"
+	"github.com/NaKa2355/pirem/internal/app/pirem/domain"
 	bdy "github.com/NaKa2355/pirem/internal/app/pirem/usecases/boundary"
+	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/controllers"
 	gateway "github.com/NaKa2355/pirem/internal/app/pirem/usecases/gateways"
-	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/irdevice"
 )
-
-type InputBoundary interface {
-	bdy.ButtonGetter
-	bdy.ButtonPusher
-
-	bdy.RemoteCreator
-	bdy.RemoteGetter
-	bdy.RemoteLister
-	bdy.RemoteUpdater
-	bdy.RemoteDeleter
-	bdy.IRLearner
-
-	bdy.DeviceGetter
-	bdy.DevicesLister
-	bdy.IRSender
-	bdy.IRReceiver
-}
 
 type Interactor struct {
 	repo   gateway.Repository
-	device irdevice.IRDevice
+	device controllers.IRDevice
 }
 
-var _ InputBoundary = &Interactor{}
+var _ bdy.Boundary = &Interactor{}
 
-func NewInteractor(repo gateway.Repository, device irdevice.IRDevice) *Interactor {
+func NewInteractor(repo gateway.Repository, device controllers.IRDevice) *Interactor {
 	return &Interactor{
 		repo:   repo,
 		device: device,
 	}
 }
 
-func (i *Interactor) GetButton(ctx context.Context, input bdy.GetButtonInput) (*button.Button, error) {
+func (i *Interactor) GetButton(ctx context.Context, input bdy.GetButtonInput) (*domain.Button, error) {
 	return i.repo.ReadButton(ctx, input.ButtonID)
 }
 
 func (i *Interactor) PushRemote(ctx context.Context, input bdy.PushButtonInput) error {
-	button, err := i.repo.ReadButton(ctx, input.ButtonId)
+	b, err := i.repo.ReadButton(ctx, input.ButtonId)
 	if err != nil {
 		return err
 	}
-	return i.device.SendIR(ctx, button.DeviceID, button.IRData)
+	return i.device.SendIR(ctx, b.DeviceID, b.IRData)
 }
 
-func (i *Interactor) CreateRemote(ctx context.Context, input bdy.CreateRemoteInput) (*remote.Remote, error) {
-	buttons := []*button.Button{}
+func (i *Interactor) CreateRemote(ctx context.Context, input bdy.CreateRemoteInput) (*domain.Remote, error) {
+	buttons := []*domain.Button{}
 	for _, b := range input.Buttons {
-		buttons = append(buttons, button.Factory(b.Name, b.Tag))
+		buttons = append(buttons, domain.Factory(b.Name, b.Tag))
 	}
 	return i.repo.CreateRemote(
 		ctx,
-		remote.RemoteFactory(input.Name, input.DeviveID, input.Tag, buttons),
+		domain.RemoteFactory(input.Name, input.DeviveID, input.Tag, buttons),
 	)
 }
 
-func (i *Interactor) GetRemote(ctx context.Context, input bdy.GetRemoteInput) (*remote.Remote, error) {
+func (i *Interactor) GetRemote(ctx context.Context, input bdy.GetRemoteInput) (*domain.Remote, error) {
 	return i.repo.ReadRemote(ctx, input.RemoteID)
 }
 
-func (i *Interactor) ListRemotes(ctx context.Context) ([]*remote.Remote, error) {
+func (i *Interactor) ListRemotes(ctx context.Context) ([]*domain.Remote, error) {
 	return i.repo.ReadRemotes(ctx)
 }
 
 func (i *Interactor) UpdateRemote(ctx context.Context, input bdy.UpdateRemoteInput) error {
-	remote, err := i.repo.ReadRemote(ctx, input.RemoteID)
+	r, err := i.repo.ReadRemote(ctx, input.RemoteID)
 	if err != nil {
 		return err
 	}
-	remote.UpdateRemote(input.RemoteName, input.DeviceID)
-	return i.repo.UpdateRemote(ctx, remote)
+	r.UpdateRemote(input.RemoteName, input.DeviceID)
+	return i.repo.UpdateRemote(ctx, r)
 }
 
 func (i *Interactor) DeleteRemote(ctx context.Context, input bdy.DeleteRemoteInput) error {
@@ -88,19 +68,19 @@ func (i *Interactor) DeleteRemote(ctx context.Context, input bdy.DeleteRemoteInp
 }
 
 func (i *Interactor) LearnIR(ctx context.Context, input bdy.LearnIRInput) error {
-	button, err := i.repo.ReadButton(ctx, input.ButtonID)
+	b, err := i.repo.ReadButton(ctx, input.ButtonID)
 	if err != nil {
 		return err
 	}
-	button.LearnIR(input.IRData)
-	return i.repo.UpdateButton(ctx, button)
+	b.LearnIR(input.IRData)
+	return i.repo.UpdateButton(ctx, b)
 }
 
-func (i *Interactor) GetDevice(ctx context.Context, input bdy.GetDeivceInput) (*device.Device, error) {
+func (i *Interactor) GetDevice(ctx context.Context, input bdy.GetDeivceInput) (*domain.Device, error) {
 	return i.device.ReadDevice(ctx, input.DeviceID)
 }
 
-func (i *Interactor) ListDevices(ctx context.Context) ([]*device.Device, error) {
+func (i *Interactor) ListDevices(ctx context.Context) ([]*domain.Device, error) {
 	return i.device.ReadDevices(ctx)
 }
 
@@ -108,6 +88,6 @@ func (i *Interactor) SendIR(ctx context.Context, input bdy.SendIRInput) error {
 	return i.device.SendIR(ctx, input.ID, input.IRData)
 }
 
-func (i *Interactor) ReceiveIR(ctx context.Context, input bdy.ReceiveIRInput) (irdata.IRData, error) {
+func (i *Interactor) ReceiveIR(ctx context.Context, input bdy.ReceiveIRInput) (domain.IRData, error) {
 	return i.device.ReceiveIR(ctx, input.ID)
 }

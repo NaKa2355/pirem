@@ -6,12 +6,11 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/NaKa2355/pirem/internal/app/pirem/domain/button"
-	"github.com/NaKa2355/pirem/internal/app/pirem/domain/remote"
+	"github.com/NaKa2355/pirem/internal/app/pirem/domain"
 	"github.com/NaKa2355/pirem/internal/app/pirem/infra/db/orm"
 	"github.com/NaKa2355/pirem/internal/app/pirem/infra/db/queries"
 	"github.com/NaKa2355/pirem/internal/app/pirem/usecases"
-	gateway "github.com/NaKa2355/pirem/internal/app/pirem/usecases/gateways"
+	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/gateways"
 )
 
 type DataAccess struct {
@@ -19,7 +18,7 @@ type DataAccess struct {
 	m  *sync.RWMutex
 }
 
-var _ gateway.Repository = &DataAccess{}
+var _ gateways.Repository = &DataAccess{}
 
 func convertError(err *error) {
 	if *err == nil {
@@ -33,15 +32,15 @@ func convertError(err *error) {
 	*err = usecases.WrapError(usecases.CodeDataBase, *err)
 }
 
-func New(dbFile string) (d *DataAccess, err error) {
+func New(dbFile string) (r gateways.Repository, err error) {
 	defer convertError(&err)
 
 	db, err := orm.New(dbFile)
 	if err != nil {
-		return d, err
+		return r, err
 	}
 
-	d = &DataAccess{
+	d := &DataAccess{
 		db: db,
 		m:  &sync.RWMutex{},
 	}
@@ -59,7 +58,7 @@ func (d *DataAccess) Close() (err error) {
 	return
 }
 
-func (d *DataAccess) CreateRemote(ctx context.Context, r *remote.Remote) (_ *remote.Remote, err error) {
+func (d *DataAccess) CreateRemote(ctx context.Context, r *domain.Remote) (_ *domain.Remote, err error) {
 	d.m.Lock()
 	defer convertError(&err)
 	defer d.m.Unlock()
@@ -71,7 +70,7 @@ func (d *DataAccess) CreateRemote(ctx context.Context, r *remote.Remote) (_ *rem
 
 		func(tx *sql.Tx) error {
 			for _, button := range r.Buttons {
-				_, err = queries.InsertIntoButton(ctx, tx, remote.ID(r.ID), button)
+				_, err = queries.InsertIntoButton(ctx, tx, domain.RemoteID(r.ID), button)
 			}
 			return err
 		},
@@ -79,7 +78,7 @@ func (d *DataAccess) CreateRemote(ctx context.Context, r *remote.Remote) (_ *rem
 	return r, err
 }
 
-func (d *DataAccess) ReadRemote(ctx context.Context, remoteID remote.ID) (r *remote.Remote, err error) {
+func (d *DataAccess) ReadRemote(ctx context.Context, remoteID domain.RemoteID) (r *domain.Remote, err error) {
 	d.m.RLock()
 	defer convertError(&err)
 	defer d.m.RUnlock()
@@ -97,7 +96,7 @@ func (d *DataAccess) ReadRemote(ctx context.Context, remoteID remote.ID) (r *rem
 	return
 }
 
-func (d *DataAccess) ReadRemotes(ctx context.Context) (remotes []*remote.Remote, err error) {
+func (d *DataAccess) ReadRemotes(ctx context.Context) (remotes []*domain.Remote, err error) {
 	d.m.RLock()
 	defer convertError(&err)
 	defer d.m.RUnlock()
@@ -120,7 +119,7 @@ func (d *DataAccess) ReadRemotes(ctx context.Context) (remotes []*remote.Remote,
 	return
 }
 
-func (d *DataAccess) ReadButton(ctx context.Context, buttonID button.ID) (c *button.Button, err error) {
+func (d *DataAccess) ReadButton(ctx context.Context, buttonID domain.ButtonID) (c *domain.Button, err error) {
 	d.m.RLock()
 	defer convertError(&err)
 	d.m.RUnlock()
@@ -133,20 +132,20 @@ func (d *DataAccess) ReadButton(ctx context.Context, buttonID button.ID) (c *but
 	return
 }
 
-func (d *DataAccess) ReadButtons(ctx context.Context, appID remote.ID) (coms []*button.Button, err error) {
+func (d *DataAccess) ReadButtons(ctx context.Context, remoteID domain.RemoteID) (coms []*domain.Button, err error) {
 	d.m.RLock()
 	defer convertError(&err)
 	defer d.m.RUnlock()
 	err = d.db.BeginTransaction(ctx, orm.Transaction{
 		func(tx *sql.Tx) error {
-			coms, err = queries.SelectFromButtons(ctx, tx, appID)
+			coms, err = queries.SelectFromButtons(ctx, tx, remoteID)
 			return err
 		},
 	}, true)
 	return
 }
 
-func (d *DataAccess) UpdateRemote(ctx context.Context, a *remote.Remote) (err error) {
+func (d *DataAccess) UpdateRemote(ctx context.Context, a *domain.Remote) (err error) {
 	d.m.Lock()
 	defer convertError(&err)
 	defer d.m.Unlock()
@@ -158,7 +157,7 @@ func (d *DataAccess) UpdateRemote(ctx context.Context, a *remote.Remote) (err er
 	return
 }
 
-func (d *DataAccess) UpdateButton(ctx context.Context, b *button.Button) (err error) {
+func (d *DataAccess) UpdateButton(ctx context.Context, b *domain.Button) (err error) {
 	d.m.Lock()
 	defer convertError(&err)
 	defer d.m.Unlock()
@@ -170,7 +169,7 @@ func (d *DataAccess) UpdateButton(ctx context.Context, b *button.Button) (err er
 	return
 }
 
-func (d *DataAccess) DeleteRemote(ctx context.Context, remoteID remote.ID) (err error) {
+func (d *DataAccess) DeleteRemote(ctx context.Context, remoteID domain.RemoteID) (err error) {
 	d.m.Lock()
 	defer convertError(&err)
 	defer d.m.Unlock()

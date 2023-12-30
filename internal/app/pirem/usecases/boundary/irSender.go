@@ -3,13 +3,12 @@ package boundary
 import (
 	"context"
 
-	"github.com/NaKa2355/pirem/internal/app/pirem/domain/device"
-	"github.com/NaKa2355/pirem/internal/app/pirem/domain/irdata"
+	"github.com/NaKa2355/pirem/internal/app/pirem/domain"
 )
 
 type SendIRInput struct {
-	ID     device.ID
-	IRData irdata.IRData
+	ID     domain.DeviceID
+	IRData domain.IRData
 }
 
 type IRSender interface {
