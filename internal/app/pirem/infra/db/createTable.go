@@ -1,4 +1,4 @@
-package dataAccess
+package db
 
 import (
 	"embed"
@@ -8,7 +8,7 @@ import (
 //go:embed queries/createTable.sql
 var createTableQueries embed.FS
 
-func (d *DataAccess) CreateTable() error {
+func (d *DataBase) CreateTable() error {
 	query, err := createTableQueries.ReadFile("queries/createTable.sql")
 	if err != nil {
 		return err

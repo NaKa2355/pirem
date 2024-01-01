@@ -22,8 +22,6 @@ func InsertIntoButton(ctx context.Context, tx *sql.Tx, remoteID domain.RemoteID,
 
 	var sqliteErr *sqlite.Error
 
-	b.ID = domain.ButtonID(genID())
-
 	_, err = stmt.Exec(b.ID, remoteID, b.Name, b.Tag, []byte{})
 	if err == nil {
 		return b, err

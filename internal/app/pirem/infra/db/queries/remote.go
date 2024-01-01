@@ -15,7 +15,6 @@ import (
 )
 
 func InsertIntoRemotes(ctx context.Context, tx *sql.Tx, r *domain.Remote) (*domain.Remote, error) {
-	r.ID = domain.RemoteID(genID())
 	_, err := tx.ExecContext(ctx, `INSERT INTO remotes(remote_id, name, device_id, tag) VALUES(?, ?, ?, ?)`, r.ID, r.Name, r.DeviceID, r.Tag)
 
 	if sqlErr, ok := err.(*sqlite.Error); ok {

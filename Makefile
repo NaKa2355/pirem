@@ -20,7 +20,7 @@ CONFIG_FILE:=config/piremd.json
 CONFIG_INSTALL:=/etc/piremd.json
 
 #サービスファイルのインストール先
-SERVICE_FILE:=config/piremd.service
+SERVICE_FILE:=init/piremd.service
 SERVICE_INSTALL:=/etc/systemd/system/piremd.service
 
 

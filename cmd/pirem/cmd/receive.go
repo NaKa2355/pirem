@@ -47,6 +47,7 @@ func progress(progChan chan any) {
 	for {
 		select {
 		case <-progChan:
+			fmt.Println()
 			return
 		case <-t.C:
 			fmt.Print(".")

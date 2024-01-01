@@ -20,7 +20,7 @@ func NewServer(l net.Listener, boundary boundary.Boundary) controllers.Web {
 	s := grpc.NewServer()
 	pirem.RegisterPiRemServiceServer(s, handler)
 	return &Server{
-		s: grpc.NewServer(),
+		s: s,
 		l: l,
 	}
 }

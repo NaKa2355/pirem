@@ -5,57 +5,35 @@
 package registry
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os/signal"
 
-	"net"
 	"os"
 	"syscall"
 
+	"github.com/NaKa2355/pirem/config"
 	dataAccess "github.com/NaKa2355/pirem/internal/app/pirem/infra/db"
-	"github.com/NaKa2355/pirem/internal/app/pirem/infra/irdevice"
+	"github.com/NaKa2355/pirem/internal/app/pirem/infra/devices"
 	"github.com/NaKa2355/pirem/internal/app/pirem/infra/web"
+	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/boundary"
+	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/controllers"
+	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/gateways"
 	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/interactor"
 	"github.com/NaKa2355/pirem/pkg/logger"
 	"github.com/NaKa2355/pirem/tools/modules"
-
 	"golang.org/x/exp/slog"
 )
 
-type Daemon struct {
-	i      *interactor.Interactor
-	logger logger.Logger
+type Handler struct {
+	logger   logger.Logger
+	devsConf []config.DeviceConfig
 }
 
-type DeviceConfig struct {
-	Name       string          `json:"name"`
-	ID         string          `json:"id"`
-	ModuleName string          `json:"module_name"`
-	Config     json.RawMessage `json:"config"`
-}
-
-type Config struct {
-	Devices                 []DeviceConfig `json:"devices"`
-	DeviceMutexLockDeadline int            `json:"device_mutex_lock_deadline"`
-	EnableReflection        bool           `json:"enable_reflection"`
-	Debug                   bool           `json:"debug"`
-}
-
-func (d *Daemon) readConf(filePath string) (*Config, error) {
-	config := &Config{}
-	config_data, err := os.ReadFile(filePath)
-	if err != nil {
-		return config, err
-	}
-	err = json.Unmarshal(config_data, config)
-	return config, err
-}
-
-func (d *Daemon) loadDevices(devices *irdevice.IRDevices, devsConf []DeviceConfig) (err error) {
-	for _, devConf := range devsConf {
-
+func (h *Handler) DeviceFactory() (controllers.IRDevice, error) {
+	var err error = nil
+	devices := devices.NewIRDevices()
+	for _, devConf := range h.devsConf {
 		module, ok := modules.Modules[devConf.ModuleName]
 		if !ok {
 			err = errors.Join(err, fmt.Errorf("module \"%s\" not found", devConf.ModuleName))
@@ -73,34 +51,17 @@ func (d *Daemon) loadDevices(devices *irdevice.IRDevices, devsConf []DeviceConfi
 			err = errors.Join(err, _err)
 			continue
 		}
-		d.logger.Info(
+		h.logger.Info(
 			"device loaded",
 			"module name", devConf.ModuleName,
 			"device name", devConf.Name,
 			"device id", devConf.ID,
 		)
 	}
-	return err
+	return devices, err
 }
 
-func New(configPath string) (d *Daemon, err error) {
-	d = &Daemon{}
-
-	level := new(slog.LevelVar)
-	handler := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
-		Level: level,
-	})
-	d.logger = slog.New(handler)
-
-	//load config file
-	config, err := d.readConf(configPath)
-	if err != nil {
-		d.logger.Error("faild to read config file",
-			"config file path", configPath,
-			"error", err.Error())
-		return d, err
-	}
-
+func (h *Handler) RepositoryFactory() (gateways.Repository, error) {
 	homeDirectory, err := os.UserHomeDir()
 	if err != nil {
 		panic(fmt.Errorf("faild to get home directory: %w", err))
@@ -110,45 +71,45 @@ func New(configPath string) (d *Daemon, err error) {
 	if err != nil {
 		panic(fmt.Errorf("faild to create repository: %w", err))
 	}
-
-	devices := irdevice.NewIRDevices()
-	err = d.loadDevices(devices, config.Devices)
-	if err != nil {
-		d.logger.Error("faild to load plugin(s)",
-			"error", err.Error())
-	}
-
-	d.i = interactor.NewInteractor(repo, devices)
-	return d, nil
+	return repo, err
 }
 
-// run until signal comes
-func (d *Daemon) Start(domainSocket string) error {
-	listener, err := net.Listen("unix", domainSocket)
+func (h *Handler) BoudaryFactory(device controllers.IRDevice, repo gateways.Repository) (boundary.Boundary, error) {
+	return interactor.NewInteractor(repo, device), nil
+}
+
+func (h *Handler) EntryPoint(boundary boundary.Boundary) {
+	s, err := web.NewUnixDomainServer("./pirem_sock", boundary)
 	if err != nil {
-		d.logger.Error("faild to make a socket", "error", err)
-		return err
+		return
 	}
-
-	err = os.Chmod(domainSocket, 0770)
-	if err != nil {
-		d.logger.Error("faild to change permisson", "error", err)
-		return err
-	}
-
-	server := web.NewServer(listener, d.i)
-
-	go server.StartListen()
-	d.logger.Info(
+	go s.StartListen()
+	h.logger.Info(
 		"daemon started",
-		"unix domain socket path", domainSocket,
+		"unix domain socket path", "./pirem_sock",
 	)
-
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
-	server.Quit()
-	d.logger.Info("shutting down daemon...")
-	d.logger.Info("stopped daemon")
-	return nil
+	h.logger.Info("shutting down daemon...")
+	s.Quit()
+	h.logger.Info("daemon stopped")
+}
+
+func NewDaemon(confFile string) *Registry {
+	level := new(slog.LevelVar)
+	handler := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+		Level: level,
+	})
+	var logger logger.Logger = slog.New(handler)
+	config, err := config.ReadConfig(confFile)
+	if err != nil {
+		logger.Error("faild to read config file", "file_path", confFile)
+	}
+	r := NewRegistry(&Handler{
+		logger:   logger,
+		devsConf: config.Devices,
+	})
+	r.SolveDependencies()
+	return r
 }
