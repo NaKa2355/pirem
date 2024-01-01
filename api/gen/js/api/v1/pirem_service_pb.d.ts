@@ -149,6 +149,61 @@ export namespace ListRemotesRequest {
   }
 }
 
+export class CreateRemoteRequest extends jspb.Message {
+  getName(): string;
+  setName(value: string): CreateRemoteRequest;
+
+  getTag(): string;
+  setTag(value: string): CreateRemoteRequest;
+
+  getDeviceId(): string;
+  setDeviceId(value: string): CreateRemoteRequest;
+
+  getButtonsList(): Array<CreateRemoteRequest.CreateButtonRequest>;
+  setButtonsList(value: Array<CreateRemoteRequest.CreateButtonRequest>): CreateRemoteRequest;
+  clearButtonsList(): CreateRemoteRequest;
+  addButtons(value?: CreateRemoteRequest.CreateButtonRequest, index?: number): CreateRemoteRequest.CreateButtonRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): CreateRemoteRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: CreateRemoteRequest): CreateRemoteRequest.AsObject;
+  static serializeBinaryToWriter(message: CreateRemoteRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): CreateRemoteRequest;
+  static deserializeBinaryFromReader(message: CreateRemoteRequest, reader: jspb.BinaryReader): CreateRemoteRequest;
+}
+
+export namespace CreateRemoteRequest {
+  export type AsObject = {
+    name: string,
+    tag: string,
+    deviceId: string,
+    buttonsList: Array<CreateRemoteRequest.CreateButtonRequest.AsObject>,
+  }
+
+  export class CreateButtonRequest extends jspb.Message {
+    getName(): string;
+    setName(value: string): CreateButtonRequest;
+
+    getTag(): string;
+    setTag(value: string): CreateButtonRequest;
+
+    serializeBinary(): Uint8Array;
+    toObject(includeInstance?: boolean): CreateButtonRequest.AsObject;
+    static toObject(includeInstance: boolean, msg: CreateButtonRequest): CreateButtonRequest.AsObject;
+    static serializeBinaryToWriter(message: CreateButtonRequest, writer: jspb.BinaryWriter): void;
+    static deserializeBinary(bytes: Uint8Array): CreateButtonRequest;
+    static deserializeBinaryFromReader(message: CreateButtonRequest, reader: jspb.BinaryReader): CreateButtonRequest;
+  }
+
+  export namespace CreateButtonRequest {
+    export type AsObject = {
+      name: string,
+      tag: string,
+    }
+  }
+
+}
+
 export class ListRemotesResponse extends jspb.Message {
   getRemotesList(): Array<api_v1_remote_pb.Remote>;
   setRemotesList(value: Array<api_v1_remote_pb.Remote>): ListRemotesResponse;

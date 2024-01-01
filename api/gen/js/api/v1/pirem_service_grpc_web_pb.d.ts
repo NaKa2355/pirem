@@ -42,7 +42,7 @@ export class PiRemServiceClient {
   ): grpcWeb.ClientReadableStream<api_v1_device_pb.Device>;
 
   createRemote(
-    request: api_v1_remote_pb.Remote,
+    request: api_v1_pirem_service_pb.CreateRemoteRequest,
     metadata: grpcWeb.Metadata | undefined,
     callback: (err: grpcWeb.RpcError,
                response: api_v1_remote_pb.Remote) => void
@@ -125,7 +125,7 @@ export class PiRemServicePromiseClient {
   ): Promise<api_v1_device_pb.Device>;
 
   createRemote(
-    request: api_v1_remote_pb.Remote,
+    request: api_v1_pirem_service_pb.CreateRemoteRequest,
     metadata?: grpcWeb.Metadata
   ): Promise<api_v1_remote_pb.Remote>;
 

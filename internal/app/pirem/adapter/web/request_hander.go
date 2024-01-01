@@ -7,6 +7,7 @@ import (
 	adapter "github.com/NaKa2355/pirem/internal/app/pirem/adapter/proto"
 	"github.com/NaKa2355/pirem/internal/app/pirem/domain"
 	bdy "github.com/NaKa2355/pirem/internal/app/pirem/usecases/boundary"
+	"github.com/NaKa2355/pirem/utils"
 )
 
 type RequestHander struct {
@@ -14,7 +15,7 @@ type RequestHander struct {
 	api.UnimplementedPiRemServiceServer
 }
 
-func NewRequestHandler(port bdy.Boundary) *RequestHander {
+func NewRequestHandler(port bdy.Boundary) api.PiRemServiceServer {
 	return &RequestHander{
 		port: port,
 	}
@@ -47,38 +48,36 @@ func (h *RequestHander) ReceiveIr(ctx context.Context, req *api.ReceiveIrRequest
 
 func (h *RequestHander) ListDevices(ctx context.Context, req *api.ListDevicesRequest) (*api.ListDevicesResponse, error) {
 	devices, err := h.port.ListDevices(ctx)
-	devicesRes := []*api.Device{}
-	for _, device := range devices {
-		devicesRes = append(devicesRes, &api.Device{
-			Id:              device.ID,
-			Name:            device.Name,
-			CanSend:         device.CanSend,
-			CanReceive:      device.CanReceive,
-			FirmwareVersion: device.FirmwareVersion,
-			DriverVersion:   device.FirmwareVersion,
-		})
-	}
 	return &api.ListDevicesResponse{
-		Devices: devicesRes,
+		Devices: utils.Map(devices, func(d *domain.Device) *api.Device {
+			return &api.Device{
+				Id:              d.ID,
+				Name:            d.Name,
+				CanSend:         d.CanSend,
+				CanReceive:      d.CanReceive,
+				FirmwareVersion: d.FirmwareVersion,
+				DriverVersion:   d.FirmwareVersion,
+			}
+		}),
 	}, err
 }
 
 func (h *RequestHander) GetDevice(ctx context.Context, req *api.GetDeviceRequest) (*api.Device, error) {
-	device, err := h.port.GetDevice(ctx, bdy.GetDeivceInput{
+	d, err := h.port.GetDevice(ctx, bdy.GetDeivceInput{
 		DeviceID: req.DeviceId,
 	})
 	return &api.Device{
-		Id:              device.ID,
-		Name:            device.Name,
-		CanSend:         device.CanSend,
-		CanReceive:      device.CanReceive,
-		FirmwareVersion: device.FirmwareVersion,
-		DriverVersion:   device.FirmwareVersion,
+		Id:              d.ID,
+		Name:            d.Name,
+		CanSend:         d.CanSend,
+		CanReceive:      d.CanReceive,
+		FirmwareVersion: d.FirmwareVersion,
+		DriverVersion:   d.FirmwareVersion,
 	}, err
 }
 
 // remotes
-func (h *RequestHander) CreateRemote(ctx context.Context, req *api.Remote) (res *api.Remote, err error) {
+func (h *RequestHander) CreateRemote(ctx context.Context, req *api.CreateRemoteRequest) (res *api.Remote, err error) {
 	name, err := domain.NewRemoteName(req.Name)
 	if err != nil {
 		return
@@ -101,14 +100,29 @@ func (h *RequestHander) CreateRemote(ctx context.Context, req *api.Remote) (res 
 		})
 	}
 
-	remote, err := h.port.CreateRemote(ctx, bdy.CreateRemoteInput{
+	r, err := h.port.CreateRemote(ctx, bdy.CreateRemoteInput{
 		Name:     name,
 		Tag:      req.Tag,
 		DeviveID: req.DeviceId,
 		Buttons:  buttons,
 	})
-	req.Id = string(remote.ID)
-	return req, err
+
+	return &api.Remote{
+		Id:       string(r.ID),
+		Name:     string(r.Name),
+		DeviceId: r.DeviceID,
+		Tag:      r.Tag,
+		Buttons: utils.Map(r.Buttons,
+			func(b *domain.Button) *api.Remote_Button {
+				return &api.Remote_Button{
+					Id:        string(b.ID),
+					Name:      string(b.Name),
+					Tag:       string(b.Tag),
+					HasIrData: b.IRData != nil,
+				}
+			},
+		),
+	}, err
 }
 
 func (h *RequestHander) ListRemotes(ctx context.Context, req *api.ListRemotesRequest) (res *api.ListRemotesResponse, err error) {
@@ -116,46 +130,52 @@ func (h *RequestHander) ListRemotes(ctx context.Context, req *api.ListRemotesReq
 	if err != nil {
 		return
 	}
-	res = &api.ListRemotesResponse{}
-	for _, remote := range remotes {
-		buttonsRes := []*api.Remote_Button{}
-		for _, button := range remote.Buttons {
-			buttonsRes = append(buttonsRes, &api.Remote_Button{
-				Id:        string(button.ID),
-				Name:      string(button.Name),
-				Tag:       string(button.Tag),
-				HasIrData: button.IRData != nil,
-			})
-		}
-		res.Remotes = append(res.Remotes, &api.Remote{
-			Buttons: buttonsRes,
-		})
-	}
-	return
+	return &api.ListRemotesResponse{
+		Remotes: utils.Map(remotes,
+			func(r *domain.Remote) *api.Remote {
+				return &api.Remote{
+					Id:       string(r.ID),
+					Tag:      r.Tag,
+					DeviceId: r.DeviceID,
+					Buttons: utils.Map(r.Buttons,
+						func(b *domain.Button) *api.Remote_Button {
+							return &api.Remote_Button{
+								Id:        string(b.ID),
+								Name:      string(b.Name),
+								Tag:       string(b.Tag),
+								HasIrData: b.IRData != nil,
+							}
+						},
+					),
+				}
+			},
+		),
+	}, nil
 }
 
 func (h *RequestHander) GetRemote(ctx context.Context, req *api.GetRemoteRequest) (res *api.Remote, err error) {
-	remote, err := h.port.GetRemote(ctx, bdy.GetRemoteInput{
+	r, err := h.port.GetRemote(ctx, bdy.GetRemoteInput{
 		RemoteID: domain.RemoteID(req.RemoteId),
 	})
 	if err != nil {
 		return
 	}
 
-	buttonsRes := []*api.Remote_Button{}
-	for _, button := range remote.Buttons {
-		buttonsRes = append(buttonsRes, &api.Remote_Button{
-			Id:        string(button.ID),
-			Name:      string(button.Name),
-			Tag:       string(button.Tag),
-			HasIrData: button.IRData != nil,
-		})
-	}
-	res = &api.Remote{
-		Buttons: buttonsRes,
-	}
-
-	return
+	return &api.Remote{
+		Id:       string(r.ID),
+		Tag:      r.Tag,
+		DeviceId: r.DeviceID,
+		Buttons: utils.Map(r.Buttons,
+			func(b *domain.Button) *api.Remote_Button {
+				return &api.Remote_Button{
+					Id:        string(b.ID),
+					Name:      string(b.Name),
+					Tag:       string(b.Tag),
+					HasIrData: b.IRData != nil,
+				}
+			},
+		),
+	}, nil
 }
 
 func (h *RequestHander) UpdateRemote(ctx context.Context, req *api.UpdateRemoteRequest) (res *api.Empty, err error) {
@@ -179,17 +199,17 @@ func (h *RequestHander) DeleteRemote(ctx context.Context, req *api.DeleteRemoteR
 
 // buttons
 func (h *RequestHander) GetButton(ctx context.Context, req *api.GetButtonRequest) (res *api.Button, err error) {
-	button, err := h.port.GetButton(ctx, bdy.GetButtonInput{
+	b, err := h.port.GetButton(ctx, bdy.GetButtonInput{
 		ButtonID: domain.ButtonID(req.ButtonId),
 	})
 	if err != nil {
 		return
 	}
 	return &api.Button{
-		Id:     string(button.ID),
-		Name:   string(button.Name),
-		Tag:    string(button.Name),
-		IrData: adapter.MarshalIRData(button.IRData),
+		Id:     string(b.ID),
+		Name:   string(b.Name),
+		Tag:    string(b.Name),
+		IrData: adapter.MarshalIRData(b.IRData),
 	}, err
 }
 

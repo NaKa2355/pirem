@@ -9,11 +9,9 @@ message RawIrData {
     repeated uint32 on_off_pluse_ns = 2;
 }
 
-message None {}
 
 message IrData {
     oneof data {
         RawIrData raw = 1;
-        None none = 2;
     }
 }

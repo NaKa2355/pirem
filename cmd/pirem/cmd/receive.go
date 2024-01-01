@@ -47,7 +47,6 @@ func progress(progChan chan any) {
 	for {
 		select {
 		case <-progChan:
-			fmt.Println()
 			return
 		case <-t.C:
 			fmt.Print(".")
@@ -100,11 +99,14 @@ func cmd(cmd *cobra.Command, args []string) error {
 			return err
 		}
 	} else {
+		if progFlag.Changed {
+			fmt.Println("")
+		}
 		binary.Write(os.Stdout, binary.LittleEndian, result)
 	}
 
 	if progFlag.Changed {
-		fmt.Println("\nReceived IR signal!")
+		fmt.Println("Received IR signal!")
 	}
 	return nil
 }

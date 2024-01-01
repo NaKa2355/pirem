@@ -40,7 +40,7 @@ func MakeConnection(protocol string, addr string) (*grpc.ClientConn, pirem.PiRem
 }
 
 func MarshalToString(m protoreflect.ProtoMessage) (string, error) {
-	op := protojson.MarshalOptions{Indent: "  "}
+	op := protojson.MarshalOptions{Indent: "  ", UseProtoNames: true}
 	raw, err := op.Marshal(m)
 	if err != nil {
 		return "", err

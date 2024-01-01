@@ -28,7 +28,7 @@ type PiRemServiceClient interface {
 	ListDevices(ctx context.Context, in *ListDevicesRequest, opts ...grpc.CallOption) (*ListDevicesResponse, error)
 	GetDevice(ctx context.Context, in *GetDeviceRequest, opts ...grpc.CallOption) (*Device, error)
 	// remotes
-	CreateRemote(ctx context.Context, in *Remote, opts ...grpc.CallOption) (*Remote, error)
+	CreateRemote(ctx context.Context, in *CreateRemoteRequest, opts ...grpc.CallOption) (*Remote, error)
 	ListRemotes(ctx context.Context, in *ListRemotesRequest, opts ...grpc.CallOption) (*ListRemotesResponse, error)
 	GetRemote(ctx context.Context, in *GetRemoteRequest, opts ...grpc.CallOption) (*Remote, error)
 	UpdateRemote(ctx context.Context, in *UpdateRemoteRequest, opts ...grpc.CallOption) (*Empty, error)
@@ -83,7 +83,7 @@ func (c *piRemServiceClient) GetDevice(ctx context.Context, in *GetDeviceRequest
 	return out, nil
 }
 
-func (c *piRemServiceClient) CreateRemote(ctx context.Context, in *Remote, opts ...grpc.CallOption) (*Remote, error) {
+func (c *piRemServiceClient) CreateRemote(ctx context.Context, in *CreateRemoteRequest, opts ...grpc.CallOption) (*Remote, error) {
 	out := new(Remote)
 	err := c.cc.Invoke(ctx, "/pirem.PiRemService/CreateRemote", in, out, opts...)
 	if err != nil {
@@ -165,7 +165,7 @@ type PiRemServiceServer interface {
 	ListDevices(context.Context, *ListDevicesRequest) (*ListDevicesResponse, error)
 	GetDevice(context.Context, *GetDeviceRequest) (*Device, error)
 	// remotes
-	CreateRemote(context.Context, *Remote) (*Remote, error)
+	CreateRemote(context.Context, *CreateRemoteRequest) (*Remote, error)
 	ListRemotes(context.Context, *ListRemotesRequest) (*ListRemotesResponse, error)
 	GetRemote(context.Context, *GetRemoteRequest) (*Remote, error)
 	UpdateRemote(context.Context, *UpdateRemoteRequest) (*Empty, error)
@@ -193,7 +193,7 @@ func (UnimplementedPiRemServiceServer) ListDevices(context.Context, *ListDevices
 func (UnimplementedPiRemServiceServer) GetDevice(context.Context, *GetDeviceRequest) (*Device, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetDevice not implemented")
 }
-func (UnimplementedPiRemServiceServer) CreateRemote(context.Context, *Remote) (*Remote, error) {
+func (UnimplementedPiRemServiceServer) CreateRemote(context.Context, *CreateRemoteRequest) (*Remote, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateRemote not implemented")
 }
 func (UnimplementedPiRemServiceServer) ListRemotes(context.Context, *ListRemotesRequest) (*ListRemotesResponse, error) {
@@ -303,7 +303,7 @@ func _PiRemService_GetDevice_Handler(srv interface{}, ctx context.Context, dec f
 }
 
 func _PiRemService_CreateRemote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Remote)
+	in := new(CreateRemoteRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -315,7 +315,7 @@ func _PiRemService_CreateRemote_Handler(srv interface{}, ctx context.Context, de
 		FullMethod: "/pirem.PiRemService/CreateRemote",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PiRemServiceServer).CreateRemote(ctx, req.(*Remote))
+		return srv.(PiRemServiceServer).CreateRemote(ctx, req.(*CreateRemoteRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

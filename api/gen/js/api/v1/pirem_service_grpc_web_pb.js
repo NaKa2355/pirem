@@ -331,16 +331,16 @@ proto.pirem.PiRemServicePromiseClient.prototype.getDevice =
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
- *   !proto.pirem.Remote,
+ *   !proto.pirem.CreateRemoteRequest,
  *   !proto.pirem.Remote>}
  */
 const methodDescriptor_PiRemService_CreateRemote = new grpc.web.MethodDescriptor(
   '/pirem.PiRemService/CreateRemote',
   grpc.web.MethodType.UNARY,
-  api_v1_remote_pb.Remote,
+  proto.pirem.CreateRemoteRequest,
   api_v1_remote_pb.Remote,
   /**
-   * @param {!proto.pirem.Remote} request
+   * @param {!proto.pirem.CreateRemoteRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
@@ -351,7 +351,7 @@ const methodDescriptor_PiRemService_CreateRemote = new grpc.web.MethodDescriptor
 
 
 /**
- * @param {!proto.pirem.Remote} request The
+ * @param {!proto.pirem.CreateRemoteRequest} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
@@ -372,7 +372,7 @@ proto.pirem.PiRemServiceClient.prototype.createRemote =
 
 
 /**
- * @param {!proto.pirem.Remote} request The
+ * @param {!proto.pirem.CreateRemoteRequest} request The
  *     request proto
  * @param {?Object<string, string>=} metadata User defined
  *     call metadata

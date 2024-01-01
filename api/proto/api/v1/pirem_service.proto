@@ -45,6 +45,17 @@ message GetDeviceRequest {
 message ListRemotesRequest {
 }
 
+message CreateRemoteRequest {
+    message CreateButtonRequest {
+        string name = 1;
+        string tag = 2;
+    }
+    string name = 1;
+    string tag = 2;
+    string device_id = 3;
+    repeated CreateButtonRequest buttons = 4;
+}
+
 message ListRemotesResponse {
     repeated Remote remotes = 1;
 }
@@ -84,7 +95,7 @@ service PiRemService {
     rpc GetDevice(GetDeviceRequest) returns (Device) {}
 
     // remotes
-    rpc CreateRemote(Remote) returns (Remote) {}
+    rpc CreateRemote(CreateRemoteRequest) returns (Remote) {}
     rpc ListRemotes(ListRemotesRequest) returns (ListRemotesResponse) {}
     rpc GetRemote(GetRemoteRequest) returns (Remote) {}
     rpc UpdateRemote(UpdateRemoteRequest) returns (Empty) {}

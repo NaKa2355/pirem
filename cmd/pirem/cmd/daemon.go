@@ -11,6 +11,7 @@ import (
 	"syscall"
 
 	"github.com/NaKa2355/pirem/config"
+	int_cmd "github.com/NaKa2355/pirem/internal/app/pirem/cmd"
 	"github.com/NaKa2355/pirem/internal/app/pirem/infra/db"
 	"github.com/NaKa2355/pirem/internal/app/pirem/infra/devices"
 	"github.com/NaKa2355/pirem/internal/app/pirem/infra/web"
@@ -26,49 +27,66 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const ConfigFilePath = "/etc/piremd.json"
+const configFilePath = "/etc/piremd.json"
+const serviceFilePath = "/lib/systemd/system/piremd.service"
+const socketFilePath = int_cmd.DomainSocketPath
+const longDiscribe = "execute as daemon.\nconfig file path(default) " +
+	configFilePath +
+	"\nservice file path: " + serviceFilePath +
+	"\nsocket file path: " + socketFilePath
 
 // daemonCmd represents the daemon command
 var daemonCmd = &cobra.Command{
 	Use:   "daemon",
 	Short: "execute as daemon",
-	Long: `execute as daemon. 
-	config file: /etc/piremd.json
-	service file: /lib/systemd/system/piremd.service
-	socket file: /tmp/pirem.sock`,
+	Long:  longDiscribe,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return startDaemon()
+		configFilePath, err := cmd.Flags().GetString("config")
+		if err != nil {
+			return err
+		}
+		return startDaemon(configFilePath)
 	},
 }
 
-func startDaemon() error {
+func startDaemon(configFilePath string) error {
 	level := new(slog.LevelVar)
 	handler := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
 		Level: level,
 	})
 	var logger logger.Logger = slog.New(handler)
-	config, err := config.ReadConfig(ConfigFilePath)
+	config, err := config.ReadConfig(configFilePath)
 	if err != nil {
-		logger.Error("faild to read config file", "file_path", ConfigFilePath)
+		logger.Error("faild to read config file",
+			"file_path", configFilePath,
+			"error", err,
+		)
+		return err
 	}
 	r := registry.NewRegistry(&Handler{
-		logger:   logger,
-		devsConf: config.Devices,
+		logger: logger,
+		config: config,
 	})
-	r.SolveDependencies()
+	err = r.SolveDependencies()
+	if err != nil {
+		logger.Error("faild to solve dependencies",
+			"error", err,
+		)
+		return err
+	}
 	r.Start()
 	return nil
 }
 
 type Handler struct {
-	logger   logger.Logger
-	devsConf []config.DeviceConfig
+	logger logger.Logger
+	config *config.Config
 }
 
 func (h *Handler) DeviceFactory() (controllers.IRDevice, error) {
 	var err error = nil
 	devices := devices.NewIRDevices()
-	for _, devConf := range h.devsConf {
+	for _, devConf := range h.config.Devices {
 		module, ok := modules.Modules[devConf.ModuleName]
 		if !ok {
 			err = errors.Join(err, fmt.Errorf("module \"%s\" not found", devConf.ModuleName))
@@ -114,14 +132,14 @@ func (h *Handler) BoudaryFactory(device controllers.IRDevice, repo gateways.Repo
 }
 
 func (h *Handler) EntryPoint(boundary boundary.Boundary) {
-	s, err := web.NewUnixDomainServer("./pirem_sock", boundary)
+	s, err := web.NewUnixDomainServer(socketFilePath, boundary)
 	if err != nil {
 		return
 	}
 	go s.StartListen()
 	h.logger.Info(
 		"daemon started",
-		"unix domain socket path", "./pirem_sock",
+		"unix domain socket path", socketFilePath,
 	)
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
@@ -133,7 +151,7 @@ func (h *Handler) EntryPoint(boundary boundary.Boundary) {
 
 func init() {
 	rootCmd.AddCommand(daemonCmd)
-
+	daemonCmd.Flags().String("config", configFilePath, "config file path")
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

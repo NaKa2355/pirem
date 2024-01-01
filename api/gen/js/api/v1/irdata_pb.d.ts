@@ -26,30 +26,11 @@ export namespace RawIrData {
   }
 }
 
-export class None extends jspb.Message {
-  serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): None.AsObject;
-  static toObject(includeInstance: boolean, msg: None): None.AsObject;
-  static serializeBinaryToWriter(message: None, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): None;
-  static deserializeBinaryFromReader(message: None, reader: jspb.BinaryReader): None;
-}
-
-export namespace None {
-  export type AsObject = {
-  }
-}
-
 export class IrData extends jspb.Message {
   getRaw(): RawIrData | undefined;
   setRaw(value?: RawIrData): IrData;
   hasRaw(): boolean;
   clearRaw(): IrData;
-
-  getNone(): None | undefined;
-  setNone(value?: None): IrData;
-  hasNone(): boolean;
-  clearNone(): IrData;
 
   getDataCase(): IrData.DataCase;
 
@@ -64,13 +45,11 @@ export class IrData extends jspb.Message {
 export namespace IrData {
   export type AsObject = {
     raw?: RawIrData.AsObject,
-    none?: None.AsObject,
   }
 
   export enum DataCase { 
     DATA_NOT_SET = 0,
     RAW = 1,
-    NONE = 2,
   }
 }
 
