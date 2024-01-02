@@ -7,7 +7,6 @@ const (
 	CodeTimeout
 	CodeBusy
 	CodeUnknown
-	CodeDeviceNotFound
 	CodeNotSupported
 
 	CodeNotFound

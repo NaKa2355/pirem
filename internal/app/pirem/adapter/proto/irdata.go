@@ -12,9 +12,14 @@ type domainIRData struct {
 }
 
 func (data *domainIRData) ConvertToRaw() *domain.RawData {
-	return &domain.RawData{
-		CarrierFreqKiloHz: data.Data.GetRaw().CarrierFreqKhz,
-		PluseNanoSec:      data.Data.GetRaw().OnOffPluseNs,
+	switch irData := data.Data.Data.(type) {
+	case *api.IrData_Raw:
+		return &domain.RawData{
+			CarrierFreqKiloHz: irData.Raw.CarrierFreqKhz,
+			PluseNanoSec:      irData.Raw.OnOffPluseNs,
+		}
+	default:
+		return &domain.RawData{}
 	}
 }
 
@@ -40,7 +45,7 @@ func UnmarshalBinaryIRData(from []byte) (domain.IRData, error) {
 	data := &anypb.Any{}
 	err := proto.Unmarshal(from, data)
 	if err != nil {
-		return nil, err
+		return &domain.RawData{}, err
 	}
 	protoIRData := &api.IrData{}
 	err = anypb.UnmarshalTo(data, protoIRData, proto.UnmarshalOptions{})
@@ -51,7 +56,7 @@ func MarshalIRDataToBinary(from domain.IRData) ([]byte, error) {
 	data := &anypb.Any{}
 	err := anypb.MarshalFrom(data, MarshalIRData(from), proto.MarshalOptions{})
 	if err != nil {
-		return nil, err
+		return []byte{}, err
 	}
 	return proto.Marshal(data)
 }

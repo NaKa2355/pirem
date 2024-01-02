@@ -83,7 +83,7 @@ func (devices *IRDevices) ReadDevice(ctx context.Context, id domain.DeviceID) (r
 	defer devices.mu.RUnlock()
 	fetchedDevice, ok := devices.devices[id]
 	if !ok {
-		return &domain.Device{}, usecases.WrapError(usecases.CodeDeviceNotFound, ErrDeviceNotFound)
+		return &domain.Device{}, usecases.WrapError(usecases.CodeNotFound, ErrDeviceNotFound)
 	}
 	info := fetchedDevice.info
 
@@ -103,7 +103,7 @@ func (devices *IRDevices) SendIR(ctx context.Context, deviceID domain.DeviceID, 
 	defer devices.mu.RUnlock()
 	device, ok := devices.devices[deviceID]
 	if !ok {
-		return usecases.WrapError(usecases.CodeDeviceNotFound, ErrDeviceNotFound)
+		return usecases.WrapError(usecases.CodeNotFound, ErrDeviceNotFound)
 	}
 	rawIR := data.ConvertToRaw()
 	return device.SendIR(ctx, &module.IRData{
@@ -118,7 +118,7 @@ func (devices *IRDevices) ReceiveIR(ctx context.Context, deviceID domain.DeviceI
 	defer devices.mu.RUnlock()
 	device, ok := devices.devices[deviceID]
 	if !ok {
-		return nil, usecases.WrapError(usecases.CodeDeviceNotFound, ErrDeviceNotFound)
+		return nil, usecases.WrapError(usecases.CodeNotFound, ErrDeviceNotFound)
 	}
 	d, err := device.ReceiveIR(ctx)
 	return adapter.UnMarshalIRData(d), err

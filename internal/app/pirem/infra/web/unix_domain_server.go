@@ -20,7 +20,7 @@ type UnixDomainServer struct {
 
 func NewUnixDomainServer(domainSocketPath string, boundary boundary.Boundary, enableReflection bool) (controllers.Web, error) {
 	handler := adapter.NewRequestHandler(boundary)
-	gs := grpc.NewServer()
+	gs := grpc.NewServer(grpc.UnaryInterceptor(adapter.ErrorUnaryServerInterceptor))
 	pirem.RegisterPiRemServiceServer(gs, handler)
 	if enableReflection {
 		reflection.Register(gs)
