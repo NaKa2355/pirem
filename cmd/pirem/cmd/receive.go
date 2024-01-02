@@ -27,7 +27,7 @@ var receiveCmd = &cobra.Command{
 
 func receiveRawIr(deviceId string) (*pirem.IrData, error) {
 	var irData *pirem.IrData
-	conn, client, err := int_cmd.MakeConnection(int_cmd.Protocol, int_cmd.DomainSocketPath)
+	conn, client, err := MakeConnection(Protocol, DomainSocketPath)
 	if err != nil {
 		return irData, err
 	}
@@ -80,7 +80,7 @@ func cmd(cmd *cobra.Command, args []string) error {
 	}
 
 	if jsonFlag.Changed {
-		jsonStr, _ := int_cmd.MarshalToString(irData)
+		jsonStr, _ := MarshalToString(irData)
 		jsonStr += "\n"
 		result = []byte(jsonStr)
 	} else {

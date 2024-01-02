@@ -62,6 +62,9 @@ func startDaemon(configFilePath string) error {
 		)
 		return err
 	}
+	if config.Debug {
+		level.Set(slog.LevelDebug)
+	}
 	r := registry.NewRegistry(&Handler{
 		logger: logger,
 		config: config,
@@ -131,7 +134,7 @@ func (h *Handler) BoudaryFactory(device controllers.IRDevice, repo gateways.Repo
 }
 
 func (h *Handler) EntryPoint(boundary boundary.Boundary) {
-	s, err := web.NewUnixDomainServer(socketFilePath, boundary, h.config.EnableReflection)
+	s, err := web.NewUnixDomainServer(socketFilePath, boundary, h.config.EnableReflection, h.logger)
 	if err != nil {
 		return
 	}

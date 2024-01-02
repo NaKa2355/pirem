@@ -9,6 +9,7 @@ import (
 	adapter "github.com/NaKa2355/pirem/internal/app/pirem/adapter/web"
 	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/boundary"
 	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/controllers"
+	"github.com/NaKa2355/pirem/pkg/logger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -18,9 +19,14 @@ type UnixDomainServer struct {
 	path string
 }
 
-func NewUnixDomainServer(domainSocketPath string, boundary boundary.Boundary, enableReflection bool) (controllers.Web, error) {
+func NewUnixDomainServer(domainSocketPath string, boundary boundary.Boundary, enableReflection bool, logger logger.Logger) (controllers.Web, error) {
 	handler := adapter.NewRequestHandler(boundary)
-	gs := grpc.NewServer(grpc.UnaryInterceptor(adapter.ErrorUnaryServerInterceptor))
+	gs := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(
+			adapter.LoggingUnaryServerInterceptor(logger),
+			adapter.ErrorUnaryServerInterceptor,
+		),
+	)
 	pirem.RegisterPiRemServiceServer(gs, handler)
 	if enableReflection {
 		reflection.Register(gs)
