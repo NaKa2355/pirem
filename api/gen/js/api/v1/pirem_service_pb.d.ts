@@ -346,3 +346,45 @@ export namespace PushButtonRequest {
   }
 }
 
+export class GetIrDataRequest extends jspb.Message {
+  getButtonId(): string;
+  setButtonId(value: string): GetIrDataRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): GetIrDataRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: GetIrDataRequest): GetIrDataRequest.AsObject;
+  static serializeBinaryToWriter(message: GetIrDataRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): GetIrDataRequest;
+  static deserializeBinaryFromReader(message: GetIrDataRequest, reader: jspb.BinaryReader): GetIrDataRequest;
+}
+
+export namespace GetIrDataRequest {
+  export type AsObject = {
+    buttonId: string,
+  }
+}
+
+export class GetIrDataResponse extends jspb.Message {
+  getIrData(): api_v1_irdata_pb.IrData | undefined;
+  setIrData(value?: api_v1_irdata_pb.IrData): GetIrDataResponse;
+  hasIrData(): boolean;
+  clearIrData(): GetIrDataResponse;
+
+  getDeviceId(): string;
+  setDeviceId(value: string): GetIrDataResponse;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): GetIrDataResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: GetIrDataResponse): GetIrDataResponse.AsObject;
+  static serializeBinaryToWriter(message: GetIrDataResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): GetIrDataResponse;
+  static deserializeBinaryFromReader(message: GetIrDataResponse, reader: jspb.BinaryReader): GetIrDataResponse;
+}
+
+export namespace GetIrDataResponse {
+  export type AsObject = {
+    irData?: api_v1_irdata_pb.IrData.AsObject,
+    deviceId: string,
+  }
+}
+

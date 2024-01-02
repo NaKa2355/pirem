@@ -97,6 +97,13 @@ export class PiRemServiceClient {
                response: api_v1_empty_pb.Empty) => void
   ): grpcWeb.ClientReadableStream<api_v1_empty_pb.Empty>;
 
+  getIrData(
+    request: api_v1_pirem_service_pb.GetIrDataRequest,
+    metadata: grpcWeb.Metadata | undefined,
+    callback: (err: grpcWeb.RpcError,
+               response: api_v1_pirem_service_pb.GetIrDataResponse) => void
+  ): grpcWeb.ClientReadableStream<api_v1_pirem_service_pb.GetIrDataResponse>;
+
 }
 
 export class PiRemServicePromiseClient {
@@ -163,6 +170,11 @@ export class PiRemServicePromiseClient {
     request: api_v1_pirem_service_pb.PushButtonRequest,
     metadata?: grpcWeb.Metadata
   ): Promise<api_v1_empty_pb.Empty>;
+
+  getIrData(
+    request: api_v1_pirem_service_pb.GetIrDataRequest,
+    metadata?: grpcWeb.Metadata
+  ): Promise<api_v1_pirem_service_pb.GetIrDataResponse>;
 
 }
 

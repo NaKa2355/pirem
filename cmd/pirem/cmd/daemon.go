@@ -132,7 +132,7 @@ func (h *Handler) BoudaryFactory(device controllers.IRDevice, repo gateways.Repo
 }
 
 func (h *Handler) EntryPoint(boundary boundary.Boundary) {
-	s, err := web.NewUnixDomainServer(socketFilePath, boundary)
+	s, err := web.NewUnixDomainServer(socketFilePath, boundary, h.config.EnableReflection)
 	if err != nil {
 		return
 	}

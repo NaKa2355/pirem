@@ -816,5 +816,66 @@ proto.pirem.PiRemServicePromiseClient.prototype.pushButton =
 };
 
 
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
+ *   !proto.pirem.GetIrDataRequest,
+ *   !proto.pirem.GetIrDataResponse>}
+ */
+const methodDescriptor_PiRemService_GetIrData = new grpc.web.MethodDescriptor(
+  '/pirem.PiRemService/GetIrData',
+  grpc.web.MethodType.UNARY,
+  proto.pirem.GetIrDataRequest,
+  proto.pirem.GetIrDataResponse,
+  /**
+   * @param {!proto.pirem.GetIrDataRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.pirem.GetIrDataResponse.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.pirem.GetIrDataRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.pirem.GetIrDataResponse)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.pirem.GetIrDataResponse>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.pirem.PiRemServiceClient.prototype.getIrData =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/pirem.PiRemService/GetIrData',
+      request,
+      metadata || {},
+      methodDescriptor_PiRemService_GetIrData,
+      callback);
+};
+
+
+/**
+ * @param {!proto.pirem.GetIrDataRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.pirem.GetIrDataResponse>}
+ *     Promise that resolves to the response
+ */
+proto.pirem.PiRemServicePromiseClient.prototype.getIrData =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/pirem.PiRemService/GetIrData',
+      request,
+      metadata || {},
+      methodDescriptor_PiRemService_GetIrData);
+};
+
+
 module.exports = proto.pirem;
 

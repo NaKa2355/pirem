@@ -75,12 +75,12 @@ func SelectFromRemotes(ctx context.Context, tx *sql.Tx) (remotes []*domain.Remot
 	remotes = make([]*domain.Remote, 0, count)
 
 	for rows.Next() {
-		r := domain.Remote{}
+		r := &domain.Remote{}
 		err = rows.Scan(&r.ID, &r.Name, &r.DeviceID, &r.Tag)
 		if err != nil {
 			return
 		}
-		remotes = append(remotes, &r)
+		remotes = append(remotes, r)
 	}
 
 	return remotes, err

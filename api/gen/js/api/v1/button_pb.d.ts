@@ -13,10 +13,8 @@ export class Button extends jspb.Message {
   getTag(): string;
   setTag(value: string): Button;
 
-  getIrData(): api_v1_irdata_pb.IrData | undefined;
-  setIrData(value?: api_v1_irdata_pb.IrData): Button;
-  hasIrData(): boolean;
-  clearIrData(): Button;
+  getHasIrData(): boolean;
+  setHasIrData(value: boolean): Button;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): Button.AsObject;
@@ -31,7 +29,7 @@ export namespace Button {
     id: string,
     name: string,
     tag: string,
-    irData?: api_v1_irdata_pb.IrData.AsObject,
+    hasIrData: boolean,
   }
 }
 

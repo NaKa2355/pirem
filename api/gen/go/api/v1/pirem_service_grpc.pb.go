@@ -37,6 +37,8 @@ type PiRemServiceClient interface {
 	GetButton(ctx context.Context, in *GetButtonRequest, opts ...grpc.CallOption) (*Button, error)
 	LearnIrData(ctx context.Context, in *LearnIrDataRequest, opts ...grpc.CallOption) (*Empty, error)
 	PushButton(ctx context.Context, in *PushButtonRequest, opts ...grpc.CallOption) (*Empty, error)
+	// irdata
+	GetIrData(ctx context.Context, in *GetIrDataRequest, opts ...grpc.CallOption) (*GetIrDataResponse, error)
 }
 
 type piRemServiceClient struct {
@@ -155,6 +157,15 @@ func (c *piRemServiceClient) PushButton(ctx context.Context, in *PushButtonReque
 	return out, nil
 }
 
+func (c *piRemServiceClient) GetIrData(ctx context.Context, in *GetIrDataRequest, opts ...grpc.CallOption) (*GetIrDataResponse, error) {
+	out := new(GetIrDataResponse)
+	err := c.cc.Invoke(ctx, "/pirem.PiRemService/GetIrData", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PiRemServiceServer is the server API for PiRemService service.
 // All implementations must embed UnimplementedPiRemServiceServer
 // for forward compatibility
@@ -174,6 +185,8 @@ type PiRemServiceServer interface {
 	GetButton(context.Context, *GetButtonRequest) (*Button, error)
 	LearnIrData(context.Context, *LearnIrDataRequest) (*Empty, error)
 	PushButton(context.Context, *PushButtonRequest) (*Empty, error)
+	// irdata
+	GetIrData(context.Context, *GetIrDataRequest) (*GetIrDataResponse, error)
 	mustEmbedUnimplementedPiRemServiceServer()
 }
 
@@ -216,6 +229,9 @@ func (UnimplementedPiRemServiceServer) LearnIrData(context.Context, *LearnIrData
 }
 func (UnimplementedPiRemServiceServer) PushButton(context.Context, *PushButtonRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PushButton not implemented")
+}
+func (UnimplementedPiRemServiceServer) GetIrData(context.Context, *GetIrDataRequest) (*GetIrDataResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetIrData not implemented")
 }
 func (UnimplementedPiRemServiceServer) mustEmbedUnimplementedPiRemServiceServer() {}
 
@@ -446,6 +462,24 @@ func _PiRemService_PushButton_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PiRemService_GetIrData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetIrDataRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PiRemServiceServer).GetIrData(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pirem.PiRemService/GetIrData",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PiRemServiceServer).GetIrData(ctx, req.(*GetIrDataRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PiRemService_ServiceDesc is the grpc.ServiceDesc for PiRemService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -500,6 +534,10 @@ var PiRemService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "PushButton",
 			Handler:    _PiRemService_PushButton_Handler,
+		},
+		{
+			MethodName: "GetIrData",
+			Handler:    _PiRemService_GetIrData_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

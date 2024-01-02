@@ -13,5 +13,5 @@ message Button {
     
     string tag = 3;
     
-    IrData ir_data = 4;
+    bool has_ir_data = 4;
 }

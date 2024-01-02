@@ -3,7 +3,6 @@ package queries
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 
 	adapter "github.com/NaKa2355/pirem/internal/app/pirem/adapter/proto"
@@ -19,7 +18,6 @@ func InsertIntoButton(ctx context.Context, tx *sql.Tx, remoteID domain.RemoteID,
 		return b, err
 	}
 	defer stmt.Close()
-
 	var sqliteErr *sqlite.Error
 
 	_, err = stmt.Exec(b.ID, remoteID, b.Name, b.Tag, []byte{})
@@ -43,13 +41,12 @@ func InsertIntoButton(ctx context.Context, tx *sql.Tx, remoteID domain.RemoteID,
 	return b, err
 }
 
-func UpdateButton(ctx context.Context, tx *sql.Tx, b *domain.Button) (err error) {
-	irdata, err := adapter.MarshalIRDataToBinary(b.IRData)
+func LearnIRData(ctx context.Context, tx *sql.Tx, buttonID domain.ButtonID, domainIRData domain.IRData) (err error) {
+	irData, err := adapter.MarshalIRDataToBinary(domainIRData)
 	if err != nil {
 		return err
 	}
-	_, err = tx.Exec(`UPDATE buttons SET name=?, irdata=? WHERE button_id=?`,
-		b.Name, irdata, b.ID)
+	_, err = tx.Exec(`UPDATE buttons SET irdata=? WHERE button_id=?`, irData, buttonID)
 
 	if err, ok := err.(*sqlite.Error); ok {
 		if err.Code() == sqlite3.SQLITE_CONSTRAINT_UNIQUE {
@@ -75,10 +72,9 @@ func SelectFromButtons(ctx context.Context, tx *sql.Tx, remoteID domain.RemoteID
 	}
 
 	buttons = make([]*domain.Button, 0, count)
-
 	rows, err := tx.QueryContext(
 		ctx,
-		`SELECT name, irdata, button_id, tag, device_id FROM buttons INNER LEFT JOIN remotes ON buttons.remote_id = remotes.remote_id WHERE remote_id=?`,
+		`SELECT name, length(irdata) != 0, button_id, tag FROM buttons WHERE buttons.remote_id=?`,
 		remoteID,
 	)
 	if err != nil {
@@ -88,38 +84,41 @@ func SelectFromButtons(ctx context.Context, tx *sql.Tx, remoteID domain.RemoteID
 
 	for rows.Next() {
 		var b = domain.Button{}
-		binaryIRData := []byte{}
-		err = rows.Scan(&b.Name, binaryIRData, &b.ID, &b.Tag, &b.DeviceID)
+		err = rows.Scan(&b.Name, &b.HasIRData, &b.ID, &b.Tag)
 		if err != nil {
 			return
-		}
-		b.IRData, err = adapter.UnmarshalBinaryIRData(binaryIRData)
-		if err != nil {
-			b.IRData = nil
 		}
 		buttons = append(buttons, &b)
 	}
 	return
 }
 
-func SelectFromButtonsWhere(ctx context.Context, tx *sql.Tx, buttonID domain.ButtonID) (b *domain.Button, err error) {
-	b = &domain.Button{}
-
-	rows, err := tx.QueryContext(
+func SelectIRDataAndDeviceIDFromButtonsWhere(ctx context.Context, tx *sql.Tx, buttonID domain.ButtonID) (IRData domain.IRData, DeviceID domain.DeviceID, err error) {
+	row := tx.QueryRowContext(
 		ctx,
-		`SELECT name, irdata, tag FROM buttons INNER LEFT JOIN remotes ON buttons.remote_id = remotes.remote_id WHERE button_id=?`,
+		`SELECT  buttons.irdata, device_id FROM buttons INNER JOIN remotes ON buttons.remote_id = remotes.remote_id WHERE button_id=?`,
 		buttonID,
 	)
+
+	binaryIRData := []byte{}
+	err = row.Scan(&binaryIRData, &DeviceID)
 	if err != nil {
 		return
 	}
-	defer rows.Close()
+	IRData, err = adapter.UnmarshalBinaryIRData(binaryIRData)
+	return
+}
 
-	if !rows.Next() {
-		return b, usecases.WrapError(usecases.CodeNotFound, errors.New("button not found"))
-	}
+func SelectFromButtonsWhere(ctx context.Context, tx *sql.Tx, buttonID domain.ButtonID) (b *domain.Button, err error) {
+	b = &domain.Button{}
 
-	err = rows.Scan(&b.Name, &b.IRData, &b.Tag, &b.DeviceID)
+	rows := tx.QueryRowContext(
+		ctx,
+		`SELECT name, length(irdata) != 0, tag FROM buttons WHERE button_id=?`,
+		buttonID,
+	)
+
+	err = rows.Scan(&b.Name, &b.HasIRData, &b.Tag)
 	b.ID = buttonID
 	return b, err
 }

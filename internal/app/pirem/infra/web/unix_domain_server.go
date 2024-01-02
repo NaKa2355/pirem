@@ -10,6 +10,7 @@ import (
 	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/boundary"
 	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/controllers"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 type UnixDomainServer struct {
@@ -17,10 +18,13 @@ type UnixDomainServer struct {
 	path string
 }
 
-func NewUnixDomainServer(domainSocketPath string, boundary boundary.Boundary) (controllers.Web, error) {
+func NewUnixDomainServer(domainSocketPath string, boundary boundary.Boundary, enableReflection bool) (controllers.Web, error) {
 	handler := adapter.NewRequestHandler(boundary)
 	gs := grpc.NewServer()
 	pirem.RegisterPiRemServiceServer(gs, handler)
+	if enableReflection {
+		reflection.Register(gs)
+	}
 	return &UnixDomainServer{
 		s:    gs,
 		path: domainSocketPath,

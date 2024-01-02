@@ -83,7 +83,7 @@ func (devices *IRDevices) ReadDevice(ctx context.Context, id domain.DeviceID) (r
 	defer devices.mu.RUnlock()
 	fetchedDevice, ok := devices.devices[id]
 	if !ok {
-		return nil, usecases.WrapError(usecases.CodeDeviceNotFound, ErrDeviceNotFound)
+		return &domain.Device{}, usecases.WrapError(usecases.CodeDeviceNotFound, ErrDeviceNotFound)
 	}
 	info := fetchedDevice.info
 

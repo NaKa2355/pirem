@@ -71,7 +71,7 @@ proto.pirem.Button.toObject = function(includeInstance, msg) {
     id: jspb.Message.getFieldWithDefault(msg, 1, ""),
     name: jspb.Message.getFieldWithDefault(msg, 2, ""),
     tag: jspb.Message.getFieldWithDefault(msg, 3, ""),
-    irData: (f = msg.getIrData()) && api_v1_irdata_pb.IrData.toObject(includeInstance, f)
+    hasIrData: jspb.Message.getBooleanFieldWithDefault(msg, 4, false)
   };
 
   if (includeInstance) {
@@ -121,9 +121,8 @@ proto.pirem.Button.deserializeBinaryFromReader = function(msg, reader) {
       msg.setTag(value);
       break;
     case 4:
-      var value = new api_v1_irdata_pb.IrData;
-      reader.readMessage(value,api_v1_irdata_pb.IrData.deserializeBinaryFromReader);
-      msg.setIrData(value);
+      var value = /** @type {boolean} */ (reader.readBool());
+      msg.setHasIrData(value);
       break;
     default:
       reader.skipField();
@@ -175,12 +174,11 @@ proto.pirem.Button.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getIrData();
-  if (f != null) {
-    writer.writeMessage(
+  f = message.getHasIrData();
+  if (f) {
+    writer.writeBool(
       4,
-      f,
-      api_v1_irdata_pb.IrData.serializeBinaryToWriter
+      f
     );
   }
 };
@@ -241,39 +239,20 @@ proto.pirem.Button.prototype.setTag = function(value) {
 
 
 /**
- * optional IrData ir_data = 4;
- * @return {?proto.pirem.IrData}
- */
-proto.pirem.Button.prototype.getIrData = function() {
-  return /** @type{?proto.pirem.IrData} */ (
-    jspb.Message.getWrapperField(this, api_v1_irdata_pb.IrData, 4));
-};
-
-
-/**
- * @param {?proto.pirem.IrData|undefined} value
- * @return {!proto.pirem.Button} returns this
-*/
-proto.pirem.Button.prototype.setIrData = function(value) {
-  return jspb.Message.setWrapperField(this, 4, value);
-};
-
-
-/**
- * Clears the message field making it undefined.
- * @return {!proto.pirem.Button} returns this
- */
-proto.pirem.Button.prototype.clearIrData = function() {
-  return this.setIrData(undefined);
-};
-
-
-/**
- * Returns whether this field is set.
+ * optional bool has_ir_data = 4;
  * @return {boolean}
  */
-proto.pirem.Button.prototype.hasIrData = function() {
-  return jspb.Message.getField(this, 4) != null;
+proto.pirem.Button.prototype.getHasIrData = function() {
+  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 4, false));
+};
+
+
+/**
+ * @param {boolean} value
+ * @return {!proto.pirem.Button} returns this
+ */
+proto.pirem.Button.prototype.setHasIrData = function(value) {
+  return jspb.Message.setProto3BooleanField(this, 4, value);
 };
 
 

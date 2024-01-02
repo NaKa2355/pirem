@@ -14,8 +14,8 @@ type Repository interface {
 	ReadButtons(ctx context.Context, appID domain.RemoteID) ([]*domain.Button, error)
 	ReadButton(context.Context, domain.ButtonID) (*domain.Button, error)
 
+	ReadIRDataAndDeviceID(context.Context, domain.ButtonID) (domain.IRData, domain.DeviceID, error)
 	UpdateRemote(context.Context, *domain.Remote) error
-	UpdateButton(context.Context, *domain.Button) error
-
+	LearnIR(context.Context, domain.ButtonID, domain.IRData) error
 	DeleteRemote(context.Context, domain.RemoteID) error
 }

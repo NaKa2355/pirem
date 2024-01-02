@@ -87,6 +87,15 @@ message PushButtonRequest {
     string button_id = 1;
 }
 
+message GetIrDataRequest {
+    string button_id = 1;
+}
+
+message GetIrDataResponse {
+    IrData ir_data = 1;
+    string device_id = 2;
+}
+
 service PiRemService {
     // devices
     rpc SendIr(SendIrRequest) returns (SendIrResponse) {}
@@ -105,4 +114,7 @@ service PiRemService {
     rpc GetButton(GetButtonRequest) returns (Button) {}
     rpc LearnIrData(LearnIrDataRequest) returns (Empty) {}
     rpc PushButton(PushButtonRequest) returns (Empty) {}
+    
+    // irdata
+    rpc GetIrData(GetIrDataRequest) returns (GetIrDataResponse) {}
 }

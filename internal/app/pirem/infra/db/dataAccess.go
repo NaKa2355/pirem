@@ -145,6 +145,20 @@ func (d *DataBase) ReadButtons(ctx context.Context, remoteID domain.RemoteID) (c
 	return
 }
 
+func (d *DataBase) ReadIRDataAndDeviceID(ctx context.Context, buttonID domain.ButtonID) (
+	irData domain.IRData, deviceId domain.DeviceID, err error) {
+	d.m.RLock()
+	defer convertError(&err)
+	defer d.m.RUnlock()
+	err = d.db.BeginTransaction(ctx, orm.Transaction{
+		func(tx *sql.Tx) error {
+			irData, deviceId, err = queries.SelectIRDataAndDeviceIDFromButtonsWhere(ctx, tx, buttonID)
+			return err
+		},
+	}, true)
+	return
+}
+
 func (d *DataBase) UpdateRemote(ctx context.Context, a *domain.Remote) (err error) {
 	d.m.Lock()
 	defer convertError(&err)
@@ -157,13 +171,13 @@ func (d *DataBase) UpdateRemote(ctx context.Context, a *domain.Remote) (err erro
 	return
 }
 
-func (d *DataBase) UpdateButton(ctx context.Context, b *domain.Button) (err error) {
+func (d *DataBase) LearnIR(ctx context.Context, buttonID domain.ButtonID, irData domain.IRData) (err error) {
 	d.m.Lock()
 	defer convertError(&err)
 	defer d.m.Unlock()
 	err = d.db.BeginTransaction(ctx, orm.Transaction{
 		func(tx *sql.Tx) error {
-			return queries.UpdateButton(ctx, tx, b)
+			return queries.LearnIRData(ctx, tx, buttonID, irData)
 		},
 	}, false)
 	return

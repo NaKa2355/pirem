@@ -118,7 +118,7 @@ func (h *RequestHander) CreateRemote(ctx context.Context, req *api.CreateRemoteR
 					Id:        string(b.ID),
 					Name:      string(b.Name),
 					Tag:       string(b.Tag),
-					HasIrData: b.IRData != nil,
+					HasIrData: b.HasIRData,
 				}
 			},
 		),
@@ -135,6 +135,7 @@ func (h *RequestHander) ListRemotes(ctx context.Context, req *api.ListRemotesReq
 			func(r *domain.Remote) *api.Remote {
 				return &api.Remote{
 					Id:       string(r.ID),
+					Name:     string(r.Name),
 					Tag:      r.Tag,
 					DeviceId: r.DeviceID,
 					Buttons: utils.Map(r.Buttons,
@@ -143,7 +144,7 @@ func (h *RequestHander) ListRemotes(ctx context.Context, req *api.ListRemotesReq
 								Id:        string(b.ID),
 								Name:      string(b.Name),
 								Tag:       string(b.Tag),
-								HasIrData: b.IRData != nil,
+								HasIrData: b.HasIRData,
 							}
 						},
 					),
@@ -164,14 +165,14 @@ func (h *RequestHander) GetRemote(ctx context.Context, req *api.GetRemoteRequest
 	return &api.Remote{
 		Id:       string(r.ID),
 		Tag:      r.Tag,
+		Name:     string(r.Name),
 		DeviceId: r.DeviceID,
 		Buttons: utils.Map(r.Buttons,
 			func(b *domain.Button) *api.Remote_Button {
 				return &api.Remote_Button{
-					Id:        string(b.ID),
-					Name:      string(b.Name),
-					Tag:       string(b.Tag),
-					HasIrData: b.IRData != nil,
+					Id:   string(b.ID),
+					Name: string(b.Name),
+					Tag:  string(b.Tag),
 				}
 			},
 		),
@@ -206,10 +207,10 @@ func (h *RequestHander) GetButton(ctx context.Context, req *api.GetButtonRequest
 		return
 	}
 	return &api.Button{
-		Id:     string(b.ID),
-		Name:   string(b.Name),
-		Tag:    string(b.Name),
-		IrData: adapter.MarshalIRData(b.IRData),
+		Id:        string(b.ID),
+		Name:      string(b.Name),
+		Tag:       string(b.Name),
+		HasIrData: b.HasIRData,
 	}, err
 }
 
@@ -224,4 +225,12 @@ func (h *RequestHander) PushButton(ctx context.Context, req *api.PushButtonReque
 	return &api.Empty{}, h.port.PushRemote(ctx, bdy.PushButtonInput{
 		ButtonId: domain.ButtonID(req.ButtonId),
 	})
+}
+
+func (h *RequestHander) GetIrData(ctx context.Context, req *api.GetIrDataRequest) (*api.GetIrDataResponse, error) {
+	out, err := h.port.GetIR(ctx, bdy.GetIRInput{ButtonID: domain.ButtonID(req.ButtonId)})
+	return &api.GetIrDataResponse{
+		IrData:   adapter.MarshalIRData(out.IRData),
+		DeviceId: out.DeviceID,
+	}, err
 }

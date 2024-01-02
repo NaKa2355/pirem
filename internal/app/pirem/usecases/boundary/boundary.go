@@ -15,4 +15,5 @@ type Boundary interface {
 	DevicesLister
 	IRSender
 	IRReceiver
+	IRGetter
 }

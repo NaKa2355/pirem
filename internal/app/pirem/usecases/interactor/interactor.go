@@ -28,17 +28,17 @@ func (i *Interactor) GetButton(ctx context.Context, input bdy.GetButtonInput) (*
 }
 
 func (i *Interactor) PushRemote(ctx context.Context, input bdy.PushButtonInput) error {
-	b, err := i.repo.ReadButton(ctx, input.ButtonId)
+	irData, deviceID, err := i.repo.ReadIRDataAndDeviceID(ctx, input.ButtonId)
 	if err != nil {
 		return err
 	}
-	return i.device.SendIR(ctx, b.DeviceID, b.IRData)
+	return i.device.SendIR(ctx, deviceID, irData)
 }
 
 func (i *Interactor) CreateRemote(ctx context.Context, input bdy.CreateRemoteInput) (*domain.Remote, error) {
 	buttons := []*domain.Button{}
 	for _, b := range input.Buttons {
-		buttons = append(buttons, domain.Factory(b.Name, b.Tag))
+		buttons = append(buttons, domain.ButtonFactory(b.Name, b.Tag, input.DeviveID))
 	}
 	return i.repo.CreateRemote(
 		ctx,
@@ -68,12 +68,7 @@ func (i *Interactor) DeleteRemote(ctx context.Context, input bdy.DeleteRemoteInp
 }
 
 func (i *Interactor) LearnIR(ctx context.Context, input bdy.LearnIRInput) error {
-	b, err := i.repo.ReadButton(ctx, input.ButtonID)
-	if err != nil {
-		return err
-	}
-	b.LearnIR(input.IRData)
-	return i.repo.UpdateButton(ctx, b)
+	return i.repo.LearnIR(ctx, input.ButtonID, input.IRData)
 }
 
 func (i *Interactor) GetDevice(ctx context.Context, input bdy.GetDeivceInput) (*domain.Device, error) {
@@ -90,4 +85,12 @@ func (i *Interactor) SendIR(ctx context.Context, input bdy.SendIRInput) error {
 
 func (i *Interactor) ReceiveIR(ctx context.Context, input bdy.ReceiveIRInput) (domain.IRData, error) {
 	return i.device.ReceiveIR(ctx, input.ID)
+}
+
+func (i *Interactor) GetIR(ctx context.Context, in bdy.GetIRInput) (bdy.GetIROutput, error) {
+	irdata, deviceID, err := i.repo.ReadIRDataAndDeviceID(ctx, in.ButtonID)
+	return bdy.GetIROutput{
+		IRData:   irdata,
+		DeviceID: deviceID,
+	}, err
 }
