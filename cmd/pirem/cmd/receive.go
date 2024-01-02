@@ -12,7 +12,6 @@ import (
 	"time"
 
 	pirem "github.com/NaKa2355/pirem/api/gen/go/api/v1"
-	int_cmd "github.com/NaKa2355/pirem/internal/app/pirem/cmd"
 
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/proto"

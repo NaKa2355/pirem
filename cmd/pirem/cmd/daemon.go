@@ -11,7 +11,6 @@ import (
 	"syscall"
 
 	"github.com/NaKa2355/pirem/config"
-	int_cmd "github.com/NaKa2355/pirem/internal/app/pirem/cmd"
 	"github.com/NaKa2355/pirem/internal/app/pirem/infra/db"
 	"github.com/NaKa2355/pirem/internal/app/pirem/infra/devices"
 	"github.com/NaKa2355/pirem/internal/app/pirem/infra/web"
@@ -29,7 +28,7 @@ import (
 
 const configFilePath = "/etc/piremd.json"
 const serviceFilePath = "/lib/systemd/system/piremd.service"
-const socketFilePath = int_cmd.DomainSocketPath
+const socketFilePath = DomainSocketPath
 const longDiscribe = "execute as daemon.\nconfig file path(default) " +
 	configFilePath +
 	"\nservice file path: " + serviceFilePath +

@@ -7,8 +7,6 @@ import (
 	"context"
 	"fmt"
 
-	int_cmd "github.com/NaKa2355/pirem/internal/app/pirem/cmd"
-
 	pirem "github.com/NaKa2355/pirem/api/gen/go/api/v1"
 
 	"github.com/spf13/cobra"
@@ -29,7 +27,7 @@ var devicesCmd = &cobra.Command{
 }
 
 func getAllDevsinfo() error {
-	conn, client, err := int_cmd.MakeConnection(int_cmd.Protocol, int_cmd.DomainSocketPath)
+	conn, client, err := MakeConnection(Protocol, DomainSocketPath)
 	if err != nil {
 		return err
 	}
@@ -40,13 +38,13 @@ func getAllDevsinfo() error {
 		return err
 	}
 
-	result, _ := int_cmd.MarshalToString(resp)
+	result, _ := MarshalToString(resp)
 	fmt.Println(result)
 	return nil
 }
 
 func getDeviceInfo(deviceID string) error {
-	conn, client, err := int_cmd.MakeConnection(int_cmd.Protocol, int_cmd.DomainSocketPath)
+	conn, client, err := MakeConnection(Protocol, DomainSocketPath)
 	if err != nil {
 		return err
 	}
@@ -57,7 +55,7 @@ func getDeviceInfo(deviceID string) error {
 		return err
 	}
 
-	result, _ := int_cmd.MarshalToString(resp)
+	result, _ := MarshalToString(resp)
 	fmt.Println(result)
 	return nil
 }
