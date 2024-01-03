@@ -1,7 +1,7 @@
 package adapter
 
 import (
-	api "github.com/NaKa2355/pirem/api/gen/go/api/v1"
+	api "github.com/NaKa2355/pirem-proto/gen/go/api/v1"
 	"github.com/NaKa2355/pirem/internal/app/pirem/domain"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"

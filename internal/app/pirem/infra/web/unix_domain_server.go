@@ -5,7 +5,7 @@ import (
 	"net"
 	"os"
 
-	pirem "github.com/NaKa2355/pirem/api/gen/go/api/v1"
+	pirem "github.com/NaKa2355/pirem-proto/gen/go/api/v1"
 	adapter "github.com/NaKa2355/pirem/internal/app/pirem/adapter/web"
 	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/boundary"
 	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/controllers"

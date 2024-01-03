@@ -5,7 +5,7 @@ import (
 	"net"
 	"time"
 
-	pirem "github.com/NaKa2355/pirem/api/gen/go/api/v1"
+	pirem "github.com/NaKa2355/pirem-proto/gen/go/api/v1"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

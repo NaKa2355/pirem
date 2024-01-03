@@ -1,7 +1,0 @@
-syntax = "proto3";
-
-package pirem;
-
-option go_package = "github.com/NaKa2355/irdeck-proto/gen/go/api/v1";
-
-message Empty {}

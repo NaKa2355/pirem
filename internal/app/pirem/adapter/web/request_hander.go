@@ -3,7 +3,7 @@ package adapter
 import (
 	"context"
 
-	api "github.com/NaKa2355/pirem/api/gen/go/api/v1"
+	api "github.com/NaKa2355/pirem-proto/gen/go/api/v1"
 	adapter "github.com/NaKa2355/pirem/internal/app/pirem/adapter/proto"
 	"github.com/NaKa2355/pirem/internal/app/pirem/domain"
 	bdy "github.com/NaKa2355/pirem/internal/app/pirem/usecases/boundary"

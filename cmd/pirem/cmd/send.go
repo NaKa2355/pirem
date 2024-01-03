@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"os"
 
-	pirem "github.com/NaKa2355/pirem/api/gen/go/api/v1"
+	pirem "github.com/NaKa2355/pirem-proto/gen/go/api/v1"
 
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/proto"
