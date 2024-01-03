@@ -10,7 +10,7 @@ import (
 	"os"
 
 	pirem "github.com/NaKa2355/pirem-proto/gen/go/api/v1"
-
+	"github.com/NaKa2355/pirem/cmd/pirem/utils"
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/proto"
 )
@@ -43,7 +43,7 @@ var sendCmd = &cobra.Command{
 			return err
 		}
 
-		conn, client, err := MakeConnection(Protocol, DomainSocketPath)
+		conn, client, err := utils.MakeConnection(utils.Protocol, utils.DomainSocketPath)
 		if err != nil {
 			return err
 		}

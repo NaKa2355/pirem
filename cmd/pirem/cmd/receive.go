@@ -12,6 +12,7 @@ import (
 	"time"
 
 	pirem "github.com/NaKa2355/pirem-proto/gen/go/api/v1"
+	"github.com/NaKa2355/pirem/cmd/pirem/utils"
 
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/proto"
@@ -27,7 +28,7 @@ var receiveCmd = &cobra.Command{
 
 func receiveRawIr(deviceId string) (*pirem.IrData, error) {
 	var irData *pirem.IrData
-	conn, client, err := MakeConnection(Protocol, DomainSocketPath)
+	conn, client, err := utils.MakeConnection(utils.Protocol, utils.DomainSocketPath)
 	if err != nil {
 		return irData, err
 	}
@@ -80,7 +81,7 @@ func cmd(cmd *cobra.Command, args []string) error {
 	}
 
 	if jsonFlag.Changed {
-		jsonStr, _ := MarshalToString(irData)
+		jsonStr, _ := utils.MarshalToString(irData)
 		jsonStr += "\n"
 		result = []byte(jsonStr)
 	} else {

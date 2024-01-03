@@ -14,27 +14,27 @@ import (
 )
 
 // infoCmd represents the info command
-var devicesCmd = &cobra.Command{
-	Use:   "devices",
-	Short: "get device(s) information",
-	Long:  `get device(s) information`,
+var remotesCmd = &cobra.Command{
+	Use:   "remotes",
+	Short: "get remote(s)",
+	Long:  `get remote(s)`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		devFlag := cmd.Flag("device")
-		if devFlag.Changed {
-			return getDeviceInfo(devFlag.Value.String())
+		remoteFalg := cmd.Flag("remote")
+		if remoteFalg.Changed {
+			return getRemote(remoteFalg.Value.String())
 		}
-		return getAllDevsinfo()
+		return listRemotes()
 	},
 }
 
-func getAllDevsinfo() error {
+func listRemotes() error {
 	conn, client, err := utils.MakeConnection(utils.Protocol, utils.DomainSocketPath)
 	if err != nil {
 		return err
 	}
 	defer conn.Close()
 
-	resp, err := client.ListDevices(context.Background(), &pirem.ListDevicesRequest{})
+	resp, err := client.ListRemotes(context.Background(), &pirem.ListRemotesRequest{})
 	if err != nil {
 		return err
 	}
@@ -44,14 +44,14 @@ func getAllDevsinfo() error {
 	return nil
 }
 
-func getDeviceInfo(deviceID string) error {
+func getRemote(remoteID string) error {
 	conn, client, err := utils.MakeConnection(utils.Protocol, utils.DomainSocketPath)
 	if err != nil {
 		return err
 	}
 	defer conn.Close()
 
-	resp, err := client.GetDevice(context.Background(), &pirem.GetDeviceRequest{DeviceId: deviceID})
+	resp, err := client.GetRemote(context.Background(), &pirem.GetRemoteRequest{RemoteId: remoteID})
 	if err != nil {
 		return err
 	}
@@ -62,7 +62,7 @@ func getDeviceInfo(deviceID string) error {
 }
 
 func init() {
-	rootCmd.AddCommand(devicesCmd)
+	rootCmd.AddCommand(remotesCmd)
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
@@ -71,5 +71,5 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	devicesCmd.Flags().StringP("device", "d", "", "device id")
+	remotesCmd.Flags().StringP("remote", "r", "", "remote id")
 }

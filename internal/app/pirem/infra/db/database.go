@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"sync"
 
 	"github.com/NaKa2355/pirem/internal/app/pirem/domain"
@@ -46,7 +45,6 @@ func New(dbFile string) (r gateways.Repository, err error) {
 	}
 
 	if err := d.CreateTable(); err != nil {
-		err = fmt.Errorf("faild to setup database: %w", err)
 		return d, err
 	}
 	return d, nil
@@ -62,19 +60,20 @@ func (d *DataBase) CreateRemote(ctx context.Context, r *domain.Remote) (_ *domai
 	d.m.Lock()
 	defer convertError(&err)
 	defer d.m.Unlock()
-	err = d.db.BeginTransaction(ctx, orm.Transaction{
+	err = d.db.BeginTransaction(ctx,
 		func(tx *sql.Tx) error {
 			r, err = queries.InsertIntoRemotes(ctx, tx, r)
-			return err
-		},
-
-		func(tx *sql.Tx) error {
+			if err != nil {
+				return err
+			}
 			for _, button := range r.Buttons {
 				_, err = queries.InsertIntoButton(ctx, tx, domain.RemoteID(r.ID), button)
+				if err != nil {
+					return err
+				}
 			}
 			return err
-		},
-	}, false)
+		}, false)
 	return r, err
 }
 
@@ -82,17 +81,16 @@ func (d *DataBase) ReadRemote(ctx context.Context, remoteID domain.RemoteID) (r 
 	d.m.RLock()
 	defer convertError(&err)
 	defer d.m.RUnlock()
-	err = d.db.BeginTransaction(ctx, orm.Transaction{
+	err = d.db.BeginTransaction(ctx,
 		func(tx *sql.Tx) error {
 			r, err = queries.SelectFromRemotesWhere(ctx, tx, remoteID)
-			return err
-		},
-		func(tx *sql.Tx) error {
+			if err != nil {
+				return err
+			}
 			buttons, err := queries.SelectFromButtons(ctx, tx, remoteID)
 			r.Buttons = buttons
 			return err
-		},
-	}, true)
+		}, true)
 	return
 }
 
@@ -100,12 +98,12 @@ func (d *DataBase) ReadRemotes(ctx context.Context) (remotes []*domain.Remote, e
 	d.m.RLock()
 	defer convertError(&err)
 	defer d.m.RUnlock()
-	err = d.db.BeginTransaction(ctx, orm.Transaction{
+	err = d.db.BeginTransaction(ctx,
 		func(tx *sql.Tx) error {
 			remotes, err = queries.SelectFromRemotes(ctx, tx)
-			return err
-		},
-		func(tx *sql.Tx) error {
+			if err != nil {
+				return err
+			}
 			for _, r := range remotes {
 				buttons, err := queries.SelectFromButtons(ctx, tx, r.ID)
 				if err != nil {
@@ -114,8 +112,7 @@ func (d *DataBase) ReadRemotes(ctx context.Context) (remotes []*domain.Remote, e
 				r.Buttons = buttons
 			}
 			return nil
-		},
-	}, true)
+		}, true)
 	return
 }
 
@@ -123,12 +120,11 @@ func (d *DataBase) ReadButton(ctx context.Context, buttonID domain.ButtonID) (c 
 	d.m.RLock()
 	defer convertError(&err)
 	d.m.RUnlock()
-	err = d.db.BeginTransaction(ctx, orm.Transaction{
+	err = d.db.BeginTransaction(ctx,
 		func(tx *sql.Tx) error {
 			c, err = queries.SelectFromButtonsWhere(ctx, tx, buttonID)
 			return err
-		},
-	}, true)
+		}, true)
 	return
 }
 
@@ -136,12 +132,12 @@ func (d *DataBase) ReadButtons(ctx context.Context, remoteID domain.RemoteID) (c
 	d.m.RLock()
 	defer convertError(&err)
 	defer d.m.RUnlock()
-	err = d.db.BeginTransaction(ctx, orm.Transaction{
+	err = d.db.BeginTransaction(ctx,
 		func(tx *sql.Tx) error {
 			coms, err = queries.SelectFromButtons(ctx, tx, remoteID)
 			return err
-		},
-	}, true)
+
+		}, true)
 	return
 }
 
@@ -150,12 +146,11 @@ func (d *DataBase) ReadIRDataAndDeviceID(ctx context.Context, buttonID domain.Bu
 	d.m.RLock()
 	defer convertError(&err)
 	defer d.m.RUnlock()
-	err = d.db.BeginTransaction(ctx, orm.Transaction{
+	err = d.db.BeginTransaction(ctx,
 		func(tx *sql.Tx) error {
 			irData, deviceId, err = queries.SelectIRDataAndDeviceIDFromButtonsWhere(ctx, tx, buttonID)
 			return err
-		},
-	}, true)
+		}, true)
 	return
 }
 
@@ -163,11 +158,10 @@ func (d *DataBase) UpdateRemote(ctx context.Context, a *domain.Remote) (err erro
 	d.m.Lock()
 	defer convertError(&err)
 	defer d.m.Unlock()
-	err = d.db.BeginTransaction(ctx, orm.Transaction{
+	err = d.db.BeginTransaction(ctx,
 		func(tx *sql.Tx) error {
 			return queries.UpdateRemote(ctx, tx, a)
-		},
-	}, false)
+		}, false)
 	return
 }
 
@@ -175,11 +169,10 @@ func (d *DataBase) LearnIR(ctx context.Context, buttonID domain.ButtonID, irData
 	d.m.Lock()
 	defer convertError(&err)
 	defer d.m.Unlock()
-	err = d.db.BeginTransaction(ctx, orm.Transaction{
+	err = d.db.BeginTransaction(ctx,
 		func(tx *sql.Tx) error {
 			return queries.LearnIRData(ctx, tx, buttonID, irData)
-		},
-	}, false)
+		}, false)
 	return
 }
 
@@ -187,10 +180,9 @@ func (d *DataBase) DeleteRemote(ctx context.Context, remoteID domain.RemoteID) (
 	d.m.Lock()
 	defer convertError(&err)
 	defer d.m.Unlock()
-	err = d.db.BeginTransaction(ctx, orm.Transaction{
+	err = d.db.BeginTransaction(ctx,
 		func(tx *sql.Tx) error {
 			return queries.DeleteFromRemoteWhere(ctx, tx, remoteID)
-		},
-	}, false)
+		}, false)
 	return err
 }

@@ -14,44 +14,29 @@ import (
 )
 
 // infoCmd represents the info command
-var devicesCmd = &cobra.Command{
-	Use:   "devices",
-	Short: "get device(s) information",
-	Long:  `get device(s) information`,
+var pushButtonCmd = &cobra.Command{
+	Use:   "push",
+	Short: "push button",
+	Long:  `push button`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		devFlag := cmd.Flag("device")
-		if devFlag.Changed {
-			return getDeviceInfo(devFlag.Value.String())
+		buttonFlag := cmd.Flag("button")
+		if buttonFlag.Changed {
+			return pushButton(buttonFlag.Value.String())
 		}
-		return getAllDevsinfo()
+		return fmt.Errorf("need argument")
 	},
 }
 
-func getAllDevsinfo() error {
+func pushButton(buttonID string) error {
 	conn, client, err := utils.MakeConnection(utils.Protocol, utils.DomainSocketPath)
 	if err != nil {
 		return err
 	}
 	defer conn.Close()
 
-	resp, err := client.ListDevices(context.Background(), &pirem.ListDevicesRequest{})
-	if err != nil {
-		return err
-	}
-
-	result, _ := utils.MarshalToString(resp)
-	fmt.Println(result)
-	return nil
-}
-
-func getDeviceInfo(deviceID string) error {
-	conn, client, err := utils.MakeConnection(utils.Protocol, utils.DomainSocketPath)
-	if err != nil {
-		return err
-	}
-	defer conn.Close()
-
-	resp, err := client.GetDevice(context.Background(), &pirem.GetDeviceRequest{DeviceId: deviceID})
+	resp, err := client.PushButton(context.Background(), &pirem.PushButtonRequest{
+		ButtonId: buttonID,
+	})
 	if err != nil {
 		return err
 	}
@@ -62,7 +47,7 @@ func getDeviceInfo(deviceID string) error {
 }
 
 func init() {
-	rootCmd.AddCommand(devicesCmd)
+	rootCmd.AddCommand(pushButtonCmd)
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
@@ -71,5 +56,5 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	devicesCmd.Flags().StringP("device", "d", "", "device id")
+	pushButtonCmd.Flags().StringP("button", "b", "", "button id")
 }

@@ -32,7 +32,7 @@ func (d *DataBase) Close() error {
 	return d.db.Close()
 }
 
-type Transaction []func(tx *sql.Tx) error
+type Transaction func(tx *sql.Tx) error
 
 func (d *DataBase) BeginTransaction(ctx context.Context, t Transaction, readOnly bool) (err error) {
 	tx, err := d.db.BeginTx(ctx, &sql.TxOptions{ReadOnly: readOnly})
@@ -40,12 +40,10 @@ func (d *DataBase) BeginTransaction(ctx context.Context, t Transaction, readOnly
 		return
 	}
 
-	for _, s := range t {
-		err = s(tx)
-		if err != nil {
-			tx.Rollback()
-			return
-		}
+	err = t(tx)
+	if err != nil {
+		tx.Rollback()
+		return
 	}
 
 	return tx.Commit()

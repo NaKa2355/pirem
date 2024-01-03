@@ -5,7 +5,6 @@ package queries
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 
 	"github.com/NaKa2355/pirem/internal/app/pirem/domain"
@@ -21,7 +20,7 @@ func InsertIntoRemotes(ctx context.Context, tx *sql.Tx, r *domain.Remote) (*doma
 		if sqlErr.Code() == sqlite3.SQLITE_CONSTRAINT_UNIQUE {
 			err = usecases.WrapError(
 				usecases.CodeAlreadyExists,
-				fmt.Errorf("same name domain already exists: %w", err),
+				fmt.Errorf("same name remote already exists: %w", err),
 			)
 			return r, err
 		}
@@ -33,21 +32,17 @@ func InsertIntoRemotes(ctx context.Context, tx *sql.Tx, r *domain.Remote) (*doma
 func SelectFromRemotesWhere(ctx context.Context, tx *sql.Tx, id domain.RemoteID) (r *domain.Remote, err error) {
 	r = &domain.Remote{}
 
-	rows, err := tx.QueryContext(ctx, `SELECT * FROM remotes a WHERE a.remote_id = ?`, id)
+	row := tx.QueryRowContext(ctx, `SELECT * FROM remotes a WHERE a.remote_id = ?`, id)
+
+	err = row.Scan(&r.ID, &r.Name, &r.DeviceID, &r.Tag)
 	if err != nil {
-		return
-	}
-	defer rows.Close()
-
-	if !rows.Next() {
-		err = usecases.WrapError(
-			usecases.CodeNotFound,
-			errors.New("domain not found"),
-		)
-		return
+		if err == sql.ErrNoRows {
+			err = usecases.WrapError(usecases.CodeNotFound,
+				fmt.Errorf("remote not found: %w", err))
+		}
+		return r, err
 	}
 
-	err = rows.Scan(&r.ID, &r.Name, &r.DeviceID, &r.Tag)
 	return r, err
 }
 

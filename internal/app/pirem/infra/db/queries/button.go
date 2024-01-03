@@ -18,23 +18,19 @@ func InsertIntoButton(ctx context.Context, tx *sql.Tx, remoteID domain.RemoteID,
 		return b, err
 	}
 	defer stmt.Close()
-	var sqliteErr *sqlite.Error
 
 	_, err = stmt.Exec(b.ID, remoteID, b.Name, b.Tag, []byte{})
 	if err == nil {
 		return b, err
 	}
 
-	if _, ok := err.(*sqlite.Error); !ok {
-		return b, err
-	}
-
-	sqliteErr = err.(*sqlite.Error)
-	if sqliteErr.Code() == sqlite3.SQLITE_CONSTRAINT_UNIQUE {
-		err = usecases.WrapError(
-			usecases.CodeAlreadyExists,
-			fmt.Errorf("same name button already exists: %w", err),
-		)
+	if sqliteErr, ok := err.(*sqlite.Error); !ok {
+		if sqliteErr.Code() == sqlite3.SQLITE_CONSTRAINT_UNIQUE {
+			err = usecases.WrapError(
+				usecases.CodeAlreadyExists,
+				fmt.Errorf("same name button already exists: %w", err),
+			)
+		}
 		return b, err
 	}
 
@@ -47,12 +43,11 @@ func LearnIRData(ctx context.Context, tx *sql.Tx, buttonID domain.ButtonID, doma
 		return err
 	}
 	_, err = tx.Exec(`UPDATE buttons SET irdata=? WHERE button_id=?`, irData, buttonID)
-
-	if err, ok := err.(*sqlite.Error); ok {
-		if err.Code() == sqlite3.SQLITE_CONSTRAINT_UNIQUE {
-			return usecases.WrapError(
-				usecases.CodeAlreadyExists,
-				fmt.Errorf("same name button already exists: %w", err),
+	if err != nil {
+		if err == sql.ErrNoRows {
+			err = usecases.WrapError(
+				usecases.CodeNotFound,
+				fmt.Errorf("button not found: %w", err),
 			)
 		}
 	}
@@ -93,27 +88,6 @@ func SelectFromButtons(ctx context.Context, tx *sql.Tx, remoteID domain.RemoteID
 	return
 }
 
-func SelectIRDataAndDeviceIDFromButtonsWhere(ctx context.Context, tx *sql.Tx, buttonID domain.ButtonID) (irData domain.IRData, deviceID domain.DeviceID, err error) {
-	irData = &domain.RawData{}
-	row := tx.QueryRowContext(
-		ctx,
-		`SELECT  buttons.irdata, device_id FROM buttons INNER JOIN remotes ON buttons.remote_id = remotes.remote_id WHERE button_id=?`,
-		buttonID,
-	)
-
-	binaryIRData := []byte{}
-	err = row.Scan(&binaryIRData, &deviceID)
-	if err != nil {
-		return
-	}
-	if len(binaryIRData) == 0 {
-		err = usecases.WrapError(usecases.CodeNotFound, fmt.Errorf("irdata not learned"))
-		return
-	}
-	irData, err = adapter.UnmarshalBinaryIRData(binaryIRData)
-	return
-}
-
 func SelectFromButtonsWhere(ctx context.Context, tx *sql.Tx, buttonID domain.ButtonID) (b *domain.Button, err error) {
 	b = &domain.Button{}
 
@@ -124,6 +98,15 @@ func SelectFromButtonsWhere(ctx context.Context, tx *sql.Tx, buttonID domain.But
 	)
 
 	err = rows.Scan(&b.Name, &b.HasIRData, &b.Tag)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			err = usecases.WrapError(
+				usecases.CodeNotFound,
+				fmt.Errorf("button not found: %w", err),
+			)
+
+		}
+	}
 	b.ID = buttonID
 	return b, err
 }

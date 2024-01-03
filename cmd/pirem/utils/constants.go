@@ -1,4 +1,4 @@
-package cmd
+package utils
 
 const Protocol = "unix"
 const DomainSocketPath = "/var/run/piremd/piremd.sock"
