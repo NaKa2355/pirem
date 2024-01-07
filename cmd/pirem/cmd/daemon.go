@@ -107,8 +107,8 @@ func (h *Handler) DeviceFactory() (controllers.IRDevice, error) {
 			devConf.ID,
 			devConf.Name,
 			driver,
-			time.Duration(h.config.DeviceSendIRIntervalMs)*time.Millisecond,
-			time.Duration(h.config.DeviceMutexLockDeadlineMs)*time.Millisecond,
+			time.Duration(time.Duration(h.config.DeviceSendIRIntervalMs)*time.Millisecond),
+			time.Duration(time.Duration(h.config.DeviceMutexLockDeadlineMs)*time.Millisecond),
 		)
 		if _err != nil {
 			err = errors.Join(err, _err)
