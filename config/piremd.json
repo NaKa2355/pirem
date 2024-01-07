@@ -1,5 +1,6 @@
 {
-    "enable_reflection": true,
-    "device_mutex_lock_deadline": 5,
+    "enable_reflection": false,
+    "device_mutex_lock_deadline_ms": 6000,
+    "device_send_ir_interval_ms": 120,
     "devices":[]
 }

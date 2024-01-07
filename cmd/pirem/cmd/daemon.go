@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/NaKa2355/pirem/cmd/pirem/utils"
 	"github.com/NaKa2355/pirem/config"
@@ -102,7 +103,13 @@ func (h *Handler) DeviceFactory() (controllers.IRDevice, error) {
 			continue
 		}
 
-		_err = devices.AddDevice(devConf.ID, devConf.Name, driver, 100, 5000)
+		_err = devices.AddDevice(
+			devConf.ID,
+			devConf.Name,
+			driver,
+			time.Duration(h.config.DeviceSendIRInterval),
+			time.Duration(h.config.DeviceMutexLockDeadline),
+		)
 		if _err != nil {
 			err = errors.Join(err, _err)
 			continue
