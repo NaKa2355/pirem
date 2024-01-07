@@ -13,11 +13,11 @@ type DeviceConfig struct {
 }
 
 type Config struct {
-	Devices                 []DeviceConfig `json:"devices"`
-	DeviceMutexLockDeadline int            `json:"device_mutex_lock_deadline_ms"`
-	DeviceSendIRInterval    int            `json:"device_send_ir_interval_ms"`
-	EnableReflection        bool           `json:"enable_reflection"`
-	Debug                   bool           `json:"debug"`
+	Devices                   []DeviceConfig `json:"devices"`
+	DeviceMutexLockDeadlineMs int            `json:"device_mutex_lock_deadline_ms"`
+	DeviceSendIRIntervalMs    int            `json:"device_send_ir_interval_ms"`
+	EnableReflection          bool           `json:"enable_reflection"`
+	Debug                     bool           `json:"debug"`
 }
 
 func ReadConfig(filePath string) (*Config, error) {
