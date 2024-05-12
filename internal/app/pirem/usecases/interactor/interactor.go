@@ -24,11 +24,23 @@ func NewInteractor(repo gateway.Repository, device controllers.IRDevice) *Intera
 }
 
 func (i *Interactor) GetButton(ctx context.Context, input bdy.GetButtonInput) (*domain.Button, error) {
-	return i.repo.ReadButton(ctx, input.ButtonID)
+	var button *domain.Button
+	err := i.repo.Transaction(ctx, func(ctx context.Context, repo gateway.Repository) (err error) {
+		button, err = repo.ReadButton(ctx, input.ButtonID)
+		return err
+	})
+	return button, err
 }
 
 func (i *Interactor) PushRemote(ctx context.Context, input bdy.PushButtonInput) error {
-	irData, deviceID, err := i.repo.ReadIRDataAndDeviceID(ctx, input.ButtonId)
+	var irData domain.IRData
+	var deviceID domain.DeviceID
+
+	err := i.repo.Transaction(ctx, func(ctx context.Context, repo gateway.Repository) (err error) {
+		irData, deviceID, err = repo.ReadIRDataAndDeviceID(ctx, input.ButtonId)
+		return err
+	})
+
 	if err != nil {
 		return err
 	}
@@ -40,35 +52,53 @@ func (i *Interactor) CreateRemote(ctx context.Context, input bdy.CreateRemoteInp
 	for _, b := range input.Buttons {
 		buttons = append(buttons, domain.ButtonFactory(b.Name, b.Tag, input.DeviveID))
 	}
-	return i.repo.CreateRemote(
-		ctx,
-		domain.RemoteFactory(input.Name, input.DeviveID, input.Tag, buttons),
-	)
+	var remote *domain.Remote
+	err := i.repo.Transaction(ctx, func(ctx context.Context, repo gateway.Repository) (err error) {
+		remote, err = repo.CreateRemote(ctx, domain.RemoteFactory(input.Name, input.DeviveID, input.Tag, buttons))
+		return err
+	})
+	return remote, err
 }
 
 func (i *Interactor) GetRemote(ctx context.Context, input bdy.GetRemoteInput) (*domain.Remote, error) {
-	return i.repo.ReadRemote(ctx, input.RemoteID)
+	var remote *domain.Remote
+	err := i.repo.Transaction(ctx, func(ctx context.Context, repo gateway.Repository) (err error) {
+		remote, err = repo.ReadRemote(ctx, input.RemoteID)
+		return err
+	})
+	return remote, err
 }
 
 func (i *Interactor) ListRemotes(ctx context.Context) ([]*domain.Remote, error) {
-	return i.repo.ReadRemotes(ctx)
+	var remotes []*domain.Remote
+	err := i.repo.Transaction(ctx, func(ctx context.Context, repo gateway.Repository) (err error) {
+		remotes, err = repo.ReadRemotes(ctx)
+		return err
+	})
+	return remotes, err
 }
 
 func (i *Interactor) UpdateRemote(ctx context.Context, input bdy.UpdateRemoteInput) error {
-	r, err := i.repo.ReadRemote(ctx, input.RemoteID)
-	if err != nil {
-		return err
-	}
-	r.UpdateRemote(input.RemoteName, input.DeviceID)
-	return i.repo.UpdateRemote(ctx, r)
+	return i.repo.Transaction(ctx, func(ctx context.Context, repo gateway.Repository) error {
+		r, err := repo.ReadRemote(ctx, input.RemoteID)
+		if err != nil {
+			return err
+		}
+		r.UpdateRemote(input.RemoteName, input.DeviceID)
+		return repo.UpdateRemote(ctx, r)
+	})
 }
 
 func (i *Interactor) DeleteRemote(ctx context.Context, input bdy.DeleteRemoteInput) error {
-	return i.repo.DeleteRemote(ctx, input.RemoteID)
+	return i.repo.Transaction(ctx, func(ctx context.Context, repo gateway.Repository) error {
+		return repo.DeleteRemote(ctx, input.RemoteID)
+	})
 }
 
 func (i *Interactor) LearnIR(ctx context.Context, input bdy.LearnIRInput) error {
-	return i.repo.LearnIR(ctx, input.ButtonID, input.IRData)
+	return i.repo.Transaction(ctx, func(ctx context.Context, repo gateway.Repository) error {
+		return repo.LearnIR(ctx, input.ButtonID, input.IRData)
+	})
 }
 
 func (i *Interactor) GetDevice(ctx context.Context, input bdy.GetDeivceInput) (*domain.Device, error) {
