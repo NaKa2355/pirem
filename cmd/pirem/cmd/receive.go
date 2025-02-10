@@ -28,7 +28,7 @@ var receiveCmd = &cobra.Command{
 
 func receiveRawIr(deviceId string) (*pirem.IrData, error) {
 	var irData *pirem.IrData
-	conn, client, err := utils.MakeConnection(utils.Protocol, utils.DomainSocketPath)
+	conn, client, err := utils.MakeConnection(utils.Protocol, utils.GrpcDomainSocketPath)
 	if err != nil {
 		return irData, err
 	}

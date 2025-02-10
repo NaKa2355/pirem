@@ -43,7 +43,7 @@ var sendCmd = &cobra.Command{
 			return err
 		}
 
-		conn, client, err := utils.MakeConnection(utils.Protocol, utils.DomainSocketPath)
+		conn, client, err := utils.MakeConnection(utils.Protocol, utils.GrpcDomainSocketPath)
 		if err != nil {
 			return err
 		}

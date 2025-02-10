@@ -28,7 +28,7 @@ var devicesCmd = &cobra.Command{
 }
 
 func getAllDevsinfo() error {
-	conn, client, err := utils.MakeConnection(utils.Protocol, utils.DomainSocketPath)
+	conn, client, err := utils.MakeConnection(utils.Protocol, utils.GrpcDomainSocketPath)
 	if err != nil {
 		return err
 	}
@@ -45,7 +45,7 @@ func getAllDevsinfo() error {
 }
 
 func getDeviceInfo(deviceID string) error {
-	conn, client, err := utils.MakeConnection(utils.Protocol, utils.DomainSocketPath)
+	conn, client, err := utils.MakeConnection(utils.Protocol, utils.GrpcDomainSocketPath)
 	if err != nil {
 		return err
 	}

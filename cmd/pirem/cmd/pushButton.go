@@ -28,7 +28,7 @@ var pushButtonCmd = &cobra.Command{
 }
 
 func pushButton(buttonID string) error {
-	conn, client, err := utils.MakeConnection(utils.Protocol, utils.DomainSocketPath)
+	conn, client, err := utils.MakeConnection(utils.Protocol, utils.GrpcDomainSocketPath)
 	if err != nil {
 		return err
 	}

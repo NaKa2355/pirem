@@ -31,7 +31,7 @@ func MakeConnection(protocol string, addr string) (*grpc.ClientConn, pirem.PiRem
 
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
-	conn, err := grpc.DialContext(ctx, DomainSocketPath, options...)
+	conn, err := grpc.DialContext(ctx, GrpcDomainSocketPath, options...)
 	if err != nil {
 		return conn, client, err
 	}

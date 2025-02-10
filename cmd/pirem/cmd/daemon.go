@@ -15,7 +15,8 @@ import (
 	"github.com/NaKa2355/pirem/config"
 	"github.com/NaKa2355/pirem/internal/app/pirem/infra/db"
 	"github.com/NaKa2355/pirem/internal/app/pirem/infra/devices"
-	"github.com/NaKa2355/pirem/internal/app/pirem/infra/web"
+	"github.com/NaKa2355/pirem/internal/app/pirem/infra/grpc_server"
+	"github.com/NaKa2355/pirem/internal/app/pirem/infra/rest_server"
 	"github.com/NaKa2355/pirem/internal/app/pirem/registry"
 	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/boundary"
 	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/controllers"
@@ -30,11 +31,13 @@ import (
 
 const configFilePath = "/etc/piremd.json"
 const serviceFilePath = "/lib/systemd/system/piremd.service"
-const socketFilePath = utils.DomainSocketPath
+const grpcSocketFilePath = utils.GrpcDomainSocketPath
+const restSocketFilePath = utils.RestDomainSocketPath
 const longDiscribe = "execute as daemon.\nconfig file path(default) " +
 	configFilePath +
 	"\nservice file path: " + serviceFilePath +
-	"\nsocket file path: " + socketFilePath
+	"\ngrpc api socket file path: " + grpcSocketFilePath +
+	"\nrest api socket file path: " + restSocketFilePath
 
 // daemonCmd represents the daemon command
 var daemonCmd = &cobra.Command{
@@ -142,20 +145,26 @@ func (h *Handler) BoudaryFactory(device controllers.IRDevice, repo gateways.Repo
 }
 
 func (h *Handler) EntryPoint(boundary boundary.Boundary) {
-	s, err := web.NewUnixDomainServer(socketFilePath, boundary, h.config.EnableReflection, h.logger)
+	grpc_s, err := grpc_server.NewUnixDomainGrpcServer(grpcSocketFilePath, boundary, h.config.EnableReflection, h.logger)
 	if err != nil {
 		return
 	}
-	go s.StartListen()
+	rest_s := rest_server.NewUnixDomainRestServer(restSocketFilePath, boundary, h.logger)
+
+	go grpc_s.StartListen()
+	go rest_s.StartListen()
+
 	h.logger.Info(
 		"daemon started",
-		"unix domain socket path", socketFilePath,
+		"grpc api unix domain socket path", grpcSocketFilePath,
+		"rest api unix domain socket path", restSocketFilePath,
 	)
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 	h.logger.Info("shutting down daemon...")
-	s.Quit()
+	grpc_s.Quit()
+	rest_s.Quit()
 	h.logger.Info("daemon stopped")
 }
 

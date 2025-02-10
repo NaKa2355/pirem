@@ -28,7 +28,7 @@ var remotesCmd = &cobra.Command{
 }
 
 func listRemotes() error {
-	conn, client, err := utils.MakeConnection(utils.Protocol, utils.DomainSocketPath)
+	conn, client, err := utils.MakeConnection(utils.Protocol, utils.GrpcDomainSocketPath)
 	if err != nil {
 		return err
 	}
@@ -45,7 +45,7 @@ func listRemotes() error {
 }
 
 func getRemote(remoteID string) error {
-	conn, client, err := utils.MakeConnection(utils.Protocol, utils.DomainSocketPath)
+	conn, client, err := utils.MakeConnection(utils.Protocol, utils.GrpcDomainSocketPath)
 	if err != nil {
 		return err
 	}

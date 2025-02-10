@@ -1,4 +1,4 @@
-package web
+package grpc_server
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"os"
 
 	pirem "github.com/NaKa2355/pirem-proto/gen/go/api/v1"
-	adapter "github.com/NaKa2355/pirem/internal/app/pirem/adapter/web"
+	adapter "github.com/NaKa2355/pirem/internal/app/pirem/adapter/grpc_api"
 	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/boundary"
 	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/controllers"
 	"github.com/NaKa2355/pirem/pkg/logger"
@@ -19,7 +19,7 @@ type UnixDomainServer struct {
 	path string
 }
 
-func NewUnixDomainServer(domainSocketPath string, boundary boundary.Boundary, enableReflection bool, logger logger.Logger) (controllers.Web, error) {
+func NewUnixDomainGrpcServer(domainSocketPath string, boundary boundary.Boundary, enableReflection bool, logger logger.Logger) (controllers.Web, error) {
 	handler := adapter.NewRequestHandler(boundary)
 	gs := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
