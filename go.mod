@@ -5,7 +5,7 @@ go 1.20
 require google.golang.org/protobuf v1.32.0
 
 require (
-	github.com/NaKa2355/pirem-mock-module v0.0.0-20250215031744-816142a9da9b
+	github.com/NaKa2355/pirem-mock-module v0.0.0-20250215042334-c0064ce01e92
 	github.com/gorilla/mux v1.8.1
 	github.com/spf13/cobra v1.8.0
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa

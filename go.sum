@@ -1,5 +1,5 @@
-github.com/NaKa2355/pirem-mock-module v0.0.0-20250215031744-816142a9da9b h1:q9/EHQQHVq+KPInLNTNLY3rtyQ+vQB3+r108oDsCv1Q=
-github.com/NaKa2355/pirem-mock-module v0.0.0-20250215031744-816142a9da9b/go.mod h1:WKS+beh8LOPZxbzz/+P9jzk1LiwnIWtOlf+I3yeFXU4=
+github.com/NaKa2355/pirem-mock-module v0.0.0-20250215042334-c0064ce01e92 h1:cBRqVnKgGxdHSS8pxiJV01kP8jBMXNifHgroFaPqsYU=
+github.com/NaKa2355/pirem-mock-module v0.0.0-20250215042334-c0064ce01e92/go.mod h1:WKS+beh8LOPZxbzz/+P9jzk1LiwnIWtOlf+I3yeFXU4=
 github.com/NaKa2355/pirem-proto v0.0.0-20240103041802-1390f4d98d1b h1:0Pm9td9MQ1YIZ8zf033Vsb/Ri2FzXQtVo7MqP/HStiY=
 github.com/NaKa2355/pirem-proto v0.0.0-20240103041802-1390f4d98d1b/go.mod h1:tKtiyjUFGvTATj/4EwX1ERA05PkgFPV0iYZQ6b3OO+Q=
 github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 h1:DklsrG3dyBCFEj5IhUbnKptjxatkF07cF2ak3yi77so=
