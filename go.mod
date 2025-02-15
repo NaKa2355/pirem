@@ -5,8 +5,8 @@ go 1.20
 require google.golang.org/protobuf v1.32.0
 
 require (
-	github.com/NaKa2355/pirem-airer-module v0.0.0-20230807195209-c31d94be122e
-	github.com/NaKa2355/pirem-mock-module v0.0.0-20230808021753-4cf766dbc207
+	github.com/NaKa2355/pirem-mock-module v0.0.0-20250215031744-816142a9da9b
+	github.com/gorilla/mux v1.8.1
 	github.com/spf13/cobra v1.8.0
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa
 	google.golang.org/grpc v1.60.1
@@ -17,7 +17,6 @@ require (
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/uuid v1.3.1 // indirect
-	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
@@ -34,8 +33,6 @@ require (
 	modernc.org/opt v0.1.3 // indirect
 	modernc.org/strutil v1.1.3 // indirect
 	modernc.org/token v1.0.1 // indirect
-	periph.io/x/conn/v3 v3.7.0 // indirect
-	periph.io/x/host/v3 v3.8.2 // indirect
 )
 
 require (
