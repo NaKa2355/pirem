@@ -100,7 +100,7 @@ func (h *Handler) DeviceFactory() (controllers.IRDevice, error) {
 			continue
 		}
 
-		driver, _err := module.NewDriver(devConf.Config)
+		driver, _err := module.LoadDevice(devConf.Config)
 		if _err != nil {
 			err = errors.Join(err, _err)
 			continue
