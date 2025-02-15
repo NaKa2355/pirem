@@ -1,4 +1,4 @@
-package module
+package driver_module
 
 type ErrCode int
 

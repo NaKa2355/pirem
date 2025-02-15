@@ -10,14 +10,14 @@ import (
 	"github.com/NaKa2355/pirem/internal/app/pirem/domain"
 	"github.com/NaKa2355/pirem/internal/app/pirem/usecases"
 	"github.com/NaKa2355/pirem/internal/app/pirem/usecases/controllers"
-	"github.com/NaKa2355/pirem/pkg/module/v1"
+	"github.com/NaKa2355/pirem/pkg/driver_module/v1"
 )
 
 var ErrDeviceNotFound = fmt.Errorf("device not found")
 
 type IRDevices struct {
 	mu      *sync.RWMutex
-	devices map[string]*DriverManager
+	devices map[string]*DeviceManager
 }
 
 var _ controllers.IRDevice = &IRDevices{}
@@ -28,13 +28,13 @@ func convertError(err *error) {
 	}
 
 	switch _err := (*err).(type) {
-	case *module.Error:
+	case *driver_module.Error:
 		switch _err.Code {
-		case module.CodeBusy:
+		case driver_module.CodeBusy:
 			*err = usecases.WrapError(usecases.CodeBusy, *err)
-		case module.CodeInvaildInput:
+		case driver_module.CodeInvaildInput:
 			*err = usecases.WrapError(usecases.CodeInvaildInput, *err)
-		case module.CodeTimeout:
+		case driver_module.CodeTimeout:
 			*err = usecases.WrapError(usecases.CodeTimeout, *err)
 		default:
 			*err = usecases.WrapError(usecases.CodeUnknown, *err)
@@ -47,11 +47,11 @@ func convertError(err *error) {
 func NewIRDevices() *IRDevices {
 	return &IRDevices{
 		mu:      &sync.RWMutex{},
-		devices: map[string]*DriverManager{},
+		devices: map[string]*DeviceManager{},
 	}
 }
 
-func (devices *IRDevices) AddDevice(deviceId string, name string, driver module.Driver, sendIRInterval time.Duration, mutexLockDeadLine time.Duration) (err error) {
+func (devices *IRDevices) AddDevice(deviceId string, name string, driver driver_module.Device, sendIRInterval time.Duration, mutexLockDeadLine time.Duration) (err error) {
 	devices.mu.Lock()
 	defer convertError(&err)
 	defer devices.mu.Unlock()
@@ -65,11 +65,15 @@ func (devices *IRDevices) ReadDevices(ctx context.Context) (fetchedDevices []*do
 	defer devices.mu.RUnlock()
 	err = nil
 	for id, d := range devices.devices {
+
+		_, canSend := d.device.(driver_module.Sender)
+		_, canReceive := d.device.(driver_module.Receiver)
+
 		fetchedDevices = append(fetchedDevices, &domain.Device{
 			ID:              id,
 			Name:            d.name,
-			CanSend:         d.info.CanSend,
-			CanReceive:      d.info.CanReceive,
+			CanSend:         canSend,
+			CanReceive:      canReceive,
 			DriverVersion:   d.info.DriverVersion,
 			FirmwareVersion: d.info.FirmwareVersion,
 		})
@@ -87,10 +91,13 @@ func (devices *IRDevices) ReadDevice(ctx context.Context, id domain.DeviceID) (r
 	}
 	info := fetchedDevice.info
 
+	_, canSend := fetchedDevice.device.(driver_module.Sender)
+	_, canReceive := fetchedDevice.device.(driver_module.Receiver)
+
 	result = &domain.Device{
 		ID:              id,
-		CanSend:         info.CanSend,
-		CanReceive:      info.CanReceive,
+		CanSend:         canSend,
+		CanReceive:      canReceive,
 		DriverVersion:   info.DriverVersion,
 		FirmwareVersion: info.DriverVersion,
 	}
@@ -106,7 +113,7 @@ func (devices *IRDevices) SendIR(ctx context.Context, deviceID domain.DeviceID, 
 		return usecases.WrapError(usecases.CodeNotFound, ErrDeviceNotFound)
 	}
 	rawIR := data.ConvertToRaw()
-	return device.SendIR(ctx, &module.IRData{
+	return device.SendIR(ctx, &driver_module.IRData{
 		CarrierFreqKiloHz: rawIR.CarrierFreqKiloHz,
 		PluseNanoSec:      rawIR.PluseNanoSec,
 	})

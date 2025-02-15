@@ -2,11 +2,11 @@ package adapter
 
 import (
 	"github.com/NaKa2355/pirem/internal/app/pirem/domain"
-	"github.com/NaKa2355/pirem/pkg/module/v1"
+	"github.com/NaKa2355/pirem/pkg/driver_module/v1"
 )
 
 type domainIRData struct {
-	irData *module.IRData
+	irData *driver_module.IRData
 }
 
 func (i *domainIRData) ConvertToRaw() *domain.RawData {
@@ -16,14 +16,14 @@ func (i *domainIRData) ConvertToRaw() *domain.RawData {
 	}
 }
 
-func MarshalIRData(from domain.IRData) *module.IRData {
+func MarshalIRData(from domain.IRData) *driver_module.IRData {
 	rawData := from.ConvertToRaw()
-	return &module.IRData{
+	return &driver_module.IRData{
 		CarrierFreqKiloHz: rawData.CarrierFreqKiloHz,
 		PluseNanoSec:      rawData.PluseNanoSec,
 	}
 }
 
-func UnMarshalIRData(from *module.IRData) domain.IRData {
+func UnMarshalIRData(from *driver_module.IRData) domain.IRData {
 	return &domainIRData{irData: from}
 }

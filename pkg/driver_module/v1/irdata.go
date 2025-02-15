@@ -1,4 +1,4 @@
-package module
+package driver_module
 
 type IRData struct {
 	CarrierFreqKiloHz uint32

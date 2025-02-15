@@ -8,10 +8,9 @@ package modules
 */
 
 import (
-	mock "github.com/NaKa2355/pirem-mock-module"
-	"github.com/NaKa2355/pirem/pkg/module/v1"
+	"github.com/NaKa2355/pirem/pkg/driver_module/v1"
 )
 
-var Modules map[string]module.Module = map[string]module.Module{
-	"mock": &mock.Module{},
+var Modules map[string]driver_module.DriverModule = map[string]driver_module.DriverModule{
+	//"mock": &mock.Module{},
 }

@@ -6,27 +6,27 @@ import (
 	"time"
 
 	"github.com/NaKa2355/pirem/internal/app/pirem/usecases"
-	"github.com/NaKa2355/pirem/pkg/module/v1"
+	"github.com/NaKa2355/pirem/pkg/driver_module/v1"
 )
 
 var errDeviceBusy = fmt.Errorf("faild to get access admission because of too many requests")
 var errNotSupportSending = fmt.Errorf("this device does not support sending")
 var errNotSupportReceiving = fmt.Errorf("this device does not support receiving")
 
-type DriverManager struct {
-	driver            module.Driver
+type DeviceManager struct {
+	device            driver_module.Device
 	sendIRInterval    time.Duration
 	mutexLockDeadline time.Duration
 	mu                chan (struct{})
 	name              string
-	info              *module.DeviceInfo
+	info              *driver_module.DeviceInfo
 }
 
-func newDriverManager(driver module.Driver, name string, sendIRInterval time.Duration, mutexLockDeadLine time.Duration) (*DriverManager, error) {
+func newDriverManager(driver driver_module.Device, name string, sendIRInterval time.Duration, mutexLockDeadLine time.Duration) (*DeviceManager, error) {
 	info, err := driver.GetInfo(context.Background())
-	return &DriverManager{
+	return &DeviceManager{
 		name:              name,
-		driver:            driver,
+		device:            driver,
 		mutexLockDeadline: mutexLockDeadLine,
 		sendIRInterval:    sendIRInterval,
 		mu:                make(chan struct{}, 1),
@@ -34,12 +34,13 @@ func newDriverManager(driver module.Driver, name string, sendIRInterval time.Dur
 	}, (err)
 }
 
-func (d *DriverManager) GetInfo(ctx context.Context) *module.DeviceInfo {
+func (d *DeviceManager) GetInfo(ctx context.Context) *driver_module.DeviceInfo {
 	return d.info
 }
 
-func (d *DriverManager) SendIR(ctx context.Context, irData *module.IRData) error {
-	if !d.info.CanSend {
+func (d *DeviceManager) SendIR(ctx context.Context, irData *driver_module.IRData) error {
+	sender, canSend := d.device.(driver_module.Sender)
+	if !canSend {
 		return usecases.WrapError(
 			usecases.CodeNotSupported,
 			errNotSupportSending,
@@ -50,7 +51,7 @@ func (d *DriverManager) SendIR(ctx context.Context, irData *module.IRData) error
 		defer func() {
 			<-d.mu
 		}()
-		err := d.driver.SendIR(ctx, irData)
+		err := sender.SendIR(ctx, irData)
 		//interval time to avoid conflict of data
 		time.Sleep(d.sendIRInterval)
 		return err
@@ -68,9 +69,10 @@ func (d *DriverManager) SendIR(ctx context.Context, irData *module.IRData) error
 
 }
 
-func (d *DriverManager) ReceiveIR(ctx context.Context) (*module.IRData, error) {
-	irData := &module.IRData{}
-	if !d.info.CanReceive {
+func (d *DeviceManager) ReceiveIR(ctx context.Context) (*driver_module.IRData, error) {
+	irData := &driver_module.IRData{}
+	receiver, canReceive := d.device.(driver_module.Receiver)
+	if !canReceive {
 		return irData, usecases.WrapError(
 			usecases.CodeNotSupported,
 			errNotSupportReceiving,
@@ -82,7 +84,7 @@ func (d *DriverManager) ReceiveIR(ctx context.Context) (*module.IRData, error) {
 		defer func() {
 			<-d.mu
 		}()
-		return d.driver.ReceiveIR(ctx)
+		return receiver.ReceiveIR(ctx)
 
 	case <-time.After(d.mutexLockDeadline):
 		return irData, usecases.WrapError(
